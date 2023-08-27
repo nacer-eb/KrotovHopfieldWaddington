@@ -397,7 +397,7 @@ class KrotovNet:
         score = 0
         print(">................,", np.shape(test_batch_images), test_batch_size)
         for i in range(0, test_batch_size):
-            score += np.int(np.argmax(self.compute(test_batch_images[i]), axis=0) == test_batch_keys[i])
+            score += int(np.argmax(self.compute(test_batch_images[i]), axis=0) == test_batch_keys[i])
             
 
         score /= test_batch_size
