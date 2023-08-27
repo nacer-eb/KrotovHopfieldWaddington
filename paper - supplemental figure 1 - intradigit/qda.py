@@ -7,7 +7,7 @@ import sys
 from main_module.KrotovV2 import *
 
 
-data_dir = "data_4/"
+data_dir = "data_4_100/"
 
 temp_range = np.arange(400, 900, 20)
 n_range = np.arange(2, 31, 1)
@@ -52,7 +52,7 @@ if not first_run:
 
     ax[0].imshow(merge_data(data_Ms[::2, ::2, 0, :].reshape(len(n_range[::2])*len(temp_range[::2]), 784), len(n_range[::2]), len(temp_range[::2])  ), cmap="bwr", vmin=-1, vmax=1, extent=extent, aspect=aspect)
     
-    im = ax[1].imshow(data_coefs[:, :, 0, 1], cmap="Reds", vmin=0.5, vmax=1, extent=extent, aspect=aspect)
+    im = ax[1].imshow(data_coefs[:, :, 0, 0], cmap="Reds", vmin=0.5, vmax=1, extent=extent, aspect=aspect) #
 
     n = np.arange(np.min(n_range), np.max(n_range), 0.01)
     T_calc = (data_T[0]@data_T[0] + data_T[0]@data_T[1])/( 2 * ( np.arctanh( 1 - (1.0/2.0)**(1.0/(2.0*n)) ) )**(1.0/n) )
