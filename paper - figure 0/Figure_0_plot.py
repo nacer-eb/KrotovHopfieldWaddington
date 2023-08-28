@@ -13,6 +13,7 @@ data_Lf = np.zeros((3, 3, 100, 10))
 
 isFirstRun = False
 
+# Fetch all data
 if isFirstRun:
     for i, temp in enumerate([400, 550, 670]):#[800, 850]:
         for j, n in enumerate([3, 15, 30]):
@@ -36,24 +37,24 @@ data_Lf = np.load(data_dir+"/data_Lf.npy")
 data_T = np.load(data_dir+"/miniBatchs_images.npy")[0]
 data_T_inv = np.linalg.pinv(data_T)
 
-
-
-
+# Use matrix inverse to obtain coefficients from memories
 all_coefs = np.sum((data_Mf@data_T_inv).reshape(3, 3, 100, 10, 20), axis=-1)
 
+# Important: Which digit class we are observing. 4 is chosen because of it UMAP nearness to 7,9. This can be ill-posed for low-n
 digit_to_observe = 4
-index = data_Lf[:, :, :, digit_to_observe] >=0.99 #data_Lf[:, :, :, 4] == 1 #- label-based index
-#index *= (np.argmax(all_coefs, axis=-1) == digit_to_observe)
 
+# Getting an index list of all memories with 4 labels (can be ill-posed for low-n)
+index = data_Lf[:, :, :, digit_to_observe] >=0.99 
 
+# Manually picking the fours... This turned out to be better, but the code can [Should?] be amended and made automatic.
 choices = np.zeros((3, 3, 4))
 choices[0, 0] = np.asarray([7, 8, 9, 10]); choices[0, 1] = np.asarray([1, 2, 3, 4]); choices[0, 2] = np.asarray([-4, -3, -2, -1])
 choices[1, 0] = np.asarray([0, 1, 2, 3]); choices[1, 1] = np.asarray([9, 10, 11, 12]); choices[1, 2] = np.asarray([0, 1, 2, 3])
 choices[2, 0] = np.asarray([0, 1, 2, 3]); choices[2, 1] = np.asarray([4, 5, 6, 7]); choices[2, 2] = np.asarray([0, 1, 2, 3])
-
 choices = np.asarray(choices, dtype=int)
 
-#"""
+
+# The first sub-figure showing the memory coefficients for the selected 4s.
 fig, ax = plt.subplots(3, 3, sharex=True)
 for i in range(0, 3):
     for j in range(0, 3):
@@ -87,8 +88,9 @@ plt.subplots_adjust(top=0.91, bottom=0.168, left=0.1, right=0.92, hspace=0.1, ws
 
 plt.show()
 
-#exit()
-# Top left panel figure
+
+
+# The second sub-figure showing the actually memories picked.
 fig, ax = plt.subplots(3, 3, sharex=True, sharey=True)
 for i in range(0, 3):
     for j in range(0, 3):
@@ -102,10 +104,10 @@ for i in range(0, 3):
         ax[-1, j].set_xlabel("\n"*1 + str(np.asarray([3, 15, 30])[j]))
 
 plt.show()
-#"""
 
 
-# Top right panel figure
+
+# The third sub-figure showing the label
 label_range = np.arange(0, 10, 1)
 fig, ax = plt.subplots(3, 3, figsize=(5, 4), sharex=True, sharey=True)
 for i in range(0, 3):
@@ -128,12 +130,6 @@ for i in range(0, 3):
 
 
 
-from matplotlib.lines import Line2D
-custom_lines = [Line2D([0], [0], color="k", linewidth=2, alpha=0.3),
-                Line2D([0], [0], marker=".", ms=13, color="k")]
-
-fig.legend(custom_lines, ['Labels', 'Mean label'], loc='upper center', ncol=4)
-        
 cbar_ax = fig.add_axes([0.91, 0.168, 0.02, 0.91-0.168])
 cb = matplotlib.colorbar.ColorbarBase(cbar_ax, cmap=matplotlib.cm.tab10, norm=matplotlib.colors.Normalize(vmin=0, vmax=9))
 cb.ax.set_ylabel("Label element/class")
