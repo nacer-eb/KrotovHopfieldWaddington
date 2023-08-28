@@ -5,7 +5,7 @@ import numpy as np
 
 from main_module.KrotovV2 import *
 
-data_dir = "data_100_10_200_supplemental/" #"data_100_10_200/"
+data_dir = "data_100_10_200/"
 
 
 data_Mf = np.zeros((3, 3, 100, 784))
