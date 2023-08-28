@@ -5,7 +5,7 @@ import numpy as np
 
 from main_module.KrotovV2 import *
 
-data_dir = "data_100_10_200_supplemental/"
+data_dir = "data_100_10_200/"
 
 # Makes sure the data_dir exits else creates it.
 if not path.exists(data_dir):
