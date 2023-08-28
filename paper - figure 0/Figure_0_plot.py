@@ -93,49 +93,53 @@ plt.show()
 
 
 # The second sub-figure showing the actually memories picked.
+def memory_samples_fig(ax):
+    for i in range(0, 3):
+        for j in range(0, 3):
+            print(np.asarray([400, 550, 670])[i], np.asarray([3, 15, 30])[j], data_Lf[i, j, index[i, j]][0])
+            sample_memories = data_Mf[i, j, index[i, j]][choices[i, j]]
+            ax[i, j].imshow(merge_data(sample_memories, 2, 2), cmap="bwr")
+            ax[i, j].set_xticks([])
+            ax[i, j].set_yticks([])
+
+            ax[i, 0].set_ylabel(str(np.asarray([400, 550, 670])[i]) + "\n")
+            ax[-1, j].set_xlabel("\n"*1 + str(np.asarray([3, 15, 30])[j]))
+
 fig, ax = plt.subplots(3, 3, sharex=True, sharey=True)
-for i in range(0, 3):
-    for j in range(0, 3):
-        print(np.asarray([400, 550, 670])[i], np.asarray([3, 15, 30])[j], data_Lf[i, j, index[i, j]][0])
-        sample_memories = data_Mf[i, j, index[i, j]][choices[i, j]]
-        ax[i, j].imshow(merge_data(sample_memories, 2, 2), cmap="bwr")
-        ax[i, j].set_xticks([])
-        ax[i, j].set_yticks([])
-
-        ax[i, 0].set_ylabel(str(np.asarray([400, 550, 670])[i]) + "\n")
-        ax[-1, j].set_xlabel("\n"*1 + str(np.asarray([3, 15, 30])[j]))
-
+memory_samples_fig(ax)
 plt.show()
 
 
 
 # The third sub-figure showing the label
-label_range = np.arange(0, 10, 1)
-fig, ax = plt.subplots(3, 3, figsize=(5, 4), sharex=True, sharey=True)
-for i in range(0, 3):
-    for j in range(0, 3):
 
-        Ls = data_Lf[i, j, index[i, j]]
-        
-        ax[i, j].plot(label_range, Ls[choices[i, j, 0]], marker="", color="k", linewidth=1)
+
+def label_coefficients_fig(ax):
+    label_range = np.arange(0, 10, 1)
+    for i in range(0, 3):
+        for j in range(0, 3):
             
-        ax[i, j].scatter(label_range, Ls[choices[i, j, 0]], marker=".", c=label_range, cmap="tab10", s=100, alpha=1)
+            Ls = data_Lf[i, j, index[i, j]]
+            
+            ax[i, j].plot(label_range, Ls[choices[i, j, 0]], marker="", color="k", linewidth=1)
+            
+            ax[i, j].scatter(label_range, Ls[choices[i, j, 0]], marker=".", c=label_range, cmap="tab10", s=100, alpha=1)
         
-        
-        ax[i, j].set_xticks([])
-        ax[-1, j].set_xticks([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
-        ax[i, j].set_yticks([-1, 1])
-
-        ax[i, 0].set_ylabel(str(np.asarray([400, 550, 670])[i]) + "\n"*2 + "Label value")
-        ax[-1, j].set_xlabel("Label element" + "\n"*2 + str(np.asarray([3, 15, 30])[j]))
-
-
+            
+            ax[i, j].set_xticks([])
+            ax[-1, j].set_xticks([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+            ax[i, j].set_yticks([-1, 1])
+            
+            ax[i, 0].set_ylabel(str(np.asarray([400, 550, 670])[i]) + "\n"*2 + "Label value")
+            ax[-1, j].set_xlabel("Label element" + "\n"*2 + str(np.asarray([3, 15, 30])[j]))
 
 
-cbar_ax = fig.add_axes([0.91, 0.168, 0.02, 0.91-0.168])
-cb = matplotlib.colorbar.ColorbarBase(cbar_ax, cmap=matplotlib.cm.tab10, norm=matplotlib.colors.Normalize(vmin=0, vmax=9))
-cb.ax.set_ylabel("Label element/class")
+    cbar_ax = fig.add_axes([0.91, 0.168, 0.02, 0.91-0.168])
+    cb = matplotlib.colorbar.ColorbarBase(cbar_ax, cmap=matplotlib.cm.tab10, norm=matplotlib.colors.Normalize(vmin=0, vmax=9))
+    cb.ax.set_ylabel("Label element/class")
 
+fig, ax = plt.subplots(3, 3, figsize=(5, 4), sharex=True, sharey=True)
+label_coefficients_fig(ax)
 plt.subplots_adjust(top=0.91, bottom=0.168, left=0.089, right=0.9, hspace=0.05, wspace=0.05)
 plt.show()
 #plt.savefig("image.png",bbox_inches='tight',dpi=100)
