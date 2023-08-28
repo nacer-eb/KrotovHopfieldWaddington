@@ -11,22 +11,24 @@ data_dir = "data_100_10_200/"
 data_Mf = np.zeros((3, 3, 100, 784))
 data_Lf = np.zeros((3, 3, 100, 10))
 
-"""
-for i, temp in enumerate([400, 550, 670]):#[800, 850]:
-    for j, n in enumerate([3, 15, 30]):
-        run = 0
-        saving_dir=data_dir+"run_"+str(run)+"_n"+str(n)+"_T"+str(temp)+".npz"
-        
-        data_tmp = np.load(saving_dir)
+isFirstRun = False
 
-        data_Mf[i, j] = data_tmp['M'][-1]
-        data_Lf[i, j] = data_tmp['L'][-1]
-
-        print(j)
+if isFirstRun:
+    for i, temp in enumerate([400, 550, 670]):#[800, 850]:
+        for j, n in enumerate([3, 15, 30]):
+            run = 0
+            saving_dir=data_dir+"run_"+str(run)+"_n"+str(n)+"_T"+str(temp)+".npz"
+            
+            data_tmp = np.load(saving_dir)
+            
+            data_Mf[i, j] = data_tmp['M'][-1]
+            data_Lf[i, j] = data_tmp['L'][-1]
+            
+            print(j)
         
-np.save(data_dir+"/data_Mf.npy", data_Mf)
-np.save(data_dir+"/data_Lf.npy", data_Lf)
-"""
+    np.save(data_dir+"/data_Mf.npy", data_Mf)
+    np.save(data_dir+"/data_Lf.npy", data_Lf)
+
 
 data_Mf = np.load(data_dir+"/data_Mf.npy")
 data_Lf = np.load(data_dir+"/data_Lf.npy")
