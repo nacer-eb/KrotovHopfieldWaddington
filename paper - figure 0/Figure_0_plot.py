@@ -5,6 +5,13 @@ import numpy as np
 
 from main_module.KrotovV2 import *
 
+import matplotlib
+font = {'family' : 'Times New Roman',
+        'weight' : 'normal',
+        'size'   : 25}
+
+matplotlib.rc('font', **font)
+
 data_dir = "data_100_10_200/"
 
 
@@ -54,15 +61,56 @@ choices[2, 0] = np.asarray([0, 1, 2, 3]); choices[2, 1] = np.asarray([4, 5, 6, 7
 choices = np.asarray(choices, dtype=int)
 
 
-# The first sub-figure showing the memory coefficients for the selected 4s.
-def memory_coef_fig(ax):
+
+# The sub-figure showing the actually memories picked.
+def memory_samples_fig(ax, isLeftAxis=True, isBotAxis=True):   
+    for i in range(0, 3):
+        for j in range(0, 3):
+            print(np.asarray([400, 550, 670])[i], np.asarray([3, 15, 30])[j], data_Lf[i, j, index[i, j]][0])
+            sample_memories = data_Mf[i, j, index[i, j]][choices[i, j]]
+            ax[i, j].imshow(merge_data(sample_memories, 2, 2), cmap="bwr")
+            ax[i, j].set_xticks([])
+            ax[i, j].set_yticks([])
+
+            if isBotAxis:
+                ax[-1, j].set_xlabel(str(np.asarray([3, 15, 30])[j]), labelpad=20)
+            else:
+                ax[0, j].xaxis.set_label_position("top")
+                ax[0, j].set_xlabel(str(np.asarray([3, 15, 30])[j]), labelpad=20)
+
+            if isLeftAxis:
+                ax[i, 0].set_ylabel(str(np.asarray([400, 550, 670])[i]), labelpad=20)
+            else:
+                ax[i, -1].yaxis.set_label_position("right")
+                ax[i, -1].set_ylabel(str(np.asarray([400, 550, 670])[i]), labelpad=20)
+
+            
+
+
+
+# The sub-figure showing the memory coefficients for the selected 4s.
+def memory_coefs_fig(ax):
     for i in range(0, 3):
         for j in range(0, 3):
             coefs = (data_Mf[i, j, index[i, j]]@data_T_inv)[choices[i, j, 0]] 
             coefs = coefs.reshape(10, 20)
 
             ax[i, j].axhline(y=0, color="r", alpha=0.5)
-        
+
+            
+            ax[i, j].xaxis.set_label_position("top")
+            ax[i, j].xaxis.tick_top()
+            ax[0, j].set_xlabel("Training \n Example #", rotation=60)
+            if i != 0:
+                ax[i, j].set_xticks([])
+
+            
+            ax[i, j].yaxis.set_label_position("right")
+            ax[i, j].yaxis.tick_right()
+            ax[i, -1].set_ylabel(r"$\alpha_\#$", rotation=60, labelpad=20)
+            if j != 2: 
+                ax[i, j].set_yticks([])
+            
             for d in range(0, 10):
                 sorted_array = sorted(coefs[d], reverse=True, key=abs)
                 
@@ -72,49 +120,14 @@ def memory_coef_fig(ax):
             
                         
                 ax[i, j].plot(np.arange(20*d, 20*(d+1), 1), symmetric_array, marker=".", linewidth=2, ms=3)
-                
-            ax[i, 0].set_ylabel(str(np.asarray([400, 550, 670])[i]) + "\n"*2 + "Coefficient value")
-            ax[-1, j].set_xlabel("Training example (reordered)" + "\n"*2 + str(np.asarray([3, 15, 30])[j]))
 
-            ax[i, 0].set_ylim(-0.15, 0.15); ax[i, 1].set_ylim(-0.1, 0.4); ax[i, -1].set_ylim(-0.1, 0.5); 
+            ax[i, j].set_ylim(-0.15, 0.4)
 
+            
 
-    cbar_ax = fig.add_axes([0.93, 0.168, 0.02, 0.91-0.168])
-    cb = matplotlib.colorbar.ColorbarBase(cbar_ax, cmap=matplotlib.cm.tab10, norm=matplotlib.colors.Normalize(vmin=0, vmax=9))
-    cb.ax.set_ylabel("Digit class")
-
-
-
-fig, ax = plt.subplots(3, 3, sharex=True)
-memory_coef_fig(ax)
-plt.subplots_adjust(top=0.91, bottom=0.168, left=0.1, right=0.92, hspace=0.1, wspace=0.169) 
-plt.show()
-
-
-
-# The second sub-figure showing the actually memories picked.
-def memory_samples_fig(ax):
-    for i in range(0, 3):
-        for j in range(0, 3):
-            print(np.asarray([400, 550, 670])[i], np.asarray([3, 15, 30])[j], data_Lf[i, j, index[i, j]][0])
-            sample_memories = data_Mf[i, j, index[i, j]][choices[i, j]]
-            ax[i, j].imshow(merge_data(sample_memories, 2, 2), cmap="bwr")
-            ax[i, j].set_xticks([])
-            ax[i, j].set_yticks([])
-
-            ax[i, 0].set_ylabel(str(np.asarray([400, 550, 670])[i]) + "\n")
-            ax[-1, j].set_xlabel("\n"*1 + str(np.asarray([3, 15, 30])[j]))
-
-fig, ax = plt.subplots(3, 3, sharex=True, sharey=True)
-memory_samples_fig(ax)
-plt.show()
-
-
-
-# The third sub-figure showing the label
-
-
-def label_coefficients_fig(ax):
+            
+# The sub-figure showing the label
+def label_coefs_fig(ax):
     label_range = np.arange(0, 10, 1)
     for i in range(0, 3):
         for j in range(0, 3):
@@ -122,26 +135,73 @@ def label_coefficients_fig(ax):
             Ls = data_Lf[i, j, index[i, j]]
             
             ax[i, j].plot(label_range, Ls[choices[i, j, 0]], marker="", color="k", linewidth=1)
-            
             ax[i, j].scatter(label_range, Ls[choices[i, j, 0]], marker=".", c=label_range, cmap="tab10", s=100, alpha=1)
-        
-            
-            ax[i, j].set_xticks([])
+
             ax[-1, j].set_xticks([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
             ax[i, j].set_yticks([-1, 1])
+
+            ax[-1, j].set_xlabel("Training \n Class", rotation=0, labelpad=20)
             
-            ax[i, 0].set_ylabel(str(np.asarray([400, 550, 670])[i]) + "\n"*2 + "Label value")
-            ax[-1, j].set_xlabel("Label element" + "\n"*2 + str(np.asarray([3, 15, 30])[j]))
+            ax[i, 0].set_ylabel("Label \n Coefficients", rotation=90, labelpad=20)
+            
+            if i != 2:
+                ax[i, j].set_xticks([])
+
+            if j != 0: 
+                ax[i, j].set_yticks([])
+            
 
 
-    cbar_ax = fig.add_axes([0.91, 0.168, 0.02, 0.91-0.168])
-    cb = matplotlib.colorbar.ColorbarBase(cbar_ax, cmap=matplotlib.cm.tab10, norm=matplotlib.colors.Normalize(vmin=0, vmax=9))
-    cb.ax.set_ylabel("Label element/class")
 
-fig, ax = plt.subplots(3, 3, figsize=(5, 4), sharex=True, sharey=True)
-label_coefficients_fig(ax)
-plt.subplots_adjust(top=0.91, bottom=0.168, left=0.089, right=0.9, hspace=0.05, wspace=0.05)
-plt.show()
-#plt.savefig("image.png",bbox_inches='tight',dpi=100)
 
-    
+
+fig = plt.figure(figsize=(19, 19))
+axs = fig.subplot_mosaic(
+    """
+    AABBCC..KKLLMM
+    AABBCC..KKLLMM
+    DDEEFF..NNOOPP
+    DDEEFF..NNOOPP
+    HHIIJJ..QQRRSS
+    HHIIJJ..QQRRSS
+    ..............
+    ..............
+    TTUUVV..aabbcc
+    TTUUVV..aabbcc
+    WWXXYY..ddeeff
+    WWXXYY..ddeeff
+    ZZ1122..hhiijj
+    ZZ1122..hhiijj
+    """
+)
+
+
+mem_ax_tl = [[axs['A'], axs['B'], axs['C']], [axs['D'], axs['E'], axs['F']], [axs['H'], axs['I'], axs['J']]]
+mem_ax_tl = np.asarray(mem_ax_tl)
+memory_samples_fig(mem_ax_tl, isBotAxis=False)
+
+
+mem_ax_br = [[axs['a'], axs['b'], axs['c']], [axs['d'], axs['e'], axs['f']], [axs['h'], axs['i'], axs['j']]]
+mem_ax_br = np.asarray(mem_ax_br)
+memory_samples_fig(mem_ax_br, isLeftAxis=False)
+
+mem_coef_ax_tr = [[axs['K'], axs['L'], axs['M']], [axs['N'], axs['O'], axs['P']], [axs['Q'], axs['R'], axs['S']]]
+mem_coef_ax_tr = np.asarray(mem_coef_ax_tr)
+memory_coefs_fig(mem_coef_ax_tr)
+
+label_coef_ax_bl = [[axs['T'], axs['U'], axs['V']], [axs['W'], axs['X'], axs['Y']], [axs['Z'], axs['1'], axs['2']]] 
+label_coef_ax_bl= np.asarray(label_coef_ax_bl)
+label_coefs_fig(label_coef_ax_bl)
+
+
+mem_ax_tl[0, 1].text(28, -30, "n-power", fontsize=30, ha='center', family='Times New Roman')
+mem_ax_tl[1, 0].text(-32, 2*28, "Temperature", rotation=90, fontsize=30, ha='center', family='Times New Roman')
+
+mem_ax_br[-1, 1].text(28, 29*2+30, "n-power", fontsize=30, ha='center', family='Times New Roman')
+mem_ax_br[1, -1].text(28*2 + 32, 2*28, "Temperature", rotation=90, fontsize=30, ha='center', family='Times New Roman')
+
+
+plt.subplots_adjust(hspace=0.4, wspace=0.4)
+plt.savefig("tmp_fig0.png", transparent=True)
+
+
