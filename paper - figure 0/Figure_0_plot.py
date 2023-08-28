@@ -55,37 +55,39 @@ choices = np.asarray(choices, dtype=int)
 
 
 # The first sub-figure showing the memory coefficients for the selected 4s.
-fig, ax = plt.subplots(3, 3, sharex=True)
-for i in range(0, 3):
-    for j in range(0, 3):
-        coefs = (data_Mf[i, j, index[i, j]]@data_T_inv)[choices[i, j, 0]] 
-        coefs = coefs.reshape(10, 20)
+def memory_coef_fig(ax):
+    for i in range(0, 3):
+        for j in range(0, 3):
+            coefs = (data_Mf[i, j, index[i, j]]@data_T_inv)[choices[i, j, 0]] 
+            coefs = coefs.reshape(10, 20)
 
-        ax[i, j].axhline(y=0, color="r", alpha=0.5)
+            ax[i, j].axhline(y=0, color="r", alpha=0.5)
         
-        for d in range(0, 10):
-            sorted_array = sorted(coefs[d], reverse=True, key=abs)
-            
-            symmetric_array = sorted_array[::-2]
-            symmetric_array = np.concatenate((symmetric_array, [sorted_array[0]]), axis=0)
-            symmetric_array = np.concatenate((symmetric_array, sorted_array[2::2]), axis=0)
+            for d in range(0, 10):
+                sorted_array = sorted(coefs[d], reverse=True, key=abs)
+                
+                symmetric_array = sorted_array[::-2]
+                symmetric_array = np.concatenate((symmetric_array, [sorted_array[0]]), axis=0)
+                symmetric_array = np.concatenate((symmetric_array, sorted_array[2::2]), axis=0)
             
                         
-            ax[i, j].plot(np.arange(20*d, 20*(d+1), 1), symmetric_array, marker=".", linewidth=2, ms=3)
+                ax[i, j].plot(np.arange(20*d, 20*(d+1), 1), symmetric_array, marker=".", linewidth=2, ms=3)
                 
             ax[i, 0].set_ylabel(str(np.asarray([400, 550, 670])[i]) + "\n"*2 + "Coefficient value")
             ax[-1, j].set_xlabel("Training example (reordered)" + "\n"*2 + str(np.asarray([3, 15, 30])[j]))
 
-            
-        ax[i, 0].set_ylim(-0.15, 0.15); ax[i, 1].set_ylim(-0.1, 0.4); ax[i, -1].set_ylim(-0.1, 0.5); 
+            ax[i, 0].set_ylim(-0.15, 0.15); ax[i, 1].set_ylim(-0.1, 0.4); ax[i, -1].set_ylim(-0.1, 0.5); 
 
 
-cbar_ax = fig.add_axes([0.93, 0.168, 0.02, 0.91-0.168])
-cb = matplotlib.colorbar.ColorbarBase(cbar_ax, cmap=matplotlib.cm.tab10, norm=matplotlib.colors.Normalize(vmin=0, vmax=9))
-cb.ax.set_ylabel("Digit class")
+    cbar_ax = fig.add_axes([0.93, 0.168, 0.02, 0.91-0.168])
+    cb = matplotlib.colorbar.ColorbarBase(cbar_ax, cmap=matplotlib.cm.tab10, norm=matplotlib.colors.Normalize(vmin=0, vmax=9))
+    cb.ax.set_ylabel("Digit class")
 
+
+
+fig, ax = plt.subplots(3, 3, sharex=True)
+memory_coef_fig(ax)
 plt.subplots_adjust(top=0.91, bottom=0.168, left=0.1, right=0.92, hspace=0.1, wspace=0.169) 
-
 plt.show()
 
 
