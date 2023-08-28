@@ -53,8 +53,8 @@ digit_to_observe = 4
 # Getting an index list of all memories with 4 labels (can be ill-posed for low-n)
 index = data_Lf[:, :, :, digit_to_observe] >=0.99 
 
-# Manually picking the fours... This turned out to be better, but the code can [Should?] be amended and made automatic.
-choices = np.zeros((3, 3, 4))
+# Choices from the above indices. As of now this is done manually, but you can do random selection or [0, 1, 2, 3] if you want.
+choices = np.zeros((3, 3, 4)) 
 choices[0, 0] = np.asarray([7, 8, 9, 10]); choices[0, 1] = np.asarray([1, 2, 3, 4]); choices[0, 2] = np.asarray([-4, -3, -2, -1])
 choices[1, 0] = np.asarray([0, 1, 2, 3]); choices[1, 1] = np.asarray([9, 10, 11, 12]); choices[1, 2] = np.asarray([0, 1, 2, 3])
 choices[2, 0] = np.asarray([0, 1, 2, 3]); choices[2, 1] = np.asarray([4, 5, 6, 7]); choices[2, 2] = np.asarray([0, 1, 2, 3])
@@ -66,10 +66,12 @@ choices = np.asarray(choices, dtype=int)
 def memory_samples_fig(ax, isLeftAxis=True, isBotAxis=True):   
     for i in range(0, 3):
         for j in range(0, 3):
-            print(np.asarray([400, 550, 670])[i], np.asarray([3, 15, 30])[j], data_Lf[i, j, index[i, j]][0])
-            sample_memories = data_Mf[i, j, index[i, j]][choices[i, j]]
-            ax[i, j].imshow(merge_data(sample_memories, 2, 2), cmap="bwr")
-            ax[i, j].set_xticks([])
+            sample_memories = data_Mf[i, j, index[i, j]][choices[i, j]] # Picking the relevant 4 memories from the complete memory set
+
+            ax[i, j].imshow(merge_data(sample_memories, 2, 2), cmap="bwr") # Plotting using the merge-data tool (KrotovV2_utils)
+
+            # Cosmetics
+            ax[i, j].set_xticks([]) 
             ax[i, j].set_yticks([])
 
             if isBotAxis:
@@ -83,8 +85,7 @@ def memory_samples_fig(ax, isLeftAxis=True, isBotAxis=True):
             else:
                 ax[i, -1].yaxis.set_label_position("right")
                 ax[i, -1].set_ylabel(str(np.asarray([400, 550, 670])[i]), labelpad=20)
-
-            
+           
 
 
 
@@ -92,19 +93,23 @@ def memory_samples_fig(ax, isLeftAxis=True, isBotAxis=True):
 def memory_coefs_fig(ax):
     for i in range(0, 3):
         for j in range(0, 3):
-            coefs = (data_Mf[i, j, index[i, j]]@data_T_inv)[choices[i, j, 0]] 
+
+            # Picking relevant memories and calculating their coefficient
+            coefs = (data_Mf[i, j, index[i, j]]@data_T_inv)[choices[i, j, 0]]
             coefs = coefs.reshape(10, 20)
 
+            # Plotting a zero-line for reference
             ax[i, j].axhline(y=0, color="r", alpha=0.5)
 
-            
+            # Cosmetics
             ax[i, j].xaxis.set_label_position("top")
             ax[i, j].xaxis.tick_top()
             ax[0, j].set_xlabel("Training \n Example #", rotation=60)
             if i != 0:
                 ax[i, j].set_xticks([])
 
-            
+
+            # Cosmetics
             ax[i, j].yaxis.set_label_position("right")
             ax[i, j].yaxis.tick_right()
             ax[i, -1].set_ylabel(r"$\alpha_\#$", rotation=60, labelpad=20)
@@ -118,9 +123,10 @@ def memory_coefs_fig(ax):
                 symmetric_array = np.concatenate((symmetric_array, [sorted_array[0]]), axis=0)
                 symmetric_array = np.concatenate((symmetric_array, sorted_array[2::2]), axis=0)
             
-                        
+                # The main plot
                 ax[i, j].plot(np.arange(20*d, 20*(d+1), 1), symmetric_array, marker=".", linewidth=2, ms=3)
 
+            # For comparison's sake a sensible fixed yaxis range.
             ax[i, j].set_ylim(-0.15, 0.4)
 
             
@@ -128,20 +134,21 @@ def memory_coefs_fig(ax):
             
 # The sub-figure showing the label
 def label_coefs_fig(ax):
-    label_range = np.arange(0, 10, 1)
+    label_range = np.arange(0, 10, 1) # List of digit classes
     for i in range(0, 3):
         for j in range(0, 3):
             
-            Ls = data_Lf[i, j, index[i, j]]
-            
+            Ls = data_Lf[i, j, index[i, j]] # Fetching the relevant digit labels
+
+            # Main plot, the line and the colored points
             ax[i, j].plot(label_range, Ls[choices[i, j, 0]], marker="", color="k", linewidth=1)
             ax[i, j].scatter(label_range, Ls[choices[i, j, 0]], marker=".", c=label_range, cmap="tab10", s=100, alpha=1)
 
+            # Cosmetics
             ax[-1, j].set_xticks([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
             ax[i, j].set_yticks([-1, 1])
 
-            ax[-1, j].set_xlabel("Training \n Class", rotation=0, labelpad=20)
-            
+            ax[-1, j].set_xlabel("Training \n Class", rotation=0, labelpad=20)          
             ax[i, 0].set_ylabel("Label \n Coefficients", rotation=90, labelpad=20)
             
             if i != 2:
@@ -154,7 +161,8 @@ def label_coefs_fig(ax):
 
 
 
-
+# Putting it all together
+                
 fig = plt.figure(figsize=(19, 19))
 axs = fig.subplot_mosaic(
     """
@@ -175,32 +183,34 @@ axs = fig.subplot_mosaic(
     """
 )
 
-
+# The top left sub-plot
 mem_ax_tl = [[axs['A'], axs['B'], axs['C']], [axs['D'], axs['E'], axs['F']], [axs['H'], axs['I'], axs['J']]]
 mem_ax_tl = np.asarray(mem_ax_tl)
 memory_samples_fig(mem_ax_tl, isBotAxis=False)
 
-
+# The bot righ sub-plot
 mem_ax_br = [[axs['a'], axs['b'], axs['c']], [axs['d'], axs['e'], axs['f']], [axs['h'], axs['i'], axs['j']]]
 mem_ax_br = np.asarray(mem_ax_br)
 memory_samples_fig(mem_ax_br, isLeftAxis=False)
 
+# The top right mem-coefs subplot
 mem_coef_ax_tr = [[axs['K'], axs['L'], axs['M']], [axs['N'], axs['O'], axs['P']], [axs['Q'], axs['R'], axs['S']]]
 mem_coef_ax_tr = np.asarray(mem_coef_ax_tr)
 memory_coefs_fig(mem_coef_ax_tr)
 
+# The bot left label-coefs subplot
 label_coef_ax_bl = [[axs['T'], axs['U'], axs['V']], [axs['W'], axs['X'], axs['Y']], [axs['Z'], axs['1'], axs['2']]] 
 label_coef_ax_bl= np.asarray(label_coef_ax_bl)
 label_coefs_fig(label_coef_ax_bl)
 
-
+# Column and row labels
 mem_ax_tl[0, 1].text(28, -30, "n-power", fontsize=30, ha='center', family='Times New Roman')
 mem_ax_tl[1, 0].text(-32, 2*28, "Temperature", rotation=90, fontsize=30, ha='center', family='Times New Roman')
 
 mem_ax_br[-1, 1].text(28, 29*2+30, "n-power", fontsize=30, ha='center', family='Times New Roman')
 mem_ax_br[1, -1].text(28*2 + 32, 2*28, "Temperature", rotation=90, fontsize=30, ha='center', family='Times New Roman')
 
-
+# Cosmetics and saving with transparency.
 plt.subplots_adjust(hspace=0.4, wspace=0.4)
 plt.savefig("tmp_fig0.png", transparent=True)
 
