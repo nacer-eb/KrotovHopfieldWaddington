@@ -19,10 +19,11 @@ from main_module.KrotovV2_utils import *
 
 
 
-data_dir = "data_100_10_200/"
 run = 0
 n, temp = 30, 670
-saving_dir = data_dir+"momentum_run_"+str(run)+"_n"+str(n)+"_T"+str(temp)+".npz"
+data_dir = "data_100_10_200/"
+subdir = "main/"
+saving_dir = data_dir+subdir+"trained_net_n"+str(n)+"_T"+str(temp)+".npz"
 
 # Loading data - will improve dir struct soon..
 data_M = np.load(saving_dir)['M']
@@ -31,7 +32,7 @@ data_T = np.load(data_dir+"miniBatchs_images.npy")[0]
 mapper = pickle.load((open(data_dir+"/umap_model_correlation.sav", 'rb')))
 
 embedding = mapper.transform(data_T)
-M_embedding = np.load(data_dir+"/memory_umap_embed_correlation_n"+str(n)+"_momentum.npy")
+M_embedding = np.load(data_dir+subdir+"/memory_umap_embed_correlation_n"+str(n)+"_T"+str(temp)+".npy")
     
 
 indices = np.zeros(20)
