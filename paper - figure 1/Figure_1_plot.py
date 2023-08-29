@@ -41,7 +41,8 @@ for i in range(len(indices)):
     indices[i] =  all_indices[np.random.randint(len(all_indices))] # -> Pick randomly when Label is mostly # digit class i//2 $
 indices = np.asarray(indices, dtype=int)
 
-t_s = [20, 90, 125, 153, 180, 280, 344] # Handpicked
+# Use the time stamps file or manually get timestamps from UMAP movies.
+t_s = [20, 90, 125, 153, 180, 280, 344] # Handpicked, notice this is /10 because of the UMAP timesteps
 t_samples = np.asarray(t_s)*10
 
 
