@@ -14,7 +14,7 @@ import umap.plot
 from main_module.KrotovV2_utils import *
 
 data_dir = "data/"
-prefix = "main/"
+prefix = "momentum/"
 n, temp = 30, 670
 
 
@@ -52,7 +52,7 @@ if verbose:
 
 
 TIME_SKIP = 10 # Time step size 
-saving_dir = data_dir+"trained_net_n"+str(n)+"_T"+str(temp)+".npz"
+saving_dir = data_dir+prefix+"trained_net_n"+str(n)+"_T"+str(temp)+".npz"
 data_M = np.load(saving_dir)['M'][::TIME_SKIP]
 tmax, N_mem = np.shape(data_M)[0], np.shape(data_M)[1]
 
@@ -68,7 +68,7 @@ for t in range(1, tmax//t_slice_size):
     if verbose:
         print(t, "out of", tmax//t_slice_size)
         
-np.save(data_dir+"/memory_umap_embed_correlation_n"+str(n)+"_T"+str(temp), M_embedding)
+np.save(data_dir+prefix+"/memory_umap_embed_correlation_n"+str(n)+"_T"+str(temp), M_embedding)
 
 # Plot the UMAP movie for reference
 M_embedding = np.load(data_dir+"/memory_umap_embed_correlation_n"+str(n)+"_T"+str(temp))
@@ -81,7 +81,7 @@ def update(t):
     return pts, text,
 
 ani = anim.FuncAnimation(fig, update, frames=len(M_embedding)-2, interval=100, blit=True, repeat=False)
-ani.save(data_dir+"UMAP_movie_n"+str(n)+"_T"+str(temp)".mp4", writer="ffmpeg")
+ani.save(data_dir+prefix+"UMAP_movie_n"+str(n)+"_T"+str(temp)+".mp4", writer="ffmpeg")
 exit()
 
 

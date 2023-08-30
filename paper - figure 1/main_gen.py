@@ -5,7 +5,7 @@ import numpy as np
 
 from main_module.KrotovV2 import *
 
-data_dir = "data_100_10_200/"
+data_dir = "data/"
 
 # Makes sure the data_dir exits else creates it.
 if not path.exists(data_dir):
@@ -14,7 +14,9 @@ if not path.exists(data_dir):
     print(data_dir, "Created!")
 
 isFirstRun = False
-prefix = "reproduced/" # I used main, reproduced [1, 4, 7]
+prefix = "[1, 7, 9]/" # I used main,and momentum
+
+selected_digits = [1, 7, 9]
 
 for noise_r in [8]:
     for temp in [670]:
@@ -22,13 +24,13 @@ for noise_r in [8]:
             print(n, temp)
             
             r = 1.0/10**(noise_r)
-            net = KrotovNet(Kx=10, Ky=10, n_deg=n, m_deg=n, M=200, nbMiniBatchs=1, momentum=0*0.6, rate=0.005, temp=temp, rand_init_mean=-0.001, rand_init_std=r)
-
+            net = KrotovNet(Kx=10, Ky=10, n_deg=n, m_deg=n, M=20*len(selected_digits), nbMiniBatchs=1, momentum=0*0.6, rate=0.005, temp=temp, rand_init_mean=-0.001, rand_init_std=r, selected_digits=selected_digits)
+            
             
             # Makes sure the data_dir exits else creates it.
             if not path.exists(data_dir+prefix):
                 print(data_dir, "Does not exist. It will be created ...")
-                os.mkdir(data_dir)
+                os.mkdir(data_dir+prefix)
                 print(data_dir, "Created!")
 
                 # Creates details.md
@@ -46,10 +48,16 @@ for noise_r in [8]:
             # First run
             if isFirstRun:
                 np.save(data_dir+"miniBatchs_images.npy", net.miniBatchs_images); exit()
+
+            # Taking only the digits we need from the full training set
+            data_T = np.load(data_dir+"miniBatchs_images.npy")[0]
+            train_mask = np.zeros(200)
+            for d in selected_digits:
+                train_mask[d*20: (d+1)*20] = 1
+            train_mask = np.asarray(train_mask, dtype=bool)
+                
+            net.miniBatchs_images[0] = data_T[train_mask]
             
-            net.miniBatchs_images = np.load(data_dir+"miniBatchs_images.npy")
-            
-                       
             net.train_plot_update(3500, isPlotting=False, isSaving=True, saving_dir=data_dir+prefix+"trained_net_n"+str(n)+"_T"+str(temp)+".npz", testFreq=100)
 
  
