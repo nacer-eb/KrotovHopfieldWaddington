@@ -14,14 +14,14 @@ import umap.plot
 from main_module.KrotovV2_utils import *
 
 data_dir = "data/"
-prefix = "[1, 7, 9]/" # "main/"#
-n, temp = 40, 800
+prefix = "[1, 4, 7]/" # "main/"#
+n, temp = 3, 800
 
 
-isUMAPObjGenerated = True
+isUMAPObjAlreadyGenerated = True
 verbose = False
 
-if not isUMAPObjGenerated:
+if not isUMAPObjAlreadyGenerated:
     data_T = get_MNIST_train_images() # Trains on the entire MNIST alternatively, use -> #np.load(data_dir+"miniBatchs_images.npy")[0]
     keys = get_MNIST_train_labels()
     M = len(data_T)
@@ -71,7 +71,7 @@ for t in range(1, tmax//t_slice_size):
 np.save(data_dir+prefix+"memory_umap_embed_correlation_n"+str(n)+"_T"+str(temp), M_embedding)
 
 # Plot the UMAP movie for reference
-M_embedding = np.load(data_dir+prefix+"memory_umap_embed_correlation_n"+str(n)+"_T"+str(temp))
+M_embedding = np.load(data_dir+prefix+"memory_umap_embed_correlation_n"+str(n)+"_T"+str(temp)+".npy")
 t = 0 
 pts, = ax.plot(M_embedding[t, :, 0], M_embedding[t, :, 1], marker=".", markersize=5, linestyle="", color="k")
 text = ax.text(0.05, 0.95, "t=", transform=ax.transAxes, fontsize=14, verticalalignment='top')

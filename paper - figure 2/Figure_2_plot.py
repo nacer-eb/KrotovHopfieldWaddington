@@ -21,8 +21,8 @@ from main_module.KrotovV2_utils import *
 
 n, temp = 30, 800
 data_dir = "../paper - figure 1/data/"
-subdir = "[1, 7, 9]/"
-selected_digits = [1, 7, 9]
+subdir = "[1, 4, 7]/"
+selected_digits = [1, 4, 7]
 saving_dir = data_dir+subdir+"trained_net_n"+str(n)+"_T"+str(temp)+".npz"
 
 
@@ -56,7 +56,7 @@ indices = np.asarray(indices, dtype=int)
 
 # Use the time stamps file or manually get timestamps from UMAP movies.
 # Handpicked, notice this is /10 because of the UMAP timesteps
-t_s = [20, 50, 60, 70, 344] 
+t_s = [20, 70, 120, 150, 344] 
 t_samples = np.asarray(t_s)*10
 
 
@@ -165,7 +165,7 @@ ax_UMAP_1 = np.asarray([axs['1'], axs['2'], axs['3'], axs['4']])
 UMAP_plot(ax_UMAP_1)
 
 ax_split_1 = np.asarray([axs['A'], axs['B']])
-split_plot(ax_split_1, 200, 2000)
+split_plot(ax_split_1, 200, 3000)
 
 ax_cb_UMAP = axs['0']
 tab10_cmap = matplotlib.cm.tab10
