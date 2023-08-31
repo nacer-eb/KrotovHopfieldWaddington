@@ -14,13 +14,13 @@ if not path.exists(data_dir):
     print(data_dir, "Created!")
 
 isFirstRun = False
-prefix = "[1, 7, 9]/" # I used main,and momentum
+prefix = "[1, 4, 7]/" # I used main,and momentum #"main"#
 
-selected_digits = [1, 7, 9]
+selected_digits = [1, 4, 7] # [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]#
 
 for noise_r in [8]:
-    for temp in [670]:
-        for n in [3, 15, 30, 40]:
+    for temp in [800]:
+        for n in [30, 3, 15, 40]:
             print(n, temp)
             
             r = 1.0/10**(noise_r)
