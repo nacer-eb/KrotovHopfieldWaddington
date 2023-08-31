@@ -467,15 +467,16 @@ class KrotovNet:
         i_end = 0
         for i in range(0, epochs):
             i_end += 1
-            if i%20 == 0:
+            if i%20 == 0 and True: # Removed, too verbose
                 print("-> %d / %d" % (i, epochs) )
+                #print("Rank: ", np.linalg.matrix_rank(self.visibleDetectors), np.linalg.matrix_rank(self.hiddenDetectors))
             
             if isDecay:
                 decayRate = 0.998
                 self.train_rate *= decayRate
 
             if (i % testFreq) == 0:
-                print(i)
+                print("-> %d / %d" % (i, epochs) )
                 self.output_test_results(testingRegiment)
 
             if isPlotting:
@@ -487,8 +488,13 @@ class KrotovNet:
                 M[i, :, :] = self.visibleDetectors
                 L[i, :, :] = self.hiddenDetectors
 
+
             
-                
+            # IMPORTANT REMOVE WHEN DONE: MAKING LAST TWO MEM AND LABELS EQUAL
+            #self.visibleDetectors[2] = self.visibleDetectors[1]
+            #self.hiddenDetectors[2] = self.hiddenDetectors[1]
+            ## End of temporary code - Boy is this dangerous
+
             self.train_cycle(self.miniBatchs_images, self.miniBatchs_labels) #Train
 
             rank_apprx = np.linalg.matrix_rank(self.visibleDetectors, tol=0.002)

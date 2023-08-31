@@ -1,6 +1,7 @@
 import sys
 sys.path.append('../')
 
+
 import tkinter as tk
 
 import numpy as np
@@ -21,6 +22,8 @@ class KV_window:
 
         # Window init
         self.window = tk.Tk() # Darkmode is not worth it
+
+        
         self.window.geometry("1080x720+0+0")
 
         # Reference the player

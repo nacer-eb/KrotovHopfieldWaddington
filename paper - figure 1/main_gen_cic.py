@@ -6,7 +6,6 @@ import numpy as np
 from main_module.KrotovV2 import *
 from generate_umap_embedding import *
 
-
 data_dir = "data/"
 
 # Makes sure the data_dir exits else creates it.
@@ -17,18 +16,22 @@ if not path.exists(data_dir):
 
 isFirstRun = False
 
-selected_digits = [1, 4, 7] # [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]#
-prefix = str(selected_digits)+"/" # I used main,and momentum #"main"#
+selected_digits = [1, 7, 9] # [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]#
+
+# The custom initial conditions as an index of selected_digits
+cic = 1
+
+prefix = str(selected_digits)+"_"+ str(selected_digits[cic]) +"/"  # I used main,and momentum #"main"#
 
 
 
-for noise_r in [10]:
+for noise_r in [8]:
     for temp in [800]:
-        for n in [3, 15, 40]:
+        for n in [45]:
             print(n, temp)
             
             r = 1.0/10**(noise_r)
-            net = KrotovNet(Kx=10, Ky=10, n_deg=n, m_deg=n, M=20*len(selected_digits), nbMiniBatchs=1, momentum=0*0.6, rate=0.005, temp=temp, rand_init_mean=-0.001, rand_init_std=r, selected_digits=selected_digits)
+            net = KrotovNet(Kx=10, Ky=10, n_deg=n, m_deg=n, M=20*len(selected_digits), nbMiniBatchs=1, momentum=0*0.6, rate=0.005*2, temp=temp, rand_init_mean=-0.001, rand_init_std=r, selected_digits=selected_digits)
             
             
             # Makes sure the data_dir exits else creates it.
@@ -44,8 +47,9 @@ for noise_r in [10]:
                     "The learning rate is " + str(net.train_rate) + ".\n" +\
                     "The momentum is " + str(net.train_momentum) + ".\n" +\
                     "The digits included in training are " + str(net.selected_digits) + ".\n" +\
-                    "Specifics can be checked by opening the file with KV_window..."
-
+                    "Specifics can be checked by opening the file with KV_window...\n\n" +\
+                    "Note here that to the Gaussian initial conditions a 0.8*" + str(selected_digits[cic])+ " is added using the class average.\n" +\
+                    "This is done to test different saddles." 
                 details_file.write(details)
                 
 
@@ -64,9 +68,12 @@ for noise_r in [10]:
 
 
             net.miniBatchs_images[0] = data_T[train_mask]
-            
-            net.train_plot_update(3500, isPlotting=False, isSaving=True, saving_dir=data_dir+prefix+"trained_net_n"+str(n)+"_T"+str(temp)+".npz", testFreq=100)
 
-            generate_umap_embedding(data_dir, prefix, n, temp)
+            net.visibleDetectors[:, :] += 0.9*net.miniBatchs_images[0, cic*20]
+
+
+            net.train_plot_update(5000, isPlotting=False, isSaving=True, saving_dir=data_dir+prefix+"trained_net_n"+str(n)+"_T"+str(temp)+".npz", testFreq=100)
             
+            generate_umap_embedding(data_dir, prefix, n, temp)
+            exit()
 
