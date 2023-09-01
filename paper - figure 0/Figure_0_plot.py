@@ -6,9 +6,10 @@ import numpy as np
 from main_module.KrotovV2 import *
 
 import matplotlib
+fontsize = 37
 font = {'family' : 'Times New Roman',
         'weight' : 'normal',
-        'size'   : 25}
+        'size'   : fontsize}
 
 matplotlib.rc('font', **font)
 
@@ -102,18 +103,14 @@ def memory_coefs_fig(ax):
             ax[i, j].axhline(y=0, color="r", alpha=0.5)
 
             # Cosmetics
-            ax[i, j].xaxis.set_label_position("top")
-            ax[i, j].xaxis.tick_top()
-            ax[0, j].set_xlabel("Training \n Example #", rotation=60)
-            if i != 0:
+            ax[2, j].set_xlabel("Training \n Example #", rotation=0)
+            if i != 2:
                 ax[i, j].set_xticks([])
 
 
             # Cosmetics
-            ax[i, j].yaxis.set_label_position("right")
-            ax[i, j].yaxis.tick_right()
-            ax[i, -1].set_ylabel(r"$\alpha_\#$", rotation=60, labelpad=20)
-            if j != 2: 
+            ax[i, 0].set_ylabel(r"$\alpha_\#$", rotation=90, labelpad=20)
+            if j != 0: 
                 ax[i, j].set_yticks([])
             
             for d in range(0, 10):
@@ -148,7 +145,7 @@ def label_coefs_fig(ax):
             ax[-1, j].set_xticks([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
             ax[i, j].set_yticks([-1, 1])
 
-            ax[-1, j].set_xlabel("Training \n Class", rotation=0, labelpad=20)          
+            ax[-1, j].set_xlabel("Training \n Class", rotation=00, labelpad=20)          
             ax[i, 0].set_ylabel("Label \n Coefficients", rotation=90, labelpad=20)
             
             if i != 2:
@@ -163,23 +160,30 @@ def label_coefs_fig(ax):
 
 # Putting it all together
                 
-fig = plt.figure(figsize=(19, 19))
+fig = plt.figure(figsize=(15, 35))
 axs = fig.subplot_mosaic(
     """
-    AABBCC..KKLLMM
-    AABBCC..KKLLMM
-    DDEEFF..NNOOPP
-    DDEEFF..NNOOPP
-    HHIIJJ..QQRRSS
-    HHIIJJ..QQRRSS
-    ..............
-    ..............
-    TTUUVV..aabbcc
-    TTUUVV..aabbcc
-    WWXXYY..ddeeff
-    WWXXYY..ddeeff
-    ZZ1122..hhiijj
-    ZZ1122..hhiijj
+    AABBCC
+    AABBCC
+    DDEEFF
+    DDEEFF
+    HHIIJJ
+    HHIIJJ
+    ......
+    KKLLMM
+    KKLLMM
+    NNOOPP
+    NNOOPP
+    QQRRSS
+    QQRRSS
+    ......
+    ......
+    TTUUVV
+    TTUUVV
+    WWXXYY
+    WWXXYY
+    ZZ1122
+    ZZ1122
     """
 )
 
@@ -187,11 +191,6 @@ axs = fig.subplot_mosaic(
 mem_ax_tl = [[axs['A'], axs['B'], axs['C']], [axs['D'], axs['E'], axs['F']], [axs['H'], axs['I'], axs['J']]]
 mem_ax_tl = np.asarray(mem_ax_tl)
 memory_samples_fig(mem_ax_tl, isBotAxis=False)
-
-# The bot righ sub-plot
-mem_ax_br = [[axs['a'], axs['b'], axs['c']], [axs['d'], axs['e'], axs['f']], [axs['h'], axs['i'], axs['j']]]
-mem_ax_br = np.asarray(mem_ax_br)
-memory_samples_fig(mem_ax_br, isLeftAxis=False)
 
 # The top right mem-coefs subplot
 mem_coef_ax_tr = [[axs['K'], axs['L'], axs['M']], [axs['N'], axs['O'], axs['P']], [axs['Q'], axs['R'], axs['S']]]
@@ -204,14 +203,13 @@ label_coef_ax_bl= np.asarray(label_coef_ax_bl)
 label_coefs_fig(label_coef_ax_bl)
 
 # Column and row labels
-mem_ax_tl[0, 1].text(28, -30, "n-power", fontsize=30, ha='center', family='Times New Roman')
-mem_ax_tl[1, 0].text(-32, 2*28, "Temperature", rotation=90, fontsize=30, ha='center', family='Times New Roman')
+mem_ax_tl[0, 1].text(28, -25, "n-power", fontsize=fontsize, ha='center', family='Times New Roman')
+mem_ax_tl[1, 0].text(-35, 2*28, "Temperature", rotation=90, fontsize=fontsize, ha='center', family='Times New Roman')
 
-mem_ax_br[-1, 1].text(28, 29*2+30, "n-power", fontsize=30, ha='center', family='Times New Roman')
-mem_ax_br[1, -1].text(28*2 + 32, 2*28, "Temperature", rotation=90, fontsize=30, ha='center', family='Times New Roman')
+wpad = 0.21
 
 # Cosmetics and saving with transparency.
-plt.subplots_adjust(hspace=0.4, wspace=0.4)
-plt.savefig("tmp_fig0.png", transparent=True)
+plt.subplots_adjust(left=wpad, right=1-wpad, hspace=0.4, wspace=0.4, top=0.95, bottom=0.05)
+plt.savefig("tmp_fig0_.png")#, transparent=True)
 
 
