@@ -173,7 +173,7 @@ ffffffgggggghhhhhhiiiiiijjjjjjX
 ffffffgggggghhhhhhiiiiiijjjjjjX
 """)
 
-panel_top = Figure_2_panel(30)
+panel_top = Figure_2_panel(30, t_s=[20, 90, 190, 236, 343])
 
 ax_mem_1 = np.asarray([axs['a'], axs['b'], axs['c'], axs['d'], axs['e']])
 panel_top.memory_sample_plot(ax_mem_1)
@@ -205,7 +205,7 @@ ax_split_1[0].text(-0.3, 0.23, r"n = 30", transform=ax_split_1[0].transAxes, fon
 
 ########################################
 
-panel_bot = Figure_2_panel(3, t_s=[20, 50, 70, 100, 344])
+panel_bot = Figure_2_panel(3, t_s=[20, 22, 30, 50, 344])
 
 ax_mem_2 = np.asarray([axs['f'], axs['g'], axs['h'], axs['i'], axs['j']])
 panel_bot.memory_sample_plot(ax_mem_2)
@@ -229,9 +229,7 @@ cb_mem_2.set_label("Pixel value")
 
 
 # The n text
-ax_split_2[0].text(-0.3, 0.23, r"n = 30", transform=ax_split_2[0].transAxes, fontsize=16, rotation=90, verticalalignment='center', ha='center', bbox=panel_top.props)
-
-
+ax_split_2[0].text(-0.3, 0.23, r"n = 3", transform=ax_split_2[0].transAxes, fontsize=16, rotation=90, verticalalignment='center', ha='center', bbox=panel_top.props)
 
 
 plt.subplots_adjust(wspace=1.2, hspace=1.2)
