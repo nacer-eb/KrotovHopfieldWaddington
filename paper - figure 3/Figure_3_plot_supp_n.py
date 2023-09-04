@@ -29,13 +29,9 @@ axs = fig.subplot_mosaic(
     """
 )
 
-# Create necessary arrays for nullclines
-temp = 700
-alpha_range = np.linspace(0, 1, 1000); l_range = np.linspace(-1, 1, 1000)
-l_0_mesh, alpha_mesh = np.meshgrid(l_range, alpha_range)
 
-# Load FP data and training examples
-data, A, B = load_data()
+# Figure 3 object
+f3 = Figure_3("run_[1, 4]_n15_T700_alpha0.8_l_00.5.npz") 
 
 # Fetch all nullcline axes
 nullcline_axes = np.asarray([axs['A'], axs['B'], axs['C'], axs['D'],
@@ -68,10 +64,10 @@ for ax in mem_snapshots_axs.ravel():
 
 n_range = np.asarray([6, 10, 20, 30, 35, 37, 38, 40])
 for i, n in enumerate(n_range):
-    alphas, betas = plot_nullclines(nullcline_axes[i], n, temp, l_0_mesh, alpha_mesh, data)
+    alphas, betas = f3.plot_nullclines(nullcline_axes[i], n)
      
     for j in range(3):
-        plot_snapshot(mem_snapshots_axs[i, j], A, B, alphas[j], betas[j], isStable=int(j!=1)+int(i==3)+int(i==4)) # if j==1 it's unstable unless i==2 in which case the center point is stable
+        f3.plot_snapshot(mem_snapshots_axs[i, j], alphas[j], betas[j], isStable=int(j!=1)+int(i==3)+int(i==4)) # if j==1 it's unstable unless i==2 in which case the center point is stable
 
 
 # Cosmetics - remove duplicates for single FPs

@@ -31,23 +31,19 @@ axs = fig.subplot_mosaic(
 )
 
 
-# Create necessary arrays for nullclines
-temp = 700
-alpha_range = np.linspace(0, 1, 1000); l_range = np.linspace(-1, 1, 1000)
-l_0_mesh, alpha_mesh = np.meshgrid(l_range, alpha_range)
+# Figure 3 object
+f3 = Figure_3("run_[1, 4]_n15_T700_alpha0.8_l_00.5.npz") 
 
-# Load FP data and training examples
-data, A, B = load_data()
-
-
-# Cosmetics
+# Saving space (Pun intended)
 default_pos_ax2 = axs['2'].get_position()
 axs['2'].remove() # Making space for 3d plot
+
+# Cosmetics
 axs['1'].set_xlabel(r'$\alpha$'); axs['3'].set_xlabel(r'$\alpha$');
 axs['1'].set_ylabel('n-power'); axs['3'].set_ylabel('n-power');
 
 # Creating the colormap for n
-norm = plt.Normalize(np.min(data[:, 1]), np.max(data[:, 1])) # Norm map for n-power
+norm = plt.Normalize(np.min(f3.FP_data[:, 1]), np.max(f3.FP_data[:, 1])) # Norm map for n-power
 c1 = np.asarray([191/256.0, 127/256.0, 191/256.0, 1]) # purple
 c2 = np.asarray([255/256.0, 209/256.0, 127/256.0, 1]) # golden yellow
 
@@ -59,8 +55,8 @@ cmap = matplotlib.colors.ListedColormap(vals)
 
 
 # Plotting
-axs['1'].scatter(data[:, -3], data[:, 1], c=data[:, 1] , cmap=cmap, norm=norm, s=0.1)
-axs['3'].scatter(data[:, -1], data[:, 1], c=data[:, 1] , cmap=cmap, norm=norm, s=0.1)
+axs['1'].scatter(f3.FP_data[:, -3], f3.FP_data[:, 1], c=f3.FP_data[:, 1] , cmap=cmap, norm=norm, s=0.1)
+axs['3'].scatter(f3.FP_data[:, -1], f3.FP_data[:, 1], c=f3.FP_data[:, 1] , cmap=cmap, norm=norm, s=0.1)
 
 
 # Define nullcline axes
@@ -87,10 +83,10 @@ for ax in mem_snapshots_axs.ravel():
 
 n_range = np.asarray([10, 20, 30, 40])
 for i, n in enumerate(n_range):
-    alphas, betas = plot_nullclines(nullcline_axes[i], n, temp, l_0_mesh, alpha_mesh, data)
+    alphas, betas = f3.plot_nullclines(nullcline_axes[i], n)
      
     for j in range(3):
-        plot_snapshot(mem_snapshots_axs[i, j], A, B, alphas[j], betas[j], isStable=int(j!=1)+int(i==2)) # if j==1 it's unstable unless i==2 in which case the center point is stable
+        f3.plot_snapshot(mem_snapshots_axs[i, j], alphas[j], betas[j], isStable=int(j!=1)+int(i==2)) # if j==1 it's unstable unless i==2 in which case the center point is stable
 
 
 # Cosmetics - remove duplicates for single FPs
@@ -107,7 +103,7 @@ center_ax_3d = fig.add_axes([default_pos_ax2.x0 + dx_adjust-0.02,
                              default_pos_ax2.y1 - default_pos_ax2.y0-2*dy_adjust],
                             projection='3d')
 
-center_ax_3d.scatter(data[:, -3], data[:, -1], data[:, 1], c=data[:, 1], cmap=cmap, norm=norm, s=1)
+center_ax_3d.scatter(f3.FP_data[:, -3], f3.FP_data[:, -1], f3.FP_data[:, 1], c=f3.FP_data[:, 1], cmap=cmap, norm=norm, s=1)
 center_ax_3d.set_xlabel(r"$\alpha$", labelpad=10); center_ax_3d.set_ylabel(r"$l_0$", labelpad=13); center_ax_3d.set_zlabel(r"$n$", labelpad=5)
 center_ax_3d.locator_params(axis='x', nbins=5)
 center_ax_3d.locator_params(axis='y', nbins=5)
