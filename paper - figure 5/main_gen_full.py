@@ -15,8 +15,8 @@ if not path.exists(data_dir):
 
 for noise_r in [2]:#[5]: # was 8.
     for temp in [800]:#np.arange(400, 680, 20):
-        for n in [38, 50]:#np.arange(2, 32, 2):
-            for run in [7]:
+        for n in [4, 23, 38, 50]:#np.arange(2, 32, 2):
+            for run in [1, 7]:
                 print(n, temp)
                 
                 r = 1.0/10**(noise_r)
