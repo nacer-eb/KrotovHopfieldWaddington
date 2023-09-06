@@ -48,6 +48,10 @@ def UMAP_plot(ax, n=30, temp=670, t_s=[20, 90, 125, 153, 180, 280, 344]):
     net = KrotovNet(M=M, nbMiniBatchs=1) # The rest will be filled in by the next line load-net
     net.load_net(saving_dir, epoch=0)   
       
+
+    # Set red and green cmap
+    rg_cmap = matplotlib.colors.ListedColormap(['red', 'green'])
+    rg_norm = matplotlib.colors.BoundaryNorm([0, 0.5, 1], rg_cmap.N)
     
     for t_i in range(0, len(t_s)-1):
 
@@ -56,9 +60,9 @@ def UMAP_plot(ax, n=30, temp=670, t_s=[20, 90, 125, 153, 180, 280, 344]):
         
         keys = np.zeros((M))
         for i in range(M):
-            keys[i] = np.argmax(net.compute(data_T[i]))
+            keys[i] = np.argmax(net.compute(data_T[i]))==(i//20) # 20 examples per class
             
-        im = ax[t_i].scatter(embedding[:, 0], embedding[:, 1], c=keys, cmap="tab10", s=25, marker=".", vmin=0, vmax=10) # Plotting the UMAP training data
+        im = ax[t_i].scatter(embedding[:, 0], embedding[:, 1], c=keys, cmap=rg_cmap, s=25, marker=".", norm=rg_norm) # Plotting the UMAP training data
 
         
         # Time stamps / Cosmetics
@@ -170,6 +174,9 @@ DDDDDDDDDDDDDDDDDDDDDDDDDDDDEEEEEEEEEEEEEEEEEEEEEEEEEEEEFFFFFFFFFFFFFFFFFFFFFFFF
 
 """)
 
+# Set red and green cmap
+rg_cmap = matplotlib.colors.ListedColormap(['red', 'green'])
+rg_norm = matplotlib.colors.BoundaryNorm([0, 0.5, 1], rg_cmap.N)
 
 ax_UMAPs_top = [axs['1'], axs['2'], axs['3'], axs['4'], axs['5'], axs['6']]
 ax_UMAPs_top = np.asarray(ax_UMAPs_top)          
@@ -181,18 +188,16 @@ UMAP_plot(ax_UMAPs_bot, n=3, t_s=[20, 27, 37, 51, 62, 90, 344])
 
 
 ax_cb_UMAP_top = axs['0']
-tab10_cmap = matplotlib.cm.tab10
-tab10_norm = matplotlib.colors.Normalize(vmin=0, vmax=10)
-cb_UMAP_top = matplotlib.colorbar.ColorbarBase(ax_cb_UMAP_top, cmap=tab10_cmap, norm=tab10_norm, orientation='vertical')
-cb_UMAP_top.set_ticks(np.arange(0, 10, 1) + 0.5) # Finally found how to center these things 
-cb_UMAP_top.set_ticklabels(np.arange(0, 10, 1))
+cb_UMAP_top = matplotlib.colorbar.ColorbarBase(ax_cb_UMAP_top, cmap=rg_cmap, norm=rg_norm, orientation='vertical')
+cb_UMAP_top.set_ticks([0.25, 0.75]) # Finally found how to center these things 
+cb_UMAP_top.set_ticklabels(["Incorrect", "Correct"], rotation=90, va='center')
 cb_UMAP_top.set_label("Network classification")
 
 
 ax_cb_UMAP_bot = axs['X']
-cb_UMAP_bot = matplotlib.colorbar.ColorbarBase(ax_cb_UMAP_bot, cmap=tab10_cmap, norm=tab10_norm, orientation='vertical')
-cb_UMAP_bot.set_ticks(np.arange(0, 10, 1) + 0.5) 
-cb_UMAP_bot.set_ticklabels(np.arange(0, 10, 1))
+cb_UMAP_bot = matplotlib.colorbar.ColorbarBase(ax_cb_UMAP_bot, cmap=rg_cmap, norm=rg_norm, orientation='vertical')
+cb_UMAP_bot.set_ticks([0.25, 0.75]) # Finally found how to center these things 
+cb_UMAP_bot.set_ticklabels(["Incorrect", "Correct"], rotation=90, va='center')
 cb_UMAP_bot.set_label("Network classification")
 
 ax_UMAPs_top[0].text(-0.35, 0.0, "n = 30", transform=ax_UMAPs_top[0].transAxes, fontsize=16, verticalalignment='center', ha='center', bbox=props, rotation=90)
