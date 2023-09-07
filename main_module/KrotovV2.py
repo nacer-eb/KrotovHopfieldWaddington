@@ -424,7 +424,7 @@ class KrotovNet:
             print("Training batch score:", test_batch_score)
     
 
-    def train_plot_update(self, epochs, isPlotting=True, isSaving=False, saving_dir=None, testFreq=100, testingRegiment=[1, 0, 0], isDecay=False, l_condition=False):
+    def train_plot_update(self, epochs, isPlotting=True, isSaving=False, saving_dir=None, testFreq=100, testingRegiment=[1, 0, 0], isDecay=False, id_mem=None):
         """
         Train & Plot function.
         Trains the network and plots it. It also allows you to test the network on the various digits batchs as per the testingRegiment parameter.
@@ -466,6 +466,13 @@ class KrotovNet:
 
         i_end = 0
         for i in range(0, epochs):
+
+            # This is cool - generally not implemented only in special**2 cases
+            if id_mem is not None:
+                for d in id_mem[1:]:
+                    self.visibleDetectors[d] = self.visibleDetectors[id_mem[0]]
+                    self.hiddenDetectors[d] = self.hiddenDetectors[id_mem[0]]
+            
             i_end += 1
             if i%20 == 0 and True: # Removed, too verbose
                 print("-> %d / %d" % (i, epochs) )
@@ -496,12 +503,8 @@ class KrotovNet:
             ## End of temporary code - Boy is this dangerous
 
             self.train_cycle(self.miniBatchs_images, self.miniBatchs_labels) #Train
-
-            rank_apprx = np.linalg.matrix_rank(self.visibleDetectors, tol=0.002)
             
-            if l_condition and rank_apprx <= 2:
-                print(rank_apprx)
-                break
+            
 
                 
         print(i_end)   
