@@ -103,7 +103,7 @@ def memory_coefs_fig(ax):
             ax[i, j].axhline(y=0, color="r", alpha=0.5)
 
             # Cosmetics
-            ax[2, j].set_xlabel("Training \n Example #", rotation=0)
+            ax[2, j].set_xlabel("Training \n Sample #", rotation=0)
             if i != 2:
                 ax[i, j].set_xticks([])
 
@@ -159,32 +159,40 @@ def label_coefs_fig(ax):
 
 
 # Putting it all together
-                
-fig = plt.figure(figsize=(15, 35))
+         
+fig = plt.figure(figsize=(28, 26))
 axs = fig.subplot_mosaic(
-    """
-    AABBCC
-    AABBCC
-    DDEEFF
-    DDEEFF
-    HHIIJJ
-    HHIIJJ
-    ......
-    KKLLMM
-    KKLLMM
-    NNOOPP
-    NNOOPP
-    QQRRSS
-    QQRRSS
-    ......
-    ......
-    TTUUVV
-    TTUUVV
-    WWXXYY
-    WWXXYY
-    ZZ1122
-    ZZ1122
-    """
+"""   
+
+AAAABBBBCCCC....KKKKLLLLMMMM#
+AAAABBBBCCCC....KKKKLLLLMMMM#
+AAAABBBBCCCC....KKKKLLLLMMMM#
+AAAABBBBCCCC....KKKKLLLLMMMM#
+DDDDEEEEFFFF....NNNNOOOOPPPP#
+DDDDEEEEFFFF....NNNNOOOOPPPP#
+DDDDEEEEFFFF....NNNNOOOOPPPP#
+DDDDEEEEFFFF....NNNNOOOOPPPP#
+HHHHIIIIJJJJ....QQQQRRRRSSSS#
+HHHHIIIIJJJJ....QQQQRRRRSSSS#
+HHHHIIIIJJJJ....QQQQRRRRSSSS#
+HHHHIIIIJJJJ....QQQQRRRRSSSS#
+.............................
+.............................
+.............................
+TTTTUUUUVVVV$................
+TTTTUUUUVVVV$................
+TTTTUUUUVVVV$................
+TTTTUUUUVVVV$................
+WWWWXXXXYYYY$................
+WWWWXXXXYYYY$................
+WWWWXXXXYYYY$................
+WWWWXXXXYYYY$................
+ZZZZ11112222$................
+ZZZZ11112222$................
+ZZZZ11112222$................
+ZZZZ11112222$................
+
+"""
 )
 
 # The top left sub-plot
@@ -208,8 +216,27 @@ mem_ax_tl[1, 0].text(-35, 2*28, "Temperature", rotation=90, fontsize=fontsize, h
 
 wpad = 0.21
 
+
+
+
+for char in ['#', '$']:
+    ax_cb_class = axs[char]
+    tab10_cmap = matplotlib.cm.tab10
+    tab10_norm = matplotlib.colors.Normalize(vmin=0, vmax=10)
+    cb_class = matplotlib.colorbar.ColorbarBase(ax_cb_class, cmap=tab10_cmap, norm=tab10_norm, orientation='vertical')
+    cb_class.set_ticks(np.arange(0, 10, 1) + 0.5) # Finally found how to center these things 
+    cb_class.set_ticklabels(np.arange(0, 10, 1))
+    cb_class.set_label("Digit class")
+
+
+alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+for i, char in enumerate(['A', 'K', 'T']):
+    axs[char].text(-0.3, 1.2, alphabet[i], transform=axs[char].transAxes, fontsize=83, verticalalignment='bottom', ha='right', fontfamily='Times New Roman', fontweight='bold')
+
+
+
+
 # Cosmetics and saving with transparency.
-plt.subplots_adjust(left=wpad, right=1-wpad, hspace=0.4, wspace=0.4, top=0.95, bottom=0.05)
-plt.savefig("tmp_fig0_.png")#, transparent=True)
+plt.savefig("Figure-0.png")#, transparent=True)
 
 
