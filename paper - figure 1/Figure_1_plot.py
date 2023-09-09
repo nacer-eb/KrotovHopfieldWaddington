@@ -21,7 +21,7 @@ from main_module.KrotovV2_utils import *
 
 n, temp = 30, 670
 data_dir = "data/"
-subdir = "momentum/"
+subdir = "main/"
 saving_dir = data_dir+subdir+"trained_net_n"+str(n)+"_T"+str(temp)+".npz"
 
 # Loading data - will improve dir struct soon..
@@ -50,11 +50,19 @@ indices = np.asarray(indices, dtype=int)
 
 # Use the time stamps file or manually get timestamps from UMAP movies.
 # Handpicked, notice this is /10 because of the UMAP timesteps
-#t_s = [20, 27, 37, 51, 62, 90, 344] #n=3
-#t_s = [20, 30, 55, 70, 150, 200, 344] #n=15
-#t_s = [20, 62, 100, 132, 191, 270, 344] #n=25
-t_s = [20, 90, 125, 153, 180, 280, 344] #n=30
-#t_s = [20, 62, 110, 161, 187, 233, 344] #n=40
+
+if n == 3:
+    t_s = [20, 27, 37, 51, 62, 90, 344] #n=3
+if n == 15:
+    t_s = [20, 30, 55, 70, 150, 200, 344] #n=15
+if n == 25:
+    t_s = [20, 62, 100, 132, 191, 270, 344] #n=25
+if n == 30:
+    t_s = [20, 90, 125, 153, 180, 280, 344] #n=30
+if n == 40:
+    t_s = [20, 62, 110, 161, 187, 233, 344] #n=40
+
+        
 t_samples = np.asarray(t_s)*10
 
 
@@ -208,6 +216,14 @@ custom_lines = [Line2D([0], [0], color=plt.cm.tab10(0.9), marker="*", linestyle=
                 Line2D([0], [0], color="k", lw=2, marker="", linestyle="-")]
 
 fig.legend(custom_lines, ['Training Data', 'Memory (Visible layer)', 'Memory trajectory/trail'], loc='upper center', ncol=4)
+
+
+
+alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+rx = [12.0/28.0, 1.0]
+ry = [15.0/20.0, 1.0]
+for i, char in enumerate(['1', 'A']):
+    axs[char].text(-0.3*rx[i], 1.0+0.1*ry[i], alphabet[i], transform=axs[char].transAxes, fontsize=44, verticalalignment='bottom', ha='right', fontfamily='Times New Roman', fontweight='bold')
 
 
 plt.subplots_adjust(top=0.92, wspace=1.4, hspace=1.4)

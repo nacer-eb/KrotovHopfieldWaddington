@@ -203,5 +203,11 @@ cb_UMAP_bot.set_label("Network classification")
 ax_UMAPs_top[0].text(-0.35, 0.0, "n = 30", transform=ax_UMAPs_top[0].transAxes, fontsize=16, verticalalignment='center', ha='center', bbox=props, rotation=90)
 ax_UMAPs_bot[0].text(-0.35, 0.0, "n = 3", transform=ax_UMAPs_bot[0].transAxes, fontsize=16, verticalalignment='center', ha='center', bbox=props, rotation=90)
 
+alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+rx = [12.0/28.0, 12.0/28.0]
+ry = [15.0/20.0, 15.0/20.0]
+for i, char in enumerate(['1', 'A']):
+    axs[char].text(-0.3*rx[i], 1.0+0.1*ry[i], alphabet[i], transform=axs[char].transAxes, fontsize=44, verticalalignment='bottom', ha='right', fontfamily='Times New Roman', fontweight='bold')
+
 plt.subplots_adjust(top=0.92, wspace=1.4, hspace=1.4)
-plt.savefig("tmp_classification.png")
+plt.savefig("Figure-1-5.png")
