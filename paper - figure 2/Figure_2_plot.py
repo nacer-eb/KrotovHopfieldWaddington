@@ -4,9 +4,10 @@ sys.path.append('../')
 import numpy as np
 
 import matplotlib
+fontsize = 28
 font = {'family' : 'Times New Roman',
         'weight' : 'normal',
-        'size'   : 18}
+        'size'   : fontsize}
 matplotlib.rc('font', **font)
 
 import matplotlib.pyplot as plt
@@ -71,7 +72,7 @@ class Figure_2_panel:
             
         for t_i, t in enumerate(self.t_samples):
             im = ax[t_i].imshow(merge_data(self.data_M[t, self.indices], 5, 3), cmap="bwr", vmin=-1, vmax=1, aspect=5.0/4.0) # Plotting the selected memory samples 
-            ax[t_i].set_title(r"$t=$"+str(t), pad=15, fontsize=16, bbox=self.props) # Time stamps / Cosmetics
+            ax[t_i].set_title(r"$t=$"+str(t), pad=30, fontsize=fontsize, bbox=self.props) # Time stamps / Cosmetics
             ax[t_i].axis('off')
 
 
@@ -95,7 +96,7 @@ class Figure_2_panel:
                 
                 
             # Time stamps / Cosmetics
-            ax[t_i].text(0.95, 0.95, r"$t=$"+str(self.t_s[t_i+1]*10), transform=ax[t_i].transAxes, fontsize=16, verticalalignment='top', ha='right', bbox=self.props)
+            ax[t_i].text(0.95, 0.95, r"$t=$"+str(self.t_s[t_i+1]*10), transform=ax[t_i].transAxes, fontsize=fontsize, verticalalignment='top', ha='right', bbox=self.props)
             
             # Plotting the memories as white points for each time point.
             ax[t_i].plot(self.M_embedding[self.t_s[t_i+1], :, 0], self.M_embedding[self.t_s[t_i+1], :, 1], marker="o",
@@ -143,9 +144,10 @@ class Figure_2_panel:
         ax[0].set_ylabel(r"$\alpha_"+str(self.selected_digits[1])+"$"); ax[1].set_ylabel(r"$\alpha_"+str(self.selected_digits[2])+"$");
 
         
-fig = plt.figure(figsize=(25, 15.7*2))
+fig = plt.figure(figsize=(31, 38))#(figsize=(25, 15.7*2))
 axs = fig.subplot_mosaic("""
-
+...............................
+...............................
 AAAAAAAA.BBBBBBBB.1111112222220
 AAAAAAAA.BBBBBBBB.1111112222220
 AAAAAAAA.BBBBBBBB.1111112222220
@@ -155,9 +157,11 @@ AAAAAAAA.BBBBBBBB.3333334444440
 AAAAAAAA.BBBBBBBB.3333334444440
 AAAAAAAA.BBBBBBBB.3333334444440
 ...............................
+...............................
 aaaaaabbbbbbccccccddddddeeeeeex
 aaaaaabbbbbbccccccddddddeeeeeex
 aaaaaabbbbbbccccccddddddeeeeeex
+...............................
 ...............................
 CCCCCCCC.DDDDDDDD.555555666666O
 CCCCCCCC.DDDDDDDD.555555666666O
@@ -168,12 +172,14 @@ CCCCCCCC.DDDDDDDD.777777888888O
 CCCCCCCC.DDDDDDDD.777777888888O
 CCCCCCCC.DDDDDDDD.777777888888O
 ...............................
+...............................
 ffffffgggggghhhhhhiiiiiijjjjjjX
 ffffffgggggghhhhhhiiiiiijjjjjjX
 ffffffgggggghhhhhhiiiiiijjjjjjX
+...............................
 """)
 
-panel_top = Figure_2_panel(30, t_s=[20, 90, 190, 236, 343])
+panel_top = Figure_2_panel(30, t_s=[20, 90, 190, 236, 343]) # 147
 
 ax_mem_1 = np.asarray([axs['a'], axs['b'], axs['c'], axs['d'], axs['e']])
 panel_top.memory_sample_plot(ax_mem_1)
@@ -182,7 +188,7 @@ ax_UMAP_1 = np.asarray([axs['1'], axs['2'], axs['3'], axs['4']])
 panel_top.UMAP_plot(ax_UMAP_1)
 
 ax_split_1 = np.asarray([axs['A'], axs['B']])
-panel_top.split_plot(ax_split_1, 0, 3400)
+panel_top.split_plot(ax_split_1, 900, 3400)
 
 ax_cb_UMAP = axs['0']
 tab10_cmap = matplotlib.cm.tab10
@@ -201,11 +207,11 @@ cb_mem.set_label("Pixel value")
 
 
 # The n text
-ax_split_1[0].text(-0.3, 0.23, r"n = 30", transform=ax_split_1[0].transAxes, fontsize=16, rotation=90, verticalalignment='center', ha='center', bbox=panel_top.props)
+ax_split_1[1].text(0.5, 1.1, r"n = 30", transform=ax_split_1[1].transAxes, fontsize=fontsize*1.3, rotation=0, verticalalignment='bottom', ha='center', bbox=panel_top.props)
 
 ########################################
 
-panel_bot = Figure_2_panel(3, t_s=[20, 22, 30, 50, 344])
+panel_bot = Figure_2_panel(3, t_s=[20, 22, 30, 50, 344]) # 147
 
 ax_mem_2 = np.asarray([axs['f'], axs['g'], axs['h'], axs['i'], axs['j']])
 panel_bot.memory_sample_plot(ax_mem_2)
@@ -227,10 +233,17 @@ ax_cb_mem_2 = axs['X']
 cb_mem_2 = matplotlib.colorbar.ColorbarBase(ax_cb_mem_2, cmap=bwr_cmap, norm=bwr_norm, orientation='vertical')
 cb_mem_2.set_label("Pixel value")
 
-
 # The n text
-ax_split_2[0].text(-0.3, 0.23, r"n = 3", transform=ax_split_2[0].transAxes, fontsize=16, rotation=90, verticalalignment='center', ha='center', bbox=panel_top.props)
+ax_split_2[1].text(0.5, 1.1, r"n = 3", transform=ax_split_2[1].transAxes, fontsize=fontsize*1.3, rotation=0, verticalalignment='bottom', ha='center', bbox=panel_top.props)
 
 
-plt.subplots_adjust(wspace=1.2, hspace=1.2)
+alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+rx = [5.0/8.0, 1.0, 5.0/8.0, 1.0]
+ry = [3.0/8.0, 1.0, 3.0/8.0, 1.0]
+for i, char in enumerate(['A', 'a', 'C', 'f']):
+    axs[char].text(-0.3*rx[i], 1.0+0.1*ry[i], alphabet[i], transform=axs[char].transAxes, fontsize=83, verticalalignment='bottom', ha='right', fontfamily='Times New Roman', fontweight='bold')
+
+
+rx = 32.0/25.0
+plt.subplots_adjust(top=0.99, bottom=0.01, wspace=2.0, hspace=0.8)
 plt.savefig("tmp.png")
