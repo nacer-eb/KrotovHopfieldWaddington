@@ -93,5 +93,13 @@ for i, n in enumerate(n_range):
             f3.plot_snapshot(mem_snapshots_axs[i, j, k], alphas[k], betas[k], hasStabilityTitle=False) # if j==1 it's unstable unless i==2 in which case the center point is stable
 
         
-    
-plt.savefig("Figure_3_plot_supp_dynamics.png")
+
+
+alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+rx = [1.0, 1.0/2.0]
+ry = [1.0, 1.0/2.0]
+for i, char in enumerate(['a', 'E']):
+    axs[char].text(-0.4*rx[i], 1.0+0.1*ry[i], alphabet[i], transform=axs[char].transAxes, fontsize=44, verticalalignment='bottom', ha='right', fontfamily='Times New Roman', fontweight='bold')
+
+plt.subplots_adjust(wspace=0.03, hspace=0.06)
+plt.savefig("Figure-3-4.png")

@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 from nullcline_gather.GatherNullClines import *
 from Figure_3_functions import *
 
-fig = plt.figure(figsize=(15*1.5, (5+1+1+3)*1.5 ))
+fig = plt.figure(figsize=(15*1.5, (5+1+1+3+1)*1.5 ))
 axs = fig.subplot_mosaic(
     """
     111122222223333
@@ -22,6 +22,7 @@ axs = fig.subplot_mosaic(
     111122222223333
     111122222223333
     111122222223333
+    ...............
     ...............
     abc.def.ghi.jkl
     AAA.BBB.CCC.DDD
@@ -109,6 +110,13 @@ center_ax_3d.locator_params(axis='x', nbins=5)
 center_ax_3d.locator_params(axis='y', nbins=5)
 
 
-plt.savefig("Figure_3_plot.png")
+alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+rx = [1/4.0, 1.0]
+ry = [1.0/5.0, 1.0]
+for i, char in enumerate(['1', 'a']):
+    axs[char].text(-0.4*rx[i], 1.0+0.1*ry[i], alphabet[i], transform=axs[char].transAxes, fontsize=44, verticalalignment='bottom', ha='right', fontfamily='Times New Roman', fontweight='bold')
+
+plt.subplots_adjust(wspace=0.03, hspace=0.03)
+plt.savefig("Figure-3.png")
 
 
