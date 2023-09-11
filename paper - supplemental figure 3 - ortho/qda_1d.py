@@ -49,27 +49,11 @@ if not first_run:
 
     digit = 0
     
-    fig, ax = plt.subplots(1, 2)
+    fig, ax = plt.subplots(1, 1, figsize=(16, 9))
 
-
-    
-    ax[0].imshow(merge_data(data_Ms[::2, ::2, digit, :].reshape(len(n_range[::2])*len(temp_range[::2]), 784), len(n_range[::2]), len(temp_range[::2])  ), cmap="bwr", vmin=-1, vmax=1, extent=extent, aspect=aspect)
-    im = ax[1].imshow(data_coefs[:, :, digit, 1-digit], cmap="bwr", vmin=-1, vmax=1, extent=extent, aspect=aspect)
-
-    n = np.arange(np.min(n_range), np.max(n_range), 0.01)
-    T_calc = (data_T[0]@data_T[0] + data_T[0]@data_T[1])/( 2 * ( np.arctanh( 1 - (1.0/2.0)**(1.0/(2.0*n)) ) )**(1.0/n) )
-    ax[1].scatter(n, T_calc, s=1, color="k")
-    ax[1].set_ylim(max(temp_range), min(temp_range))
-    
-    ax[1].set_yticks([])
-    ax[0].set_xlabel(r"$n$", labelpad=10); ax[1].set_xlabel(r"$n$", labelpad=10)
-    ax[0].set_ylabel("Temperature", labelpad=10)
-    
-    t, b = 0.855, 0.145 
-    cb_ax = fig.add_axes([0.91, b, 0.02, t-b])
-    
-    fig.colorbar(im, cax=cb_ax)
-    cb_ax.set_ylabel(r"$\alpha_{"+str([4, 9][1-digit])+"}$ coefficients")
-    
-    plt.subplots_adjust(top=0.9, bottom=0.1, left=0.1, right=0.9, hspace=0.2, wspace=0.2)
+    t_i = -7
+    plt.title("T="+str(temp_range[t_i]))
+    im = ax.plot(data_coefs[t_i, :, digit, 1-digit])
+    ax.set_ylabel(r"$\alpha$")
+    ax.set_xlabel("n-power")
     plt.show()
