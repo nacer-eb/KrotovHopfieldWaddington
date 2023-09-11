@@ -62,5 +62,14 @@ for i, d in enumerate([1, 7]):
             t = (k)*(tmax//5)
             ax_all[i, j, k].imshow(merge_data(data_M[t, :25 , :], 5, 5), cmap="bwr", vmin=-1, vmax=1)
 
-plt.savefig("Figure_5_supp.png")
+
+
+alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+rx = [1.0, 1.0]
+ry = [1.0, 1.0]
+for i, char in enumerate(['A', 'a']):
+    axs[char].text(-0.3*rx[i], 1.0+0.1*ry[i], alphabet[i], transform=axs[char].transAxes, fontsize=34, verticalalignment='bottom', ha='right', fontfamily='Times New Roman', fontweight='bold')
+
+            
+plt.savefig("Figure-6-1.png")
 
