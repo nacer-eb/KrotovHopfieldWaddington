@@ -7,7 +7,7 @@ import sys
 from main_module.KrotovV2 import *
 
 
-data_dir = "data_4_100/"
+data_dir = "data_4_rand/"
 
 temp_range = np.arange(400, 900, 20)
 n_range = np.arange(2, 31, 1)
@@ -48,26 +48,14 @@ if not first_run:
     extent = [np.min(n_range), np.max(n_range), np.max(temp_range), np.min(temp_range)]
 
     
-    fig, ax = plt.subplots(1, 2)
+    fig, ax = plt.subplots(1, 1)
 
-    ax[0].imshow(merge_data(data_Ms[::2, ::2, 0, :].reshape(len(n_range[::2])*len(temp_range[::2]), 784), len(n_range[::2]), len(temp_range[::2])  ), cmap="bwr", vmin=-1, vmax=1, extent=extent, aspect=aspect)
+    t_i = -7
     
-    im = ax[1].imshow(data_coefs[:, :, 0, 0], cmap="Reds", vmin=0.5, vmax=1, extent=extent, aspect=aspect) #
+    ax.plot(data_coefs[t_i, :, 0, 1], marker=".") #
 
-    n = np.arange(np.min(n_range), np.max(n_range), 0.01)
-    T_calc = (data_T[0]@data_T[0] + data_T[0]@data_T[1])/( 2 * ( np.arctanh( 1 - (1.0/2.0)**(1.0/(2.0*n)) ) )**(1.0/n) )
-    ax[1].scatter(n, T_calc, s=1, color="k")
-    ax[1].set_ylim(max(temp_range), min(temp_range))
-
-    ax[1].set_yticks([])
-    ax[0].set_xlabel(r"$n$", labelpad=10); ax[1].set_xlabel(r"$n$", labelpad=10)
-    ax[0].set_ylabel("Temperature", labelpad=10)
+    plt.title("Temperature: " + str(temp_range[t_i]))
+    ax.set_xlabel("n-power")
+    ax.set_ylabel(r"$\alpha$")
     
-    t, b = 0.855, 0.145 
-    cb_ax = fig.add_axes([0.91, b, 0.02, t-b])
-    
-    fig.colorbar(im, cax=cb_ax)
-    cb_ax.set_ylabel(r"$\alpha_{4, 1}$ coefficients")
-    
-    plt.subplots_adjust(top=0.9, bottom=0.1, left=0.1, right=0.9, hspace=0.2, wspace=0.2)
     plt.show()
