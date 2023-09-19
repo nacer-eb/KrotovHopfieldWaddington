@@ -29,7 +29,7 @@ n_range = n_full_range[job_number-1::job_max]
 
    
 for noise_r in [5]:
-    for temp in [650]:
+    for temp in [650-100]:
         for n in n_range:
             print(n, temp)
             
@@ -69,7 +69,7 @@ for noise_r in [5]:
 
             net.miniBatchs_images[0] = data_T[train_mask]
             
-            #net.train_plot_update(10000, isPlotting=False, isSaving=True, saving_dir=data_dir+prefix+"trained_net_n"+str(n)+"_T"+str(temp)+".npz", testFreq=100)
+            net.train_plot_update(10000, isPlotting=False, isSaving=False, saving_dir=data_dir+prefix+"trained_net_n"+str(n)+"_T"+str(temp)+".npz", testFreq=100)
             net.train_plot_update(1, isPlotting=False, isSaving=True, saving_dir=data_dir+prefix+"trained_net_end_n"+str(n)+"_T"+str(temp)+".npz", testFreq=100)
 
             
