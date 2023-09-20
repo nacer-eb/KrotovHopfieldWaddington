@@ -40,7 +40,6 @@ class Figure_3:
 
         
     def plot_nullclines(self, ax, n, temp=700, t_0=0, t=0, plotDynamics=False, density=1):
-
         
         GNC = GatherNullClines(753, 494, 719, n, temp/(2.0**(1.0/n)), +1)  
         alpha_nullcline = GNC.alpha_nullcline(self.alpha_mesh, self.l_0_mesh)
