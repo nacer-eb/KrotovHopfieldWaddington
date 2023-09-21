@@ -117,6 +117,6 @@ for i, char in enumerate(['1', 'a']):
     axs[char].text(-0.4*rx[i], 1.0+0.1*ry[i], alphabet[i], transform=axs[char].transAxes, fontsize=44, verticalalignment='bottom', ha='right', fontfamily='Times New Roman', fontweight='bold')
 
 plt.subplots_adjust(wspace=0.03, hspace=0.03)
-plt.savefig("Figure-3.png")
+plt.savefig("Figure-3_tmp.png")
 
 
