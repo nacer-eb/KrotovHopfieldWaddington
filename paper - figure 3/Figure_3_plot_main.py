@@ -55,10 +55,6 @@ for i in range(0, 256):
 cmap = matplotlib.colors.ListedColormap(vals)
 
 
-# Plotting
-axs['1'].scatter(f3.FP_data[:, -3], f3.FP_data[:, 1], c=f3.FP_data[:, 1] , cmap=cmap, norm=norm, s=0.1)
-axs['3'].scatter(f3.FP_data[:, -1], f3.FP_data[:, 1], c=f3.FP_data[:, 1] , cmap=cmap, norm=norm, s=0.1)
-
 
 # Define nullcline axes
 nullcline_axes = np.asarray([axs['A'], axs['B'], axs['C'], axs['D']])
@@ -104,11 +100,27 @@ center_ax_3d = fig.add_axes([default_pos_ax2.x0 + dx_adjust-0.02,
                              default_pos_ax2.y1 - default_pos_ax2.y0-2*dy_adjust],
                             projection='3d')
 
-center_ax_3d.scatter(f3.FP_data[:, -3], f3.FP_data[:, -1], f3.FP_data[:, 1], c=f3.FP_data[:, 1], cmap=cmap, norm=norm, s=1)
+
 center_ax_3d.set_xlabel(r"$\alpha$", labelpad=10); center_ax_3d.set_ylabel(r"$l_0$", labelpad=13); center_ax_3d.set_zlabel(r"$n$", labelpad=5)
 center_ax_3d.locator_params(axis='x', nbins=5)
 center_ax_3d.locator_params(axis='y', nbins=5)
 
+
+
+ns = f3.FP_data[:, 1]
+alphas = np.zeros((len(ns), 3))
+l_0s = np.zeros((len(ns), 3))
+for i, n in enumerate(ns):
+    n_mask = f3.FP_data[:, 1]==n
+    index_sort = np.argsort(f3.FP_data[n_mask, -1])
+    
+    alphas[i] = f3.FP_data[n_mask, -3][index_sort][[0, np.sum(n_mask)//2, -1]]
+    l_0s[i] = f3.FP_data[n_mask, -1][index_sort][[0, np.sum(n_mask)//2, -1]]
+
+for i in range(3):
+    axs['1'].scatter(alphas[:, i], ns, c=ns, cmap=cmap, norm=norm, s=0.7)
+    axs['3'].scatter(l_0s[:, i], ns, c=ns, cmap=cmap, norm=norm, s=0.7)
+    center_ax_3d.scatter(alphas[:, i], l_0s[:, i], ns, c=ns, cmap=cmap, norm=norm, s=1)
 
 alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
 rx = [1/4.0, 1.0]
