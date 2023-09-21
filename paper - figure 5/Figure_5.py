@@ -51,44 +51,40 @@ data_coefs = data_Ms @ data_T_inv
 aspect = (np.min(n_range) - np.max(n_range))/(np.min(temp_range) - np.max(temp_range))
 extent = [np.min(n_range), np.max(n_range), np.max(temp_range), np.min(temp_range)]
 
-fig = plt.figure(figsize=(22+1, 8+3+11+3+11))
+fig = plt.figure(figsize=(30, 87-56+1))
 axs = fig.subplot_mosaic("""
-...AAAAAAAAAAAAAAAAx...
-...AAAAAAAAAAAAAAAAx...
-...AAAAAAAAAAAAAAAAx...
-...AAAAAAAAAAAAAAAAx...
-...AAAAAAAAAAAAAAAAx...
-...AAAAAAAAAAAAAAAAx...
-...AAAAAAAAAAAAAAAAx...
-...AAAAAAAAAAAAAAAAx...
-.......................
-.......................
-.......................
-BBBBBBBBBBBbbbbbbbbbbbX
-BBBBBBBBBBBbbbbbbbbbbbX
-BBBBBBBBBBBbbbbbbbbbbbX
-BBBBBBBBBBBbbbbbbbbbbbX
-BBBBBBBBBBBbbbbbbbbbbbX
-BBBBBBBBBBBbbbbbbbbbbbX
-BBBBBBBBBBBbbbbbbbbbbbX
-BBBBBBBBBBBbbbbbbbbbbbX
-BBBBBBBBBBBbbbbbbbbbbbX
-BBBBBBBBBBBbbbbbbbbbbbX
-BBBBBBBBBBBbbbbbbbbbbbX
-.......................
-.......................
-.......................
-CCCCCCCCCCCccccccccccc#
-CCCCCCCCCCCccccccccccc#
-CCCCCCCCCCCccccccccccc#
-CCCCCCCCCCCccccccccccc#
-CCCCCCCCCCCccccccccccc#
-CCCCCCCCCCCccccccccccc#
-CCCCCCCCCCCccccccccccc#
-CCCCCCCCCCCccccccccccc#
-CCCCCCCCCCCccccccccccc#
-CCCCCCCCCCCccccccccccc#
-CCCCCCCCCCCccccccccccc#
+.....AAAAAAAAAAAAAAAAAAAAx....
+.....AAAAAAAAAAAAAAAAAAAAx....
+.....AAAAAAAAAAAAAAAAAAAAx....
+.....AAAAAAAAAAAAAAAAAAAAx....
+.....AAAAAAAAAAAAAAAAAAAAx....
+.....AAAAAAAAAAAAAAAAAAAAx....
+.....AAAAAAAAAAAAAAAAAAAAx....
+.....AAAAAAAAAAAAAAAAAAAAx....
+.....AAAAAAAAAAAAAAAAAAAAx....
+.....AAAAAAAAAAAAAAAAAAAAx....
+..............................
+..............................
+..............................
+BBBBBBBB.bbbbbbbbX....OOOOOOOO
+BBBBBBBB.bbbbbbbbX....OOOOOOOO
+BBBBBBBB.bbbbbbbbX....OOOOOOOO
+BBBBBBBB.bbbbbbbbX....OOOOOOOO
+BBBBBBBB.bbbbbbbbX....OOOOOOOO
+BBBBBBBB.bbbbbbbbX....OOOOOOOO
+BBBBBBBB.bbbbbbbbX....OOOOOOOO
+BBBBBBBB.bbbbbbbbX....OOOOOOOO
+..............................
+..............................
+..............................
+CCCCCCCC.cccccccc#....oooooooo
+CCCCCCCC.cccccccc#....oooooooo
+CCCCCCCC.cccccccc#....oooooooo
+CCCCCCCC.cccccccc#....oooooooo
+CCCCCCCC.cccccccc#....oooooooo
+CCCCCCCC.cccccccc#....oooooooo
+CCCCCCCC.cccccccc#....oooooooo
+CCCCCCCC.cccccccc#....oooooooo
 """)
 
 
@@ -101,6 +97,7 @@ axs['A'].set_xticks([]); axs['A'].set_yticks([])
 
 
 ax = np.asarray([[axs['B'], axs['b']], [axs['C'], axs['c']] ])
+ax_1d = np.asarray([axs['O'], axs['o']])
 ax_cb = np.asarray([axs['X'], axs['#']])
 
 
@@ -122,8 +119,12 @@ for digit in [0, 1]:
     bwr_cmap = matplotlib.cm.bwr
     bwr_norm = matplotlib.colors.Normalize(vmin=-1, vmax=1)
     cb_bwr = matplotlib.colorbar.ColorbarBase(ax_cb[digit], cmap=bwr_cmap, norm=bwr_norm, orientation='vertical')
-    cb_bwr.set_label(r"$\alpha_" + str(selected_digits[1-digit]) + "$")
+    cb_bwr.set_label(r"$\alpha_" + str(selected_digits[1-digit]) + "$", labelpad=20)
 
+    for t in [-1, -5, -8]:
+        ax_1d[digit].plot(data_coefs[t, :, digit, 1-digit], marker=".", label="T = "+str(temp_range[t]))
+        ax_1d[digit].set_xlabel(r"$n$")
+        ax_1d[digit].legend()
 
 bwr_cmap = matplotlib.cm.bwr
 bwr_norm = matplotlib.colors.Normalize(vmin=-1, vmax=1)
@@ -137,5 +138,5 @@ ry = [1.0, 8.0/11.0, 8.0/11.0]
 for i, char in enumerate(['A', 'B', 'C']):
     axs[char].text(-0.2*rx[i], 1.0+0.1*ry[i], alphabet[i], transform=axs[char].transAxes, fontsize=77, verticalalignment='bottom', ha='right', fontfamily='Times New Roman', fontweight='bold')
 
-plt.subplots_adjust(wspace=1.0)
-plt.savefig("Figure-5.png")
+#plt.subplots_adjust(wspace=1.0)
+plt.savefig("Figure-5_.png")
