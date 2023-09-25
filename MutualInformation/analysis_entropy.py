@@ -27,7 +27,7 @@ data_Ls = np.zeros((Nn, N_mem, 10))
 data_T = np.load(data_dir + "miniBatchs_images.npy")[0]
 data_T_inv = np.linalg.pinv(data_T)
 
-temp = 650
+temp = 700
 
 if isFirstRun:
     for i, n in enumerate(n_range):
@@ -72,34 +72,6 @@ if True:
     plt.savefig("max_abs_alpha.png")
 
 
-# Trying to calculate p_i as absolute alphas normalized.
-if True:
-    data_coefs_per_class = np.sum(np.abs(data_coefs), axis=-1)
-    data_coefs_density = data_coefs_per_class / np.repeat(np.expand_dims(np.sum(data_coefs_per_class, axis=-1), axis=-1), 10, axis=-1)
-    
-    entropy = np.mean(np.sum( -data_coefs_density*np.log10(data_coefs_density), axis=-1), axis=-1)
-
-    fig, ax = plt.subplots(1, 1, figsize=(16, 9))
-    ax.scatter(n_range, entropy, marker=".")
-    ax.set_xlabel("n-power")
-    ax.set_ylabel("Absolute Marginal Alpha Entropy")
-    plt.savefig("Entropy_from_absolute_p_i.png")
-
-
-# Trying to calculate p_i as flat classless alphas normalized.
-if True:
-    data_coefs_density = np.abs(data_coefs_flat) / np.repeat(np.expand_dims(np.sum(np.abs(data_coefs_flat), axis=-1), axis=-1), 200, axis=-1)
-    
-    entropy = np.mean(np.sum( -data_coefs_density*np.log10(data_coefs_density), axis=-1), axis=-1)
-
-    fig, ax = plt.subplots(1, 1, figsize=(16, 9))
-    ax.scatter(n_range, entropy, marker=".")
-    ax.set_xlabel("n-power")
-    ax.set_ylabel("Classless Alpha Entropy")
-    plt.savefig("ClasslessEntropy.png")
-exit()
-
-
 
 # Paul Entropy is interesting and non-monotonic
 if True:
@@ -130,38 +102,6 @@ if True:
     ax.set_ylabel("Paul's Entropy")
     plt.savefig("First_20_dominating_samples_entropy_PaulsEntropy.png")
 
-
-if False:
-    # Don't know what to do with this...
-    # 2D variable window
-    w_min = 1
-    w_max = 50
-    p_i = np.zeros((w_max-w_min, Nn, N_mem, 10))
-    entropy = np.zeros((w_max-w_min, Nn, N_mem))
-    
-    window_start = 0
-    
-    for w, window_end in enumerate(range(w_min, w_max)):
-        print(w)
-        for i, n in enumerate(n_range):
-            for j in range(N_mem):
-                i_sort = np.argsort(np.abs(data_coefs_flat[i, j]), axis=-1)[::-1]
-                i_sort_index = i_sort[window_start:window_end]//20
-                
-                for d in range(10):
-                    p_i[w, i, j, d] = np.sum(i_sort_index==d)/(window_end - window_start)
-                    
-                    if p_i[w, i, j, d] > 0:
-                        entropy[w, i, j] += -p_i[w, i, j, d]*np.log10(p_i[w, i, j, d])
-                        
-            
-    mean_entropy_per_n = np.mean(entropy, axis=-1)
-
-    fig, ax = plt.subplots(1, 1, figsize=(16, 9))
-    
-    plt.imshow(mean_entropy_per_n, cmap="bwr", extent=[w_min, w_max, min(n_range), max(n_range)], aspect=Nn/(w_max-w_min))
-    plt.colorbar()
-    plt.show()
 
 
 
