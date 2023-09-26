@@ -132,7 +132,7 @@ for d_ic in range(2):
     for d_probe in range(2):
         axs_sample[d_ic, d_probe].imshow(merge_data(data_Ms_unique[:, :, d_ic, d_probe, :].reshape(len(temp_range)*len(n_range), 784), len(n_range), len(temp_range)),
                                          cmap="bwr", vmin=-1, vmax=1,
-                                         extent=[min(n_range), np.max(n_range), min(temp_range), np.max(temp_range)],
+                                         extent=[min(n_range), np.max(n_range), max(temp_range), np.min(temp_range)],
                                          aspect=(max(n_range)-min(n_range))/(max(temp_range) - min(temp_range)))
 
         cmap_ortho = get_custom_cmap(digit_classes[1-d_probe])
@@ -140,7 +140,7 @@ for d_ic in range(2):
         norm_ortho = matplotlib.colors.Normalize(vmin=np.clip(np.min(data_ortho)-0.1, -1, 0.6), vmax=np.clip(np.max(data_ortho)+0.1, -1, 0.6))
         
         axs_ortho[d_ic, d_probe].imshow(data_ortho, cmap=cmap_ortho, norm=norm_ortho,
-                                        extent=[min(n_range), np.max(n_range), min(temp_range), np.max(temp_range)],
+                                        extent=[min(n_range), np.max(n_range), max(temp_range), np.min(temp_range)],
                                         aspect=(max(n_range)-min(n_range))/(max(temp_range) - min(temp_range)))
         
 
