@@ -58,6 +58,8 @@ data_coefs_flat = data_coefs.reshape(Nt, Nn, N_mem, 200)
 #
 
 
+colors = ["blue", "orange", "red"]
+
 import scipy.signal as sig
 
 
@@ -65,7 +67,6 @@ import scipy.signal as sig
 # Average maximum (absolute) alpha per n
 if False:
     fig, ax = plt.subplots(1, 1, figsize=(16, 9))
-    colors = ["blue", "orange", "red"]
     window_size=[25, 27, 19]
     for h, temp in enumerate(temp_range):
         data_coefs_abs_max = np.mean(np.max(np.abs(data_coefs_flat[h]), axis=-1), axis=-1)
@@ -91,11 +92,10 @@ if False:
 
 
 # Paul Entropy is interesting and non-monotonic
-if False:
+if True:
     fig, ax = plt.subplots(1, 1, figsize=(16, 9))
 
-    colors = ["blue", "orange", "red"]
-    window_size=[33, 33, 33]
+    window_size=[9, 11, 9]
     for h, temp in enumerate(temp_range):
         p_i = np.zeros((Nn, N_mem, 10))
         entropy = np.zeros((Nn, N_mem))
@@ -115,114 +115,153 @@ if False:
                         entropy[i, j] += -p_i[i, j, d]*np.log10(p_i[i, j, d])
 
                     
-        mean_entropy_per_n = np.mean(entropy, axis=-1)
-        mean_entropy_per_n_std = np.std(entropy, axis=-1)*0.1
+        if h < 3:
+            mean_entropy_per_n = np.mean(entropy, axis=-1)
+            mean_entropy_per_n_std = np.std(entropy, axis=-1)*0.2
       
-        filtered = sig.savgol_filter(mean_entropy_per_n, window_size[h], 3)
-        filtered = sig.savgol_filter(filtered, window_size[h], 3)
-
+            filtered = sig.savgol_filter(mean_entropy_per_n, window_size[h], 3)
+            filtered = sig.savgol_filter(filtered, window_size[h]*2, 3)
         
-        ax.plot(n_range, filtered, label="T="+str(temp), color=colors[h])
-        ax.scatter(n_range, mean_entropy_per_n, marker=".", color=colors[h], alpha=0.73) #, edgecolor="k"
-        
-        delta = mean_entropy_per_n_std
-        delta = sig.savgol_filter(delta, 21, 3)
-        
-        ax.fill_between(n_range, filtered + delta, filtered-delta, alpha=0.2, facecolor=colors[h])
-        
+            ax.plot(n_range, filtered, label="T="+str(temp), color=colors[h])
+            ax.scatter(n_range, mean_entropy_per_n, marker=".", color=colors[h], alpha=0.73) #, edgecolor="k"
+            
+            delta = mean_entropy_per_n_std
+            delta = sig.savgol_filter(delta, 21, 3)
+            
+            ax.fill_between(n_range, filtered + delta, filtered-delta, alpha=0.2, facecolor=colors[h])
+            
     ax.set_xlabel("n-power")
     ax.set_ylabel("Paul's Entropy")
     ax.legend()
     plt.savefig("First_20_dominating_samples_entropy_PaulsEntropy_multiT.png")
 
 
+isFirstRun = False
+if isFirstRun:
+    # Combine number of reconstruction with Paul's Entropy
 
-# sum of alpha = 0.5 thing
-window = np.zeros((Nt, Nn, N_mem)) # reconstruct size
-alpha_tol = 0.2
-for h, temp in enumerate(temp_range):
-    for i, n in enumerate(n_range):
-   
-        for j in range(N_mem):
-            i_sort = np.argsort(np.abs(data_coefs_flat[h, i, j]), axis=-1)[::-1]
-            i_sort_sum = np.cumsum(data_coefs_flat[h, i, j, i_sort])
+    # tol = 5 # 1 maybe too strong
+    rs = np.zeros((Nt, Nn, N_mem)) # reconstruct size
+    
+    for h, temp in enumerate(temp_range):
+        for i, n in enumerate(n_range):
+            print(i)
 
-            if np.max(data_coefs_flat[h, i, j]) >= alpha_tol:
-                window[h, i, j] = np.argwhere(i_sort_sum >= alpha_tol)[0] + 1
-            else:
-                window[h, i, j] = len(data_coefs_flat[h, i, j])
+            tol = 784*0.05*np.mean(np.mean(np.abs(data_Ms[h, i]), axis=-1), axis=-1) # Variable tolerance
+            print(temp, n, tol)
 
+            for j in range(N_mem):
+                i_sort = np.argsort(np.abs(data_coefs_flat[h, i, j]), axis=-1)[::-1]
+                
+                for window in range(1, 200):
+                    rM = data_coefs_flat[h, i, j, i_sort[:window]]@data_T[i_sort[:window]]
+                    err = np.sum(np.abs(rM - data_Ms[h, i, j]))
+                    
+                    rs[h, i, j] = window
+                    if err < tol:
+                        break;
+    np.save("rs_relevant_samples.npy", rs)
 
-window_mean = np.mean(window, axis=-1)
-window_std = np.std(window, axis=-1)*0.5
+rs = np.load("rs_relevant_samples.npy")
+rs_mean = np.mean(rs, axis=-1)
+rs_std = np.std(rs, axis=-1)
 
 fig, ax = plt.subplots(1, 1, figsize=(16, 9))
 
-colors = ["blue", "orange", "red"]
-window_size = np.asarray([11, 11, 11])+6
+window_size=[11, 13, 9]
 for h, temp in enumerate(temp_range):
-    #ax.scatter(n_range, window_mean[h], label="T="+str(temp))
-      
-    filtered = sig.savgol_filter(window_mean[h], window_size[h], 4)
-    filtered = sig.savgol_filter(filtered, 7, 1)
+    filtered = sig.savgol_filter(rs_mean[h], window_size[h], 3)
+    filtered = sig.savgol_filter(filtered, window_size[h]*2, 3)
     
     ax.plot(n_range, filtered, label="T="+str(temp), color=colors[h])
-    ax.scatter(n_range, window_mean[h], marker=".", color=colors[h], alpha=0.73) #, edgecolor="k"
+    ax.scatter(n_range, rs_mean[h], marker=".", color=colors[h], alpha=0.73) #, edgecolor="k"
     
-    delta = window_std[h]
+    delta = rs_std[h]
     delta = sig.savgol_filter(delta, 21, 3)
     
     ax.fill_between(n_range, filtered + delta, filtered-delta, alpha=0.2, facecolor=colors[h])
-    
+
+
 ax.set_xlabel("n-power")
 ax.set_ylabel("Number of useful samples")
+ax.legend()
+plt.savefig("rs_relevant_samples.png")
+
+
+
+fig, ax = plt.subplots(1, 1, figsize=(16, 9))
+window_size=[11, 13, 9]
+for h, temp in enumerate(temp_range):
+    p_i = np.zeros((Nn, N_mem, 10))
+    entropy = np.zeros((Nn, N_mem))
+    for i, n in enumerate(n_range):
+        for j in range(N_mem):
+            i_sort = np.argsort(np.abs(data_coefs_flat[h, i, j]), axis=-1)[::-1]
+            i_sort_index = i_sort[:int(rs[h, i, j])]//20 # 20 here is number of samples per class used to check if index corresponds to a certain digit class
+            
+            for d in range(10):
+                p_i[i, j, d] = np.sum(i_sort_index==d)/int(rs[h, i, j])
+            
+                if p_i[i, j, d] > 0:
+                    entropy[i, j] += -p_i[i, j, d]*np.log10(p_i[i, j, d])
+                
+
+    mean_entropy_per_n = np.mean(entropy, axis=-1)
+    std_entropy_per_n = np.std(entropy, axis=-1)
+
+    filtered = sig.savgol_filter(mean_entropy_per_n, window_size[h], 3)
+    filtered = sig.savgol_filter(filtered, window_size[h]*2, 3)
+    
+    ax.plot(n_range, filtered, label="T="+str(temp), color=colors[h])
+    ax.scatter(n_range, mean_entropy_per_n, marker=".", color=colors[h], alpha=0.73) #, edgecolor="k"
+    
+    delta = std_entropy_per_n
+    delta = sig.savgol_filter(delta, 21, 3)
+    
+    ax.fill_between(n_range, filtered + delta, filtered-delta, alpha=0.2, facecolor=colors[h])
+
+
+ax.set_xlabel("n-power")
+ax.set_ylabel("Variable Binsize Paul Entropy")
+ax.legend()
+plt.savefig("VariablePaulsEntropy.png")
+
+
+
+fig, ax = plt.subplots(1, 1, figsize=(16, 9))
+window_size=[9, 13, 9]
+for h, temp in enumerate(temp_range):
+    entropy = np.zeros((Nn, N_mem))
+    for i, n in enumerate(n_range):
+        for j in range(N_mem):
+            i_sort = np.argsort(np.abs(data_coefs_flat[h, i, j]), axis=-1)[::-1]
+            i_sort_index = i_sort[:int(rs[h, i, j])]//20 # 20 here is number of samples per class used to check if index corresponds to a certain digit class
+            i_sort_windowed = i_sort[:int(rs[h, i, j])]
+            
+            norm = np.sum(np.abs(data_coefs_flat[h, i, j, i_sort_windowed]), axis=-1)
+
+            for w_i in range(int(rs[h, i, j])):
+                p_i = np.abs(data_coefs_flat[h, i, j, i_sort_windowed[w_i]])/norm
+                entropy[i, j] += -p_i*np.log10(p_i)
+
+    mean_entropy_per_n = np.mean(entropy, axis=-1)
+    std_entropy_per_n = np.std(entropy, axis=-1)
+
+    filtered = sig.savgol_filter(mean_entropy_per_n, window_size[h], 3)
+    filtered = sig.savgol_filter(filtered, window_size[h]*2, 3)
+    
+    ax.plot(n_range, filtered, label="T="+str(temp), color=colors[h])
+    ax.scatter(n_range, mean_entropy_per_n, marker=".", color=colors[h], alpha=0.73) #, edgecolor="k"
+    
+    delta = std_entropy_per_n
+    delta = sig.savgol_filter(delta, 21, 3)
+    
+    ax.fill_between(n_range, filtered + delta, filtered-delta, alpha=0.2, facecolor=colors[h])
+
+
+ax.set_xlabel("n-power")
+ax.set_ylabel("Variable Binsize Acategorical Entropy")
 ax.legend()
 plt.savefig("tmp.png")
 
 
-
-# Paul Entropy is interesting and non-monotonic
-if True:
-    fig, ax = plt.subplots(1, 1, figsize=(16, 9))
-
-    colors = ["blue", "orange", "red"]
-    window_size=[33, 33, 33]
-    for h, temp in enumerate(temp_range):
-        p_i = np.zeros((Nn, N_mem, 10))
-        entropy = np.zeros((Nn, N_mem))
-        
-       
-        for i, n in enumerate(n_range):
-            window_start = 0
-            window_end = int(window_mean[h, i]) #21 is rly good # 30 is good
-
-            for j in range(N_mem):
-                i_sort = np.argsort(np.abs(data_coefs_flat[h, i, j]), axis=-1)[::-1]
-                i_sort_index = i_sort[window_start:window_end]//20
-            
-                for d in range(10):
-                    p_i[i, j, d] = np.sum(i_sort_index==d)/(window_end - window_start)
-                    
-                    if p_i[i, j, d] > 0:
-                        entropy[i, j] += -p_i[i, j, d]*np.log10(p_i[i, j, d])
-
-                    
-        mean_entropy_per_n = np.mean(entropy, axis=-1)
-        mean_entropy_per_n_std = np.std(entropy, axis=-1)*0.1
-      
-        filtered = sig.savgol_filter(mean_entropy_per_n, window_size[h], 3)
-        filtered = sig.savgol_filter(filtered, window_size[h], 3)
-
-        
-        #ax.plot(n_range, filtered, label="T="+str(temp), color=colors[h])
-        ax.scatter(n_range, mean_entropy_per_n, marker=".", color=colors[h], alpha=0.73) #, edgecolor="k"
-        
-        delta = mean_entropy_per_n_std
-        delta = sig.savgol_filter(delta, 21, 3)
-        
-        #ax.fill_between(n_range, filtered + delta, filtered-delta, alpha=0.2, facecolor=colors[h])
-        
-    ax.set_xlabel("n-power")
-    ax.set_ylabel("Paul's Entropy")
-    ax.legend()
-    plt.savefig("tmp.png")
