@@ -94,8 +94,8 @@ for i, n in enumerate(n_range):
 
         
 
-
-alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+# For merging with main figure I start alphabet at C
+alphabet = [ 'C', 'D', 'E', 'F', 'G', 'H']
 rx = [1.0, 1.0/2.0]
 ry = [1.0, 1.0/2.0]
 for i, char in enumerate(['a', 'E']):
