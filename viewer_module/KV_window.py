@@ -14,6 +14,7 @@ from tkinter import filedialog as tkFileDialog
 import matplotlib.pyplot as plt
 from matplotlib import animation as anim
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
+### DEV NOTE \IMPORTANT/ : If on linux use apt-get install fonts-noto to obtain necessary unicode characters. 
 
 from viewer_module.KV_player import *
 
