@@ -16,10 +16,10 @@ prefix = str(selected_digits)+"/" # I used main,and momentum #"main"#
 tmax = 10000
 N_mem = 100
 
-n_range = np.arange(1, 41, 1)
+n_range = np.arange(1, 61, 1)
 Nn = len(n_range)
 
-temp_range = [650, 700]
+temp_range = [550, 650, 750]
 Nt = len(temp_range)
 
 data_Ms = np.zeros((Nt, Nn, N_mem, 784))
@@ -61,7 +61,7 @@ data_coefs_flat = data_coefs.reshape(Nt, Nn, N_mem, 200)
 
 
 # Average maximum (absolute) alpha per n
-if True:
+if False:
     fig, ax = plt.subplots(1, 1, figsize=(16, 9))
     for h, temp in enumerate(temp_range):
         data_coefs_abs_max = np.mean(np.max(np.abs(data_coefs_flat[h]), axis=-1), axis=-1)       
@@ -113,7 +113,7 @@ if True:
 
 
 # Combine number of reconstruction with Paul's Entropy
-tol = 10 # 1 maybe too strong
+tol = 5 # 1 maybe too strong
 rs = np.zeros((Nt, Nn, N_mem)) # reconstruct size
 
 

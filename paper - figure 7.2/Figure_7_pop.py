@@ -17,7 +17,7 @@ matplotlib.rc('font', **font)
 
 data_dir = "data/"
 selected_digits = [4, 9]#
-prefix = str(selected_digits)+"_2/" # I used main,and momentum #"main"#
+prefix = str(selected_digits)+"_stable/" # I used main,and momentum #"main"#
 
 temp_range = np.arange(500, 900, 20)
 n_range = np.arange(2, 32, 2)

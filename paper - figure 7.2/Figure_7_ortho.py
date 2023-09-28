@@ -17,7 +17,7 @@ matplotlib.rc('font', **font)
 
 data_dir = "data/"
 selected_digits = [4, 9]#
-prefix = str(selected_digits)+"/" # I used main,and momentum #"main"#
+prefix = str(selected_digits)+"_stable/" # I used main,and momentum #"main"#
 
 temp_range = np.arange(500, 900, 20)
 n_range = np.arange(2, 32, 2)
@@ -25,7 +25,7 @@ n_range = np.arange(2, 32, 2)
 data_Ms = np.zeros((len(temp_range), len(n_range), 2, 100, 784))
 data_Ls = np.zeros((len(temp_range), len(n_range), 2, 100, 10))
 
-isFirstRun = False
+isFirstRun = True
 if isFirstRun:
     for i, temp in enumerate(temp_range):
         for j, n in enumerate(n_range):

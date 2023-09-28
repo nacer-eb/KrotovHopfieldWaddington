@@ -7,7 +7,7 @@ data_dir = "data/[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]/"
 data = np.load(data_dir + "trained_net_n30_T650.npz")
 
 threshold = 0.5
-timestep = 20
+timestep = 200
 
 tmax, N_mem, tmp = np.shape(data['M'])
 
