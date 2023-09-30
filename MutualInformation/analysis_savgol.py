@@ -117,7 +117,7 @@ if True:
                     
         if h < 3:
             mean_entropy_per_n = np.mean(entropy, axis=-1)
-            mean_entropy_per_n_std = np.std(entropy, axis=-1)*0.2
+            mean_entropy_per_n_std = np.std(entropy, axis=-1)
       
             filtered = sig.savgol_filter(mean_entropy_per_n, window_size[h], 3)
             filtered = sig.savgol_filter(filtered, window_size[h]*2, 3)
