@@ -40,7 +40,7 @@ default_pos_ax2 = axs['2'].get_position()
 axs['2'].remove() # Making space for 3d plot
 
 # Cosmetics
-axs['1'].set_xlabel(r'$\alpha$'); axs['3'].set_xlabel(r'$\alpha$');
+axs['1'].set_xlabel(r'$\alpha$'); axs['3'].set_xlabel(r'$l_0$');
 axs['1'].set_ylabel('n-power'); axs['3'].set_ylabel('n-power');
 
 # Creating the colormap for n
@@ -78,7 +78,7 @@ for ax in mem_snapshots_axs.ravel():
 
 
 
-n_range = np.asarray([10, 20, 30, 40])
+n_range = np.asarray([6, 20, 30, 40])
 for i, n in enumerate(n_range):
     alphas, betas = f3.plot_nullclines(nullcline_axes[i], n)
      
