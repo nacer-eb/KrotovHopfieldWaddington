@@ -16,14 +16,17 @@ matplotlib.rc('font', **font)
 
 
 data_dir = "data/"
-selected_digits = [4, 9]#
-prefix = str(selected_digits)+"_stable/" # I used main,and momentum #"main"#
+selected_digits = [1, 7]#
+prefix = str(selected_digits)+"/" # I used main,and momentum #"main"#
 
-temp_range = np.arange(500, 900, 20)
-n_range = np.arange(2, 32, 2)
+temp_range = np.arange(600, 900, 20)[::2]
+n_range = np.arange(2, 62, 2)[::2]
 
-data_Ms = np.zeros((len(temp_range), len(n_range), 2, 100, 784))
-data_Ls = np.zeros((len(temp_range), len(n_range), 2, 100, 10))
+
+N_mem = 50
+
+data_Ms = np.zeros((len(temp_range), len(n_range), 2, N_mem, 784))
+data_Ls = np.zeros((len(temp_range), len(n_range), 2, N_mem, 10))
 
 data_M_saddles = np.zeros((len(temp_range), len(n_range), 2, 784))
 
@@ -35,12 +38,17 @@ if isFirstRun:
 
                 # Final states
                 saving_dir=data_dir+prefix+"trained_net_end_n"+str(n)+"_T"+str(temp)+"ic"+str(selected_digits[k])+".npz"
-                data_Ms[i, j, k] = np.load(saving_dir)['M']
-                data_Ls[i, j, k] = np.load(saving_dir)['L']
 
+                if os.path.isfile(saving_dir):
+                    data_Ms[i, j, k] = np.load(saving_dir)['M']
+                    data_Ls[i, j, k] = np.load(saving_dir)['L']
+                    
                 # Final states
                 saving_dir=data_dir+prefix+"net_saddle_n"+str(n)+"_T"+str(temp)+"ic"+str(selected_digits[k])+".npz"
-                data_M_saddles[i, j, k] = np.load(saving_dir)['M']
+
+                if os.path.isfile(saving_dir):
+                    data_M_saddles[i, j, k] = np.load(saving_dir)['M']
+                
                 
         print(temp)
 
@@ -57,7 +65,7 @@ data_M_saddles = np.load(data_dir+prefix+"data_M_saddles.npy")
 data_Ls = np.load(data_dir+prefix+"data_Ls.npy")
 
 
-data_T = np.load(data_dir+"miniBatchs_images.npy")[0]
+data_T = np.load(data_dir+prefix+"miniBatchs_images.npy")[0]
 data_T_inv = np.linalg.pinv(data_T)
 
 data_M_saddles_coefs = data_M_saddles@data_T_inv
@@ -134,13 +142,13 @@ def get_custom_cmap(digit_class):
     
     return custom_cmap
 
-digit_classes = [4, 9]
+digit_classes = selected_digits # REDUNDANT, IMPROVE THIS...
 
 for d_ic in range(2):
     d_probe = d_ic
     cmap_digit = get_custom_cmap(digit_classes[d_probe])
     
-    data_pop = data_Ms_pop[:, :, d_ic, d_probe]/100.0
+    data_pop = data_Ms_pop[:, :, d_ic, d_probe]/N_mem
     norm_pop = matplotlib.colors.Normalize(vmin=np.min(data_pop)-0.05, vmax=np.max(data_pop)+0.05)
     
     axs_pop[d_ic].imshow(data_pop, cmap=cmap_digit, norm=norm_pop,
@@ -166,16 +174,16 @@ for d_ic in range(2):
 
 
 # bifurcation plots
-t_index = -1
-axs_bifurcation[0].scatter(data_Ms_pop[t_index, :, 0, 0], n_range)
-axs_bifurcation[0].scatter(data_Ms_pop[t_index, :, 1, 0], n_range)
+t_index = -3
 
-axs_bifurcation[1].scatter(data_M_saddles_coefs[t_index, :, 0, 0], n_range)
-axs_bifurcation[1].scatter(data_M_saddles_coefs[t_index, :, 1, 0], n_range)
+for d_ic in range(2):
+    axs_bifurcation[0].scatter(data_Ms_pop[t_index, :, d_ic, 1], n_range, color=tab10_cmap(tab10_norm(selected_digits[d_ic])))
+    axs_bifurcation[1].scatter(data_M_saddles_coefs[t_index, :, d_ic, 1], n_range, color=tab10_cmap(tab10_norm(selected_digits[d_ic])))
+
 
 
 
 
 plt.subplots_adjust(wspace=0.075)
-plt.savefig("Figure_pop.png")
+plt.savefig("Figure_pop_new.png")
 exit()

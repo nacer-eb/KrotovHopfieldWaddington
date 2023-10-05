@@ -4,6 +4,8 @@ sys.path.append('../')
 import numpy as np
 import sys
 
+import os
+
 from main_module.KrotovV2 import *
 
 import matplotlib.pyplot as plt
@@ -16,24 +18,29 @@ matplotlib.rc('font', **font)
 
 
 data_dir = "data/"
-selected_digits = [4, 9]#
-prefix = str(selected_digits)+"_stable/" # I used main,and momentum #"main"#
+selected_digits = [1, 7]#
+prefix = str(selected_digits)+"/" # I used main,and momentum #"main"#
 
-temp_range = np.arange(500, 900, 20)
-n_range = np.arange(2, 32, 2)
+temp_range = np.arange(600, 900, 20)[::2] #temp_range = np.arange(500, 900, 20)
+n_range = np.arange(2, 61, 1)[::2] #n_range = np.arange(2, 32, 2)
 
-data_Ms = np.zeros((len(temp_range), len(n_range), 2, 100, 784))
-data_Ls = np.zeros((len(temp_range), len(n_range), 2, 100, 10))
+N_mem = 50
+
+data_Ms = np.zeros((len(temp_range), len(n_range), 2, N_mem, 784))
+data_Ls = np.zeros((len(temp_range), len(n_range), 2, N_mem, 10))
 
 isFirstRun = True
 if isFirstRun:
     for i, temp in enumerate(temp_range):
         for j, n in enumerate(n_range):
             for k in range(2):
-                
+
+
                 saving_dir=data_dir+prefix+"trained_net_end_n"+str(n)+"_T"+str(temp)+"ic"+str(selected_digits[k])+".npz"
-                data_Ms[i, j, k] = np.load(saving_dir)['M']
-                data_Ls[i, j, k] = np.load(saving_dir)['L']
+
+                if os.path.isfile(saving_dir):
+                    data_Ms[i, j, k] = np.load(saving_dir)['M']
+                    data_Ls[i, j, k] = np.load(saving_dir)['L']
                 
         print(temp)
 
@@ -47,7 +54,7 @@ if isFirstRun:
 data_Ms = np.load(data_dir+prefix+"data_Ms.npy")
 data_Ls = np.load(data_dir+prefix+"data_Ls.npy")
 
-data_T = np.load(data_dir+"miniBatchs_images.npy")[0]
+data_T = np.load(data_dir+prefix+"miniBatchs_images.npy")[0]
 data_T_inv = np.linalg.pinv(data_T)
 
 
@@ -57,10 +64,13 @@ for i, temp in enumerate(temp_range):
         for j, n in enumerate(n_range):
             for k in range(2):
                 for l in range(2):
-                    if np.any(np.argmax(data_Ls[i, j, k], axis=-1) == selected_digits[l]):
-                        index = np.argmax(np.argmax(data_Ls[i, j, k], axis=-1) == selected_digits[l])
-                        data_Ms_unique[i, j, k, l] = data_Ms[i, j, k, index]
-
+                    # mask = np.argmax(data_Ls[i, j, k], axis=-1) == selected_digits[l] # Wide
+                    mask = data_Ls[i, j, k, :, selected_digits[l]] >= 0.8 # Strict
+                    if np.any(mask):
+                        #index = np.argmax(np.argmax(data_Ls[i, j, k], axis=-1) == selected_digits[l])
+                        #data_Ms_unique[i, j, k, l] = data_Ms[i, j, k, index] # The old pick one version
+                        data_Ms_unique[i, j, k, l] = np.mean(data_Ms[i, j, k, mask, :], -2)
+                        
 data_coefs = data_Ms_unique@data_T_inv                        
 
 fig = plt.figure(figsize=(7+9*2, 105-68+1))
@@ -137,7 +147,8 @@ for d_ic in range(2):
 
         cmap_ortho = get_custom_cmap(digit_classes[1-d_probe])
         data_ortho = data_coefs[:, :, d_ic, d_probe, 1-d_probe]
-        norm_ortho = matplotlib.colors.Normalize(vmin=np.clip(np.min(data_ortho)-0.1, -1, 0.6), vmax=np.clip(np.max(data_ortho)+0.1, -1, 0.6))
+        norm_ortho = matplotlib.colors.Normalize(vmin=np.clip(np.min(data_ortho)-0.1, -1, 0.6), vmax=0)
+        #norm_ortho = matplotlib.colors.Normalize(vmin=np.clip(np.min(data_ortho)-0.1, -1, 0.6), vmax=np.clip(np.max(data_ortho)+0.1, -1, 0.6))
         
         axs_ortho[d_ic, d_probe].imshow(data_ortho, cmap=cmap_ortho, norm=norm_ortho,
                                         extent=[min(n_range), np.max(n_range), max(temp_range), np.min(temp_range)],
@@ -172,5 +183,5 @@ for i, char in enumerate(['A', 'C']):
     axs[char].text(-0.3*rx[i], 1.0+0.1*ry[i], alphabet[i], transform=axs[char].transAxes, fontsize=81, verticalalignment='bottom', ha='right', fontfamily='Times New Roman', fontweight='bold')
     
 plt.subplots_adjust(wspace=0.075)
-plt.savefig("Figure_ortho.png")
+plt.savefig("Figure_ortho_new.png")
 exit()
