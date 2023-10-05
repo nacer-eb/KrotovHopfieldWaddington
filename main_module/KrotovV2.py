@@ -474,9 +474,9 @@ class KrotovNet:
                     self.hiddenDetectors[d] = self.hiddenDetectors[id_mem[0]]
             
             i_end += 1
-            if i%20 == 0 and True: # Removed, too verbose
-                print("-> %d / %d" % (i, epochs) )
-                #print("Rank: ", np.linalg.matrix_rank(self.visibleDetectors), np.linalg.matrix_rank(self.hiddenDetectors))
+            #if i%20 == 0 and True: # Removed, too verbose
+            #print("-> %d / %d" % (i, epochs) )
+            #print("Rank: ", np.linalg.matrix_rank(self.visibleDetectors), np.linalg.matrix_rank(self.hiddenDetectors))
             
             if isDecay:
                 decayRate = 0.998
