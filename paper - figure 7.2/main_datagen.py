@@ -18,9 +18,9 @@ prefix = str(selected_digits)+"/" # I used main,and momentum #"main"#
 
 prefix_run = "end_states_0/"
 
-global_learning_rate = 0.01 #0.01 #2000 epoch +- et mem 100
+global_learning_rate = 0.01 
 
-noise_r = 3
+noise_r = 2 # lowered from 3
 def single_run(nT):
     n, temp = nT
     
@@ -110,8 +110,8 @@ if __name__ == "__main__":
             print(data_dir, "Created!")
 
        
-        n_range = np.arange(2, 62, 1)[::2]    
-        temp_range = np.arange(600, 900, 20)[::2] #np.arange(600, 900, 20)[::2]
+        n_range = np.arange(2, 62, 1)[::1]    
+        temp_range = np.arange(700, 900, 20)[::1] #np.arange(600, 900, 20)[::2]
     
         n, T = np.meshgrid(n_range, temp_range)
         nT_merge = np.asarray([n.flatten(), T.flatten()]).T

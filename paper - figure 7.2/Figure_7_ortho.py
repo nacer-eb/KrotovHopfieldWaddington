@@ -21,36 +21,39 @@ data_dir = "data/"
 selected_digits = [1, 7]#
 prefix = str(selected_digits)+"/" # I used main,and momentum #"main"#
 
+N_runs = 40
+
 temp_range = np.arange(600, 900, 20)[::2] #temp_range = np.arange(500, 900, 20)
 n_range = np.arange(2, 61, 1)[::2] #n_range = np.arange(2, 32, 2)
 
-N_mem = 50
+N_mem = 100
 
-data_Ms = np.zeros((len(temp_range), len(n_range), 2, N_mem, 784))
-data_Ls = np.zeros((len(temp_range), len(n_range), 2, N_mem, 10))
+data_Ms = np.zeros((N_runs, len(temp_range), len(n_range), 2, N_mem, 784))
+data_Ls = np.zeros((N_runs, len(temp_range), len(n_range), 2, N_mem, 10))
 
-isFirstRun = True
+isFirstRun = False
 if isFirstRun:
-    for i, temp in enumerate(temp_range):
-        for j, n in enumerate(n_range):
-            for k in range(2):
+    for r in range(N_runs):
+        for i, temp in enumerate(temp_range):
+            for j, n in enumerate(n_range):
+                for k in range(2):
 
-
-                saving_dir=data_dir+prefix+"trained_net_end_n"+str(n)+"_T"+str(temp)+"ic"+str(selected_digits[k])+".npz"
-
-                if os.path.isfile(saving_dir):
-                    data_Ms[i, j, k] = np.load(saving_dir)['M']
-                    data_Ls[i, j, k] = np.load(saving_dir)['L']
+                    run_prefix = "end_states_" + str(r) + "/"
+                    saving_dir=data_dir+prefix+run_prefix+"trained_net_end_n"+str(n)+"_T"+str(temp)+"ic"+str(selected_digits[k])+".npz"
+                    
+                    if os.path.isfile(saving_dir):
+                        data_Ms[r, i, j, k] = np.load(saving_dir)['M']
+                        data_Ls[r, i, j, k] = np.load(saving_dir)['L']
+                    else:
+                        print("WARNING: File not found, ", saving_dir)
                 
-        print(temp)
+            print(temp)
 
     np.save(data_dir+prefix+"data_Ms.npy", data_Ms)
     np.save(data_dir+prefix+"data_Ls.npy", data_Ls)
 
 
-
 # Then
-
 data_Ms = np.load(data_dir+prefix+"data_Ms.npy")
 data_Ls = np.load(data_dir+prefix+"data_Ls.npy")
 
@@ -58,20 +61,23 @@ data_T = np.load(data_dir+prefix+"miniBatchs_images.npy")[0]
 data_T_inv = np.linalg.pinv(data_T)
 
 
+data_Ms_unique_runs = np.zeros((N_runs, len(temp_range), len(n_range), 2, 2, 784))
 data_Ms_unique = np.zeros((len(temp_range), len(n_range), 2, 2, 784))
 
-for i, temp in enumerate(temp_range):
+for r in range(N_runs):
+    for i, temp in enumerate(temp_range):
         for j, n in enumerate(n_range):
             for k in range(2):
                 for l in range(2):
-                    # mask = np.argmax(data_Ls[i, j, k], axis=-1) == selected_digits[l] # Wide
-                    mask = data_Ls[i, j, k, :, selected_digits[l]] >= 0.8 # Strict
+                    #mask = np.argmax(data_Ls[i, j, k], axis=-1) == selected_digits[l] # Wide
+                    mask = data_Ls[r, i, j, k, :, selected_digits[l]] >= 0.2 # Strict
                     if np.any(mask):
                         #index = np.argmax(np.argmax(data_Ls[i, j, k], axis=-1) == selected_digits[l])
                         #data_Ms_unique[i, j, k, l] = data_Ms[i, j, k, index] # The old pick one version
-                        data_Ms_unique[i, j, k, l] = np.mean(data_Ms[i, j, k, mask, :], -2)
-                        
-data_coefs = data_Ms_unique@data_T_inv                        
+                        data_Ms_unique_runs[r, i, j, k, l] = np.mean(data_Ms[r, i, j, k, mask, :], -2)
+
+data_Ms_unique = np.mean(data_Ms_unique_runs, axis=0)
+data_coefs = data_Ms_unique@data_T_inv
 
 fig = plt.figure(figsize=(7+9*2, 105-68+1))
 axs = fig.subplot_mosaic("""
@@ -147,7 +153,7 @@ for d_ic in range(2):
 
         cmap_ortho = get_custom_cmap(digit_classes[1-d_probe])
         data_ortho = data_coefs[:, :, d_ic, d_probe, 1-d_probe]
-        norm_ortho = matplotlib.colors.Normalize(vmin=np.clip(np.min(data_ortho)-0.1, -1, 0.6), vmax=0)
+        norm_ortho = matplotlib.colors.Normalize(vmin=np.clip(np.min(data_ortho)-0.1, -1, 0.6), vmax=0.1)
         #norm_ortho = matplotlib.colors.Normalize(vmin=np.clip(np.min(data_ortho)-0.1, -1, 0.6), vmax=np.clip(np.max(data_ortho)+0.1, -1, 0.6))
         
         axs_ortho[d_ic, d_probe].imshow(data_ortho, cmap=cmap_ortho, norm=norm_ortho,

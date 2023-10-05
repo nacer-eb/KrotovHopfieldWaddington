@@ -53,7 +53,7 @@ for noise_r in [1]: # was 8.
                 
                 net.hiddenDetectors[:, :] += -0.3
                 net.visibleDetectors[:, :] = 0.3*net.miniBatchs_images[0, k]
-
+                
                 net.hiddenDetectors[:, net.selected_digits[k]] += 0.3 # Silly mistake this should be 0.6 not 0.3
 
                 net.train_plot_update(5000, isPlotting=False, isSaving=True, saving_dir=data_dir+prefix+"trained_net_n"+str(n)+"_T"+str(temp)+"ic"+str(selected_digits[k])+".npz", testFreq=400)
