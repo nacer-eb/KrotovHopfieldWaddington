@@ -56,13 +56,16 @@ class KrotovNet:
 
         self.useClipping = useClipping
 
+        np.random.seed()
         # Random inits the memories.
         if initHiddenDetectors is None:
+            np.random.seed()
             self.hiddenDetectors = np.random.normal(self.rand_init_mean, self.rand_init_std, (self.K, self.N_C)) # You can multiply this by zero and get the same thing
         else:
             self.hiddenDetectors = initHiddenDetectors
             
         if initVisibleDetectors is None:
+            np.random.seed()
             self.visibleDetectors = np.random.normal(self.rand_init_mean, self.rand_init_std, (self.K, self.N))
         else:
             self.visibleDetectors = initVisibleDetectors
@@ -164,6 +167,7 @@ class KrotovNet:
     """  //////////// UTILS \\\\\\\\\\\\\\\\\\\ """
     # Resets the memories and labels
     def reset_ML(self):
+        np.random.seed()
         self.visibleDetectors = np.random.normal(self.rand_init_mean, self.rand_init_std, (self.K, self.N))
         self.hiddenDetectors = np.random.normal(self.rand_init_mean, self.rand_init_std, (self.K, self.N_C))
         
