@@ -85,13 +85,13 @@ class Figure_3:
 
 
 
-    def plot_snapshot(self, ax, alpha, beta, isStable=True, hasStabilityTitle=True):
+    def plot_snapshot(self, ax, alpha, beta, isStable=True, hasStabilityTitle=True, fontsize=14):
         sample_mem = alpha * self.A + beta * self.B
         ax.imshow(sample_mem.reshape(28, 28), cmap="bwr")
 
         if hasStabilityTitle:
-            ax.set_title("Stable", color="green", fontsize=14)
+            ax.set_title("Stable", color="green", fontsize=fontsize)
             if not isStable:
-                ax.set_title("Unstable", color="red", fontsize=14)
+                ax.set_title("Unstable", color="red", fontsize=fontsize)
 
 
