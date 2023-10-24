@@ -62,18 +62,23 @@ def single_n(nT_merge):
         
 
     net.miniBatchs_images[0] = data_T[train_mask]
-            
+
+    net.train_plot_update(1, isPlotting=False, isSaving=True, saving_dir=data_dir+prefix+"trained_net_ic_n"+str(n)+"_T"+str(temp)+".npz", testFreq=500)
     net.train_plot_update(10000, isPlotting=False, isSaving=False, saving_dir=data_dir+prefix+"trained_net_n"+str(n)+"_T"+str(temp)+".npz", testFreq=500)
     net.train_plot_update(1, isPlotting=False, isSaving=True, saving_dir=data_dir+prefix+"trained_net_end_n"+str(n)+"_T"+str(temp)+".npz", testFreq=500)
 
-            
+
 
 if __name__ == '__main__':
-    n_range = np.arange(1, 61, 1)
-    temp_range = np.asarray([550, 650, 750])
-
+    
+    n_range = np.arange(2, 61, 1)
+    temp_range = np.asarray([450, 650, 750])#np.asarray([550, 650, 750])
+    
     n, T = np.meshgrid(n_range, temp_range)
     nT_merge = np.asarray([n.flatten(), T.flatten()]).T
     
     with Pool(61) as p:
         p.map(single_n, nT_merge)
+
+        
+
