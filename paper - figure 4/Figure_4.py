@@ -65,11 +65,11 @@ IIIIIIII.JJJJJJJJ#....KKKKKKKK
 # Obtain & Plot the training data for intra and inter cases #
 #############################################################
 #############################################################
-data_dir_intra = "data_4_rand/"
-data_dir_inter = "data_49_mean/"
+data_dir_intra = "data_44_intra/"
+data_dir_inter = "data_49_mean_inter/"
 
-data_T_intra = np.load(data_dir_intra+"n2_T400.npz")['miniBatchs_images'][0]
-data_T_inter = np.load(data_dir_inter+"n2_T400.npz")['miniBatchs_images'][0]
+data_T_intra = np.load(data_dir_intra+"trained_net_end_n"+str(2)+"_T"+str(400)+".npz")['miniBatchs_images'][0]
+data_T_inter = np.load(data_dir_inter+"trained_net_end_n"+str(2)+"_T"+str(400)+".npz")['miniBatchs_images'][0]
 
 data_T_intra_inv = np.linalg.pinv(data_T_intra)
 data_T_inter_inv = np.linalg.pinv(data_T_inter)
@@ -98,11 +98,11 @@ n_range = np.arange(2, 31, 1)
 
 data_Ms_intra = np.zeros((len(temp_range), len(n_range), 1, 784))
 
-first_run = False
+first_run = True
 if first_run:
     for i, temp in enumerate(temp_range):
         for j, n in enumerate(n_range):
-            saving_dir=data_dir_intra+"n"+str(n)+"_T"+str(temp)+".npz"
+            saving_dir=data_dir_intra+"trained_net_end_n"+str(n)+"_T"+str(temp)+".npz"
             
             data = np.load(saving_dir)
             data_Ms_intra[i, j] = data['M']
@@ -139,7 +139,7 @@ ax[0].set_xlabel(r"$n$")
 ax[0].set_ylabel(r"Temperature", labelpad=20)
 
 cmap_ortho = get_custom_cmap(4)
-data_ortho = data_coefs_intra[:, :, 0, 1]
+data_ortho = data_coefs_intra[:, :, 0, 1] # <<<<<<<<<<<<----- MAKE THE CHOICE OF INDEX AUTOMATIC!!!!
 norm_ortho = matplotlib.colors.Normalize(0.5, 1)
 ax[1].imshow(data_ortho, cmap=cmap_ortho, norm=norm_ortho, extent=extent, aspect=aspect) #
 ax[1].set_xlabel(r"$n$")
@@ -174,13 +174,13 @@ cb_intra.set_label(r"$\alpha_{4, 1}$", labelpad=50)
 
 temp_range = np.arange(400, 900, 20)
 n_range = np.arange(2, 31, 1)
-data_Ms_inter = np.zeros((len(temp_range), len(n_range), 1, 784))
+data_Ms_inter = np.zeros((len(temp_range), len(n_range), 2, 784))
 
-first_run = False
+first_run = True
 if first_run:
     for i, temp in enumerate(temp_range):
         for j, n in enumerate(n_range):
-            saving_dir=data_dir_inter+"n"+str(n)+"_T"+str(temp)+".npz"
+            saving_dir=data_dir_inter+"trained_net_end_n"+str(n)+"_T"+str(temp)+".npz"
             
             data = np.load(saving_dir)
             data_Ms_inter[i, j] = data['M']
