@@ -11,18 +11,18 @@ import matplotlib.pyplot as plt
 import matplotlib
 font = {'family' : 'Times New Roman',
         'weight' : 'normal',
-        'size'   : 21}
+        'size'   : 31}
 matplotlib.rc('font', **font)
 
 
 data_dir = "data/"
 selected_digits = [1, 7]#
-prefix = str(selected_digits)+"/" # _coarse_stable
+prefix = str(selected_digits)+"_long/" # _coarse_stable
 
-N_runs = 2
+N_runs = 3
 
-temp_range = np.arange(700, 900, 20)[::1] #temp_range = np.arange(500, 900, 20)
-n_range = np.arange(2, 61, 1)[::1] #n_range = np.arange(2, 32, 2)
+temp_range = [550, 750, 800] #[550, 650, 750] #np.arange(700, 900, 20)[::2] #temp_range = np.arange(500, 900, 20)
+n_range = np.arange(2, 60, 1)[::1] #n_range = np.arange(2, 32, 2)
 
 #temp_range = np.arange(600, 900, 20)[6::2] #temp_range = np.arange(500, 900, 20)
 #n_range = np.arange(2, 61, 1)[::2] #n_range = np.arange(2, 32, 2)
@@ -41,7 +41,7 @@ if isFirstRun:
             for k in range(2):
                 for r in range(N_runs):
 
-                    run_prefix = "end_states_" + str(r) + "/"
+                    run_prefix = "end_states_g" + str(r) + "/"
                     saving_dir=data_dir+prefix+run_prefix+"trained_net_end_n"+str(n)+"_T"+str(temp)+"ic"+str(selected_digits[k])+".npz"
                     
                     if os.path.isfile(saving_dir):
@@ -76,6 +76,11 @@ data_T_inv = np.linalg.pinv(data_T)
 
 data_M_saddles_coefs = data_M_saddles@data_T_inv
 
+
+data_M_saddles_coefs = (data_M_saddles_coefs.reshape(len(temp_range), len(n_range), 2, 10, 20)).sum(axis=-1)
+data_M_saddles_coefs = data_M_saddles_coefs[:, :, :, selected_digits]
+
+
 data_Ms_pop_run = np.zeros((N_runs, len(temp_range), len(n_range), 2, 2)) # Population proportion
 data_Ms_pop = np.zeros((len(temp_range), len(n_range), 2, 2)) # Population proportion
 
@@ -84,34 +89,36 @@ for r in range(N_runs):
         for j, n in enumerate(n_range):
             for k in range(2):
                 for l in range(2):
-                    data_Ms_pop_run[r, i, j, k, l] = np.sum(np.argmax(data_Ls[r, i, j, k], axis=-1) == selected_digits[l], axis=-1) # not strict
-                    #data_Ms_pop_run[r, i, j, k, l] = np.sum( (data_Ls[r, i, j, k, :, selected_digits[l]] >= -0.95), axis=-1 ) # stricter
+                    #data_Ms_pop_run[r, i, j, k, l] = np.sum(np.argmax(data_Ls[r, i, j, k], axis=-1) == selected_digits[l], axis=-1) # not strict
+                    data_Ms_pop_run[r, i, j, k, l] = np.sum( (data_Ls[r, i, j, k, :, selected_digits[l]] >= 0.95), axis=-1 ) # stricter
 
 
 # Standard mean
 data_Ms_pop = np.mean(data_Ms_pop_run, axis=0)
 
 
-cmap_tab10 = matplotlib.cm.tab10
-norm = matplotlib.colors.Normalize(vmin=0, vmax=10)
-
-fig, ax = plt.subplots(3, 2, figsize=(16, 16), sharey=True)
-
-for t_i, t_slices in enumerate([-1, -3, -4]):
-    for ic_i, ic in enumerate([1, 7]):
-        for r in range(N_runs):
-            ax[t_i, 0].scatter(data_Ms_pop_run[r, t_slices, :, ic_i, 0].T/100.0, n_range, s=10, alpha=0.5, color=cmap_tab10(norm(ic)))
-        ax[t_i, 1].scatter(data_M_saddles_coefs[t_slices, :, ic_i, 0], n_range, s=10, alpha=0.5, color=cmap_tab10(norm(ic)))
-
-        ax[t_i, 0].set_ylabel("Temperature: "+str(temp_range[t_slices]) + " \n n-range")
-
-        ax[-1, 0].set_xlabel(r"Proportion of $1$s")
-        ax[-1, 1].set_xlabel(r"$\alpha_1$ of saddle")
+tab10_cmap = matplotlib.colormaps["tab10"]
+tab10_norm = matplotlib.colors.Normalize(0, 10)
 
 
+data_Ms_coefs = data_Ms[0]@data_T_inv
+print(np.shape(data_Ms_coefs))
+
+print(n_range[18])
+print(temp_range[-1])
+
+fig, ax = plt.subplots(1, 2, figsize=(16, 9))
+for d_i, d in enumerate([1, 7]):
+    mask = data_Ls[0, -1, 18, 0, :, d] > 0.5
+
+    data_Ms_coefs_d = np.mean(data_Ms_coefs[-1, 18, 0, mask], axis=0) # data_Ms_coefs[-1, 18, 0, mask][0] # The first or mean
+    i_sort = np.argsort(np.abs(data_Ms_coefs_d))[::-1]
+
+    ax[d_i].scatter(range(200), data_Ms_coefs_d[i_sort], c=tab10_cmap(tab10_norm(i_sort//20)), s=20)
+
+ax[0].set_ylabel(r"$\alpha$")
+ax[0].set_title("1s")
+ax[1].set_title("7s")
+plt.show()
 
 
-
-plt.tight_layout()
-plt.savefig("Figure_pop_slice.png")
-exit()
