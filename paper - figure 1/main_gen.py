@@ -17,12 +17,12 @@ if not path.exists(data_dir):
 
 isFirstRun = False
 
-selected_digits = [1, 4, 7] # [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]#
-prefix = str(selected_digits)+"/" # I used main,and momentum #"main"#
+selected_digits = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]# [1, 4, 7] #
+prefix = "noisy/" #str(selected_digits)+"/" # I used main,and momentum #"main"#
 
 
 for noise_r in [10]:
-    for temp in [800]:
+    for temp in [670]: #800
         for n in [3, 15, 30, 40]:
             print(n, temp)
             
@@ -64,7 +64,7 @@ for noise_r in [10]:
 
             net.miniBatchs_images[0] = data_T[train_mask]
             
-            net.train_plot_update(3500, isPlotting=False, isSaving=True, saving_dir=data_dir+prefix+"trained_net_n"+str(n)+"_T"+str(temp)+".npz", testFreq=100)
+            net.train_plot_update(3500, isPlotting=False, isSaving=True, saving_dir=data_dir+prefix+"trained_net_n"+str(n)+"_T"+str(temp)+".npz", testFreq=100, noiseMean=0, noiseStd=0.01)
 
             generate_umap_embedding(data_dir, prefix, n, temp, verbose=True)
             
