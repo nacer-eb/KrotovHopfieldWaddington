@@ -65,8 +65,10 @@ IIIIIIII.JJJJJJJJ#....KKKKKKKK
 # Obtain & Plot the training data for intra and inter cases #
 #############################################################
 #############################################################
-data_dir_intra = "data_44_intra/"
-data_dir_inter = "data_49_mean_inter/"
+data_dir_intra =  "data_44_intra/" #"data_[2, 2]_intra/"
+
+digit_classes = [4, 9]#[3, 8]#[4, 7]#[4, 9]
+data_dir_inter = "data_49_mean_inter/" # "data_"+str(digit_classes)+"_mean_inter/"
 
 data_T_intra = np.load(data_dir_intra+"trained_net_end_n"+str(2)+"_T"+str(400)+".npz")['miniBatchs_images'][0]
 data_T_inter = np.load(data_dir_inter+"trained_net_end_n"+str(2)+"_T"+str(400)+".npz")['miniBatchs_images'][0]
@@ -198,7 +200,7 @@ ax = np.asarray([[axs['F'], axs['G']], [axs['I'], axs['J']] ])
 ax_1d = np.asarray([axs['H'], axs['K']])
 ax_cb = np.asarray([axs['@'], axs['#']])
 
-digit_classes = [4, 9]
+
 
 for digit in [0, 1]:
     ax[digit, 0].imshow(merge_data(data_Ms_inter[::3, ::3, digit, :].reshape(len(n_range[::3])*len(temp_range[::3]), 784), len(n_range[::3]), len(temp_range[::3])  ),
@@ -211,7 +213,9 @@ for digit in [0, 1]:
     im = ax[digit, 1].imshow(data_ortho, cmap=cmap_ortho, norm=norm_ortho, extent=extent, aspect=aspect)
 
     n = np.arange(np.min(n_range), np.max(n_range), 0.01)
-    T_calc = (data_T_inter[0]@data_T_inter[0] + data_T_inter[0]@data_T_inter[1])/( 2 * ( np.arctanh( 1 - (1.0/2.0)**(1.0/(2.0*n)) ) )**(1.0/n) )
+
+    # I used 1-digit here to deal with potential asymmetry, but it shouldn't matter A@A should be roughly B@B
+    T_calc = (data_T_inter[1-digit]@data_T_inter[1-digit] + data_T_inter[0]@data_T_inter[1])/( 2 * ( np.arctanh( 1 - (1.0/2.0)**(1.0/(2.0*n)) ) )**(1.0/n) )
     ax[digit, 1].scatter(n, T_calc, s=1, c="red")
     ax[digit, 1].set_ylim(max(temp_range), min(temp_range))
 

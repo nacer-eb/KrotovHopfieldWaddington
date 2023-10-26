@@ -10,7 +10,7 @@ from main_module.KrotovV2 import *
 # Change this if you're NOT using a supplied minibatch/training_sample AND don't want mean digits in the newly generated one
 isMeanMinibatch = True
 
-selected_digits = [4, 9]
+selected_digits = [3, 8] #[4, 9]
 data_dir = "data_"+str(selected_digits)+"_mean_inter/"
     
 def single_n(nT_merge):
@@ -58,7 +58,7 @@ if __name__ == '__main__':
         np.save(data_dir+"miniBatchs_images.npy", net.miniBatchs_images);
 
     if not os.path.isfile(data_dir+"miniBatchs_images.npy") and isMeanMinibatch:
-        net = KrotovNet(Kx=1, Ky=1, n_deg=30, m_deg=30, M=2*20, nbMiniBatchs=1, momentum=0*0.6, rate=0.001, temp=600, rand_init_mean=-0.001, rand_init_std=0.01, selected_digits=selected_digits)
+        net = KrotovNet(Kx=1, Ky=1, n_deg=30, m_deg=30, M=2*50, nbMiniBatchs=1, momentum=0*0.6, rate=0.001, temp=600, rand_init_mean=-0.001, rand_init_std=0.01, selected_digits=selected_digits)
         miniBatchs_images_mean = np.zeros((1, 2, 784))
 
         miniBatchs_images_mean[0, 0] = np.mean(net.miniBatchs_images[0, :net.M//2], axis=0)

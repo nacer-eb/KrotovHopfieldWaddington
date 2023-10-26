@@ -7,7 +7,7 @@ from multiprocessing import Pool
 
 from main_module.KrotovV2 import *
 
-selected_digits = [4, 4]
+selected_digits = [2, 2]#[4, 4]
 data_dir = "data_"+str(selected_digits)+"_intra/"
 
 def single_n(nT_merge):
