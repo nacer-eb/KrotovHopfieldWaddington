@@ -60,13 +60,14 @@ class KrotovNet:
         # Random inits the memories.
         if initHiddenDetectors is None:
             np.random.seed()
-            self.hiddenDetectors = np.random.normal(self.rand_init_mean, self.rand_init_std, (self.K, self.N_C)) # You can multiply this by zero and get the same thing
+            self.hiddenDetectors = np.random.normal(self.rand_init_mean, self.rand_init_std, (self.K, self.N_C)) 
         else:
             self.hiddenDetectors = initHiddenDetectors
             
         if initVisibleDetectors is None:
             np.random.seed()
             self.visibleDetectors = np.random.normal(self.rand_init_mean, self.rand_init_std, (self.K, self.N))
+            
         else:
             self.visibleDetectors = initVisibleDetectors
 
@@ -310,7 +311,7 @@ class KrotovNet:
         return dV
 
     # Combines gradient descent of both layers (M/L), Normalization per memory and momentum.
-    def train_cycle(self, mb_v, mb_t):
+    def train_cycle(self, mb_v, mb_t, noiseMean=0, noiseStd=0):
 
         for mb in range(0, self.nbMiniBatchs):
             tmp_dV_v = self.visibleLayer_train(mb_v[mb], mb_t[mb])
@@ -337,8 +338,10 @@ class KrotovNet:
                 
                 V_hidden = np.divide(self.dV_hiddenDetectors, V_hidden_norm_factor, out=np.zeros_like(self.dV_hiddenDetectors), where=V_hidden_norm_factor!=0)
                 #V_hidden = self.dV_hiddenDetectors/V_hidden_norm_factor 
+
                 
-                self.hiddenDetectors += self.train_rate*V_hidden 
+                # Added noise - by default zero
+                self.hiddenDetectors += self.train_rate*V_hidden + np.random.normal(noiseMean, noiseStd, (self.K, self.N_C))
                 self.hiddenDetectors = np.clip(self.hiddenDetectors, -1., 1.)
                 
             
@@ -348,8 +351,9 @@ class KrotovNet:
             V_visible_norm_factor = np.reshape(np.repeat(np.max(np.abs(self.dV_visibleDetectors), axis=1), self.N), (self.K, self.N))
             V_visible = np.divide(self.dV_visibleDetectors, V_visible_norm_factor, out=np.zeros_like(self.dV_visibleDetectors), where=V_visible_norm_factor!=0)
             #V_visible = self.dV_visibleDetectors/V_visible_norm_factor
-                        
-            self.visibleDetectors += self.train_rate*V_visible
+
+            # Added noise - by default zero
+            self.visibleDetectors += self.train_rate*V_visible + np.random.normal(noiseMean, noiseStd, (self.K, self.N))
             
             
             # This is where linearity may arise or be corrected.
@@ -364,13 +368,6 @@ class KrotovNet:
                 norm_v[norm_v < 1] = 1
                 norm_v = np.expand_dims(norm_v, -1)
                 norm_v = np.repeat(norm_v, np.shape(self.visibleDetectors)[-1], -1)
-
-                """
-                norm_h = np.max(np.abs(self.hiddenDetectors), axis=-1)
-                norm_h[norm_h < 1] = 1
-                norm_h = np.expand_dims(norm_h, -1)
-                norm_h = np.repeat(norm_h, np.shape(self.hiddenDetectors)[-1], -1)
-                """
                 
                 self.visibleDetectors = np.divide(self.visibleDetectors, norm_v)
                 #self.hiddenDetectors = np.divide(self.hiddenDetectors, norm_h)
@@ -472,6 +469,7 @@ class KrotovNet:
         for i in range(0, epochs):
 
             # This is cool - generally not implemented only in special**2 cases
+            # Forcing memories to be identical
             if id_mem is not None:
                 for d in id_mem[1:]:
                     self.visibleDetectors[d] = self.visibleDetectors[id_mem[0]]
