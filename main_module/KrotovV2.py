@@ -311,7 +311,7 @@ class KrotovNet:
         return dV
 
     # Combines gradient descent of both layers (M/L), Normalization per memory and momentum.
-    def train_cycle(self, mb_v, mb_t, noiseMean=0, noiseStd=0):
+    def train_cycle(self, mb_v, mb_t, noiseMean, noiseStd):
 
         for mb in range(0, self.nbMiniBatchs):
             tmp_dV_v = self.visibleLayer_train(mb_v[mb], mb_t[mb])
@@ -425,7 +425,7 @@ class KrotovNet:
             print("Training batch score:", test_batch_score)
     
 
-    def train_plot_update(self, epochs, isPlotting=True, isSaving=False, saving_dir=None, testFreq=100, testingRegiment=[1, 0, 0], isDecay=False, id_mem=None):
+    def train_plot_update(self, epochs, isPlotting=True, isSaving=False, saving_dir=None, testFreq=100, testingRegiment=[1, 0, 0], isDecay=False, id_mem=None, noiseMean=0, noiseStd=0):
         """
         Train & Plot function.
         Trains the network and plots it. It also allows you to test the network on the various digits batchs as per the testingRegiment parameter.
@@ -498,13 +498,14 @@ class KrotovNet:
                 L[i, :, :] = self.hiddenDetectors
 
 
-            
+
+            # Remove these next few lines
             # IMPORTANT REMOVE WHEN DONE: MAKING LAST TWO MEM AND LABELS EQUAL
             #self.visibleDetectors[2] = self.visibleDetectors[1]
             #self.hiddenDetectors[2] = self.hiddenDetectors[1]
             ## End of temporary code - Boy is this dangerous
 
-            self.train_cycle(self.miniBatchs_images, self.miniBatchs_labels) #Train
+            self.train_cycle(self.miniBatchs_images, self.miniBatchs_labels, noiseMean, noiseStd) #Train
             
             
 
