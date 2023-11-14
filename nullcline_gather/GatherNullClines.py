@@ -61,6 +61,7 @@ class GatherNullClines:
 
     
     def PN_dt_beta(self, alpha, l_0):
+        # There might've been a mistake + self.OB should be -self.OB
         PN_dt_beta = (-l_0*(1.0 + self.O_B(alpha, l_0))**(2*self.m-1)  * (1.0 - (self.O_B(alpha, l_0))**2) * (self.d_B(alpha))**(self.n-1)
                        + 4 * (1.0 + self.O_B(alpha, -1) )**(2*self.m-1) * (1.0 - (self.O_B(alpha, -1) )**2) * (self.d_B(alpha))**(self.n-1) )
 
@@ -104,7 +105,7 @@ class GatherNullClines:
 
         
         dt_l_0 /= np.maximum(np.abs(self.PN_dt_l_gamma(alpha)), np.abs(dt_l_0))
-
+        
         return interaction*dt_l_0, interaction*dt_alpha
     
 
