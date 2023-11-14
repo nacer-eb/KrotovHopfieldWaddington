@@ -24,7 +24,7 @@ data_Mf = np.zeros((3, 3, 100, 784))
 data_Lf = np.zeros((3, 3, 100, 10))
 
 # Turn this to false to make compilation faster
-isFirstRun = False
+isFirstRun = True
 
 # Fetch all data
 if isFirstRun:
@@ -74,12 +74,21 @@ digit_to_observe = 4
 # Getting an index list of all memories with 4 labels (can be ill-posed for low-n)
 index = data_Lf[:, :, :, digit_to_observe] >=0.99 
 
+choices = np.zeros((3, 3, 4), dtype=int) 
 # Choices from the above indices. As of now this is done manually, but you can do random selection or [0, 1, 2, 3] if you want.
-choices = np.zeros((3, 3, 4)) 
+"""
 choices[0, 0] = np.asarray([7, 8, 9, 10]); choices[0, 1] = np.asarray([1, 2, 3, 4]); choices[0, 2] = np.asarray([-4, -3, -2, -1])
 choices[1, 0] = np.asarray([0, 1, 2, 3]); choices[1, 1] = np.asarray([9, 10, 11, 12]); choices[1, 2] = np.asarray([0, 1, 2, 3])
 choices[2, 0] = np.asarray([0, 1, 2, 3]); choices[2, 1] = np.asarray([4, 5, 6, 7]); choices[2, 2] = np.asarray([0, 1, 2, 3])
 choices = np.asarray(choices, dtype=int)
+"""
+
+for i in range(3):
+    for j in range(3):
+        for c in range(4):
+            choices[i, j] = index[i, j, int(c%int(np.sum(index[i, j], axis=-1)))]
+
+        print(choices[i, j])
 
 
 
