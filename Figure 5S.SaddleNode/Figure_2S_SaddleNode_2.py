@@ -15,6 +15,8 @@ import matplotlib.animation as anim
 
 from nullcline_gather.GatherNullClines import *
 
+
+# E here (and in general in this repo) is simply a reference to the cost function.
 def E(l_0, alpha, n, temp):
     d_AA, d_AB, d_BB = 753/temp, 494/temp, 719/temp
 
@@ -88,7 +90,7 @@ E_axes = np.asarray([ax['Q'], ax['R'], ax['S'], ax['T']])
 ax['Q'].xaxis.tick_top(); ax['R'].xaxis.tick_top(); ax['S'].xaxis.tick_top(); ax['T'].xaxis.tick_top()
 ax['Q'].xaxis.set_label_position('top'); ax['R'].xaxis.set_label_position('top'); ax['S'].xaxis.set_label_position('top'); ax['T'].xaxis.set_label_position('top') 
 
-ax['Q'].set_ylabel(r'log$(E)$', labelpad=10); ax['R'].set_ylabel(r'log$(E)$', labelpad=10); ax['S'].set_ylabel(r'log$(E)$', labelpad=10); ax['T'].set_ylabel(r'log$(E)$', labelpad=10)
+ax['Q'].set_ylabel(r'log$(C)$', labelpad=10); ax['R'].set_ylabel(r'log$(C)$', labelpad=10); ax['S'].set_ylabel(r'log$(C)$', labelpad=10); ax['T'].set_ylabel(r'log$(C)$', labelpad=10)
 
 
 temp = 700
