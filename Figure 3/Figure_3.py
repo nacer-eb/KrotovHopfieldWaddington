@@ -398,7 +398,7 @@ custom_lines = [Line2D([0], [0], color=plt.cm.tab10(0.9), marker="*", linestyle=
                 Line2D([0], [0], marker="o", markeredgecolor="k", markerfacecolor="white", markeredgewidth=4, linestyle="", ms=13),
                 Line2D([0], [0], color="k", lw=2, marker="", linestyle="-")]
 
-fig.legend(custom_lines, ['Training Data', 'Memory (Visible layer)', 'Memory trajectory/trail'], loc='upper center', ncol=4)
+fig.legend(custom_lines, ['Training Data', 'Memory', 'Memory trajectory/trail'], loc='upper center', ncol=4)
 
 
 plt.subplots_adjust(top=0.92, wspace=1.4, hspace=1.4)
