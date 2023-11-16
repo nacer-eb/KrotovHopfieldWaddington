@@ -1,3 +1,4 @@
+import argparse
 import sys
 sys.path.append('../')
 
@@ -18,7 +19,14 @@ matplotlib.rc('font', **font)
 
 
 
-n, temp = 30, 670
+n = 30
+
+parser = argparse.ArgumentParser(description="This program generates Figure 3 and its supplements.")
+parser.add_argument('--n', help="The n-power for the figure. [DEFAULT=30]", default=30, type=int)
+parse_args = parser.parse_args()
+n = parse_args.n
+
+temp = 670
 data_dir = "data/"
 
 selected_digits = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -30,7 +38,7 @@ saving_dir = data_dir+subdir+"trained_net_n"+str(n)+"_T"+str(temp)+".npz"
 data_M = np.load(saving_dir)['M']
 data_L = np.load(saving_dir)['L']
 
-umap_model_path = "../defaults/UMAP_model_correlation.sav"
+umap_model_path = "../defaults/umap_model_correlation.sav"
 dataset = "../defaults/miniBatchs_images.npy"
 data_T = np.load(dataset)[0]
 
