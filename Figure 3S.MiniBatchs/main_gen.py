@@ -42,10 +42,10 @@ def single_n(nT_merge):
     for mb in range(4):
         train_mask = np.zeros(200)
         for d in selected_digits:
-            train_mask[d*20: d*20 + 5*(mb+1)] = 1
+            train_mask[d*20 + 5*(mb): d*20 + 5*(mb+1)] = 1
         train_mask = np.asarray(train_mask, dtype=bool)
         
-        net.miniBatchs_images[mb] = data_T[train_mask]
+        net.miniBatchs_images[mb] = np.copy(data_T[train_mask])
 
     
     net.train_plot_update(1, isPlotting=False, isSaving=True, saving_dir=data_dir+prefix+"trained_net_ic_n"+str(n)+"_T"+str(temp)+".npz", testFreq=500)
