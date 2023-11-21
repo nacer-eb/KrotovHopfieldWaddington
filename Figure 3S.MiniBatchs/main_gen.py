@@ -33,8 +33,8 @@ def single_n(nT_merge):
     n, temp = nT_merge
     print(n, temp)
 
-    # Here the rate is divided by 4 to account for the 4 miniBatchs (which effectively increase the learning rate)
-    net = KrotovNet(Kx=10, Ky=10, n_deg=n, m_deg=n, M=5*len(selected_digits), nbMiniBatchs=4, momentum=0*0.6, rate=0.005/4.0, temp=temp, rand_init_mean=-0.003, rand_init_std=initial_noise, selected_digits=selected_digits)
+    # The 4 miniBatchs (effectively increase the learning rate)
+    net = KrotovNet(Kx=10, Ky=10, n_deg=n, m_deg=n, M=5*len(selected_digits), nbMiniBatchs=4, momentum=0*0.6, rate=0.005, temp=temp, rand_init_mean=-0.003, rand_init_std=initial_noise, selected_digits=selected_digits)
             
 
     # Modified to deal with minibatchs we take the first/second/third/fourth 5 digits of each class

@@ -87,7 +87,7 @@ if n == 40:
     t_s = [20, 62, 110, 161, 187, 233, 344] #n=40
 
         
-t_samples = np.asarray(t_s)*10
+t_samples = np.asarray(t_s)*10//4 # Here divide by 4 because the miniBatchs effectively increase the learning rate
 
 
 props = dict(boxstyle='round', facecolor='whitesmoke', alpha=0.5) #facecolor='cyan', alpha=0.1) 
