@@ -66,7 +66,7 @@ for i in range(len(indices)):
     
 # This selects handpicked memory (slight improvement for n=30)
 # set useHandpicked to False if you're using a different dataset or want randomly picked memories
-useHandpicked = True
+useHandpicked = False
 if n == 30 and useHandpicked: 
     indices = [2, 11, 0, 29, 51, 95, 42, 99, 19, 71, 8, 34, 6, 78, 7, 56, 14, 16, 70, 49] 
     
