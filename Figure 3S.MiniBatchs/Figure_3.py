@@ -72,22 +72,20 @@ if n == 30 and useHandpicked:
     
 indices = np.asarray(indices, dtype=int)
 
-# Use the time stamps file or manually get timestamps from UMAP movies.
+#  Manually get timestamps from UMAP movies.
 # Handpicked, notice this is /10 because of the UMAP timesteps
 
 if n == 3:
-    t_s = [20, 27, 37, 51, 62, 90, 344] #n=3
+     t_s = [5, 14, 25, 31, 40, 50, 344] #n=3
 if n == 15:
-    t_s = [20, 30, 55, 70, 150, 200, 344] #n=15
-if n == 25:
-    t_s = [20, 62, 100, 132, 191, 270, 344] #n=25
+    t_s = [5, 14, 25, 31, 40, 50, 344]  #n=15
 if n == 30:
-    t_s = [20, 90, 125, 153, 180, 280, 344] #n=30
+    t_s = [5, 11, 28, 36, 50, 90, 344] #n=30
 if n == 40:
-    t_s = [20, 62, 110, 161, 187, 233, 344] #n=40
+    t_s = [10, 18, 27, 45, 60, 90, 344] #n=40
 
         
-t_samples = np.asarray(t_s)*10//4 # Here divide by 4 because the miniBatchs effectively increase the learning rate
+t_samples = np.asarray(t_s)*10
 
 
 props = dict(boxstyle='round', facecolor='whitesmoke', alpha=0.5) #facecolor='cyan', alpha=0.1) 
@@ -410,5 +408,5 @@ fig.legend(custom_lines, ['Training Data', 'Memory', 'Memory trajectory/trail'],
 
 
 plt.subplots_adjust(top=0.92, wspace=1.4, hspace=1.4)
-plt.savefig("Figure_3_n"+str(n)+".png")
+plt.savefig("Figure_3S_miniBatchs_n"+str(n)+".png")
 
