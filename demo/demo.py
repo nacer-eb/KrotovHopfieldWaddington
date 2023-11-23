@@ -19,6 +19,18 @@ selected_digits = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 data_dir = "data/"
 prefix = str(selected_digits) + "/"
 
+# Makes sure the data_dir exits else creates it.
+if not path.exists(data_dir):
+    print(data_dir, "Does not exist. It will be created ...")
+    os.mkdir(data_dir)
+    print(data_dir, "Created!")
+
+if not path.exists(data_dir+prefix):
+    print(data_dir+prefix, "Does not exist. It will be created ...")
+    os.mkdir(data_dir+prefix)
+    print(data_dir+prefix, "Created!")
+        
+
 
 
 # networks can be generated as:
