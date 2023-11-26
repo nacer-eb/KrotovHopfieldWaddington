@@ -48,11 +48,11 @@ class Figure_5:
     def plot_nullclines(self, ax, n, temp=700, t_0=0, t=0, plotDynamics=False, density=1):
         
         GNC = GatherNullClines(self.A@self.A, self.A@self.B, self.B@self.B, n, temp/(2.0**(1.0/n)), +1)  
-        alpha_nullcline = GNC.alpha_nullcline(self.alpha_mesh, self.l_0_mesh)
-        l_nullcline = GNC.l_0_nullcline(self.alpha_mesh, self.l_0_mesh)
+        d_alpha_dt, norm_condition = GNC.calc_d_alpha_dt(self.alpha_mesh, self.l_0_mesh)
+        d_ell_dt, d_ell_dt_p_sat, d_ell_dt_m_sat = GNC.calc_d_ell_dt(self.alpha_mesh, self.l_0_mesh)
 
-        ax.contour(self.l_0_mesh, self.alpha_mesh, alpha_nullcline, [0], colors="purple", linewidths=8, alpha=0.5)
-        ax.contour(self.l_0_mesh, self.alpha_mesh, l_nullcline, [0], colors="orange", linewidths=8, alpha=0.5)
+        ax.contour(self.l_0_mesh, self.alpha_mesh, d_alpha_dt, [0], colors="purple", linewidths=8, alpha=0.5)
+        ax.contour(self.l_0_mesh, self.alpha_mesh, d_ell_dt, [0], colors="orange", linewidths=8, alpha=0.5)
 
         if not plotDynamics:
             textbox = ax.text(0.07, 0.94, r"$n=$"+str(n), transform=ax.transAxes, fontsize=37, verticalalignment='top', horizontalalignment='left', bbox=self.props)
@@ -75,8 +75,8 @@ class Figure_5:
 
         # This mainly for supplemental figures where you plot the memories as they split
         if plotDynamics:
-            dt_l_0, dt_alpha = GNC.get_dt(self.alpha_mesh, self.l_0_mesh)
-            ax.streamplot(self.l_0_mesh, self.alpha_mesh, dt_l_0, dt_alpha, color="grey", density=density)
+            
+            ax.streamplot(self.l_0_mesh, self.alpha_mesh, d_ell_dt*norm_condition, d_alpha_dt*norm_condition, color="grey", density=density)
             
             textbox = ax.text(0.95, 0.04, "epoch "+str(t), transform=ax.transAxes, fontsize=37, verticalalignment='bottom', horizontalalignment='right', bbox=self.props)
            
