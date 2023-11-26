@@ -1,18 +1,14 @@
 import numpy as np
 
 class GatherNullClines:
-    def __init__(self, D_AA, D_AB, D_BB, n, T, pm):
-        self.D_AA = D_AA
-        self.D_AB = D_AB
-        self.D_BA = self.D_AB
-        self.D_BB = D_BB
+    def __init__(self, A_dot_A, A_dot_B, B_dot_B, n, T, pm):
 
-        self.T = T
-        self.n = n
+
+        self.A_dot_A, self.A_dot_B, self.B_dot_B, self.n, self.T, self.pm = A_dot_A, A_dot_B, B_dot_B, n, T, pm
         self.m = n # by default.
 
-        self.pm = pm
-
+    
+    # I use beta here, but this is the same as alpha_B, and alpha_A = alpha.
     def beta(self, alpha):
         if self.pm == 1:
             return 1 - np.abs(alpha)
@@ -21,116 +17,132 @@ class GatherNullClines:
             return -1 + np.abs(alpha)
 
         # else
-        print("Garbage in, garbage out. pm was set to", pm)
+        print("Garbage in, garbage out. pm was set to", pm, "it should be either +1 or -1 and represents the sign of beta.")
         exit(-1)
 
+
+    # In case you're in a weird region of the (alpha,beta)-space
+    # For now not used; I assume you don't run this when both alpha and beta are negative
     def ReLU(self, x):
         return (np.abs(x) + x)/2.0
 
+
+    def calc_nabla_A(self, alpha, ell):
+
+        A_dot_A, A_dot_B, B_dot_B, n, T, pm = self.A_dot_A, self.A_dot_B, self.B_dot_B, self.n, self.T, self.pm
+
+        beta = self.beta(alpha)
+
+        M_dot_A = self.ReLU(alpha*A_dot_A + beta*A_dot_B)
+        
+        l_A_o_A = np.tanh( ell * (M_dot_A/T)**n )
+        l_gamma_o_A = -np.tanh( (M_dot_A/T)**n )
+
+        
+        nabla_A = ( (1 - l_A_o_A)**(2*n - 1)  *  (1 - l_A_o_A**2)  *  (M_dot_A/T)**(n-1) * ell
+
+                         + 4 * (1 + l_gamma_o_A)**(2*n - 1)  *  (1 - l_gamma_o_A**2) *  (M_dot_A/T)**(n-1) 
+        )
+
+        return nabla_A
+
+
+    def calc_nabla_B(self, alpha, ell):
+
+        A_dot_A, A_dot_B, B_dot_B, n, T, pm = self.A_dot_A, self.A_dot_B, self.B_dot_B, self.n, self.T, self.pm
+
+        beta = self.beta(alpha)
+
+        M_dot_B = self.ReLU(alpha*A_dot_B + beta*B_dot_B)
+        
+        l_A_o_B = np.tanh( ell * (M_dot_B/T)**n )
+        l_gamma_o_B = -np.tanh( (M_dot_B/T)**n )
+
+        
+        nabla_B = ( -(1 + l_A_o_B)**(2*n - 1)  *  (1 - l_A_o_B**2)  *  (M_dot_B/T)**(n-1) * ell
+
+                         + 4 * (1 + l_gamma_o_B)**(2*n - 1)  *  (1 - l_gamma_o_B**2) *  (M_dot_B/T)**(n-1) 
+        )
+
+        return nabla_B
+
+
+    def calc_nabla_ell(self, alpha, ell):
+        
+        A_dot_A, A_dot_B, B_dot_B, n, T, pm = self.A_dot_A, self.A_dot_B, self.B_dot_B, self.n, self.T, self.pm
     
-    def d_A(self, alpha):
-        d_A = self.ReLU(alpha*self.D_AA + self.beta(alpha)*self.D_AB)/self.T
+        beta = self.beta(alpha)
 
-        return d_A
+        
+        M_dot_A = self.ReLU(alpha*A_dot_A + beta*A_dot_B)
+        M_dot_B = self.ReLU(alpha*A_dot_B + beta*B_dot_B)
 
-
-    def d_B(self, alpha):
-        d_B = self.ReLU(alpha*self.D_BA + self.beta(alpha)*self.D_BB)/self.T
-
-        return d_B
+        l_A_o_A = np.tanh( ell * (M_dot_A/T)**n )        
+        l_A_o_B = np.tanh( ell * (M_dot_B/T)**n )
 
 
-    def O_A(self, alpha, l_0):
-        O_A = np.tanh(l_0 * ( self.d_A(alpha) )**self.n )
+        nabla_ell = ( (1 - l_A_o_A)**(2*n - 1)  *  (1 - l_A_o_A**2) * (M_dot_A/T)**n
 
-        return O_A
+                      -  (1 + l_A_o_B)**(2*n - 1)  *  (1 - l_A_o_B**2) * (M_dot_B/T)**n
+            
+        )
 
 
-    def O_B(self, alpha, l_0):
-        O_B = np.tanh(l_0 * ( self.d_B(alpha) )**self.n )
+        return nabla_ell
 
-        return O_B
+    def calc_nabla_gamma(self, alpha, ell):
 
+        A_dot_A, A_dot_B, B_dot_B, n, T, pm = self.A_dot_A, self.A_dot_B, self.B_dot_B, self.n, self.T, self.pm
+    
+        beta = self.beta(alpha)
+
+        M_dot_A = self.ReLU(alpha*A_dot_A + beta*A_dot_B)
+        M_dot_B = self.ReLU(alpha*A_dot_B + beta*B_dot_B)
+        
+        l_gamma_o_A = -np.tanh( (M_dot_A/T)**n )
+        l_gamma_o_B = -np.tanh( (M_dot_B/T)**n )
+
+
+        nabla_gamma = ( - (1 + l_gamma_o_A)**(2*n - 1)  *  (1 - l_gamma_o_A**2)  *  (M_dot_A/T)**n
+
+                        - (1 + l_gamma_o_B)**(2*n - 1)  *  (1 - l_gamma_o_B**2)  *  (M_dot_B/T)**n
+        )
+
+
+        return nabla_gamma
     
 
-    def PN_dt_alpha(self, alpha, l_0):
-        PN_dt_alpha = (l_0*(1.0 - self.O_A(alpha, l_0))**(2*self.m-1)  * (1.0 - (self.O_A(alpha, l_0))**2) * (self.d_A(alpha))**(self.n-1)
-                       + 4.0 * (1.0 + self.O_A(alpha, -1) )**(2*self.m-1) * (1.0 - (self.O_A(alpha, -1) )**2) * (self.d_A(alpha))**(self.n-1) )
-
-        return PN_dt_alpha
-
+       
     
-    def PN_dt_beta(self, alpha, l_0):
-        # There might've been a mistake + self.OB should be -self.OB
-        PN_dt_beta = (-l_0*(1.0 + self.O_B(alpha, l_0))**(2*self.m-1)  * (1.0 - (self.O_B(alpha, l_0))**2) * (self.d_B(alpha))**(self.n-1)
-                       + 4 * (1.0 + self.O_B(alpha, -1) )**(2*self.m-1) * (1.0 - (self.O_B(alpha, -1) )**2) * (self.d_B(alpha))**(self.n-1) )
+    def calc_d_alpha_dt(self, alpha, ell):
 
-        return PN_dt_beta
-
-
-    def PN_dt_l_gamma(self, alpha):
-        O_gamma_A = self.O_A(alpha, -1.0)
-        O_gamma_B = self.O_B(alpha, -1.0)
+        beta = self.beta(alpha)
         
-        return (( -1.0 - O_gamma_A )**(2*self.m-1) * ( 1.0 - O_gamma_A**2 ) * (self.d_A(alpha)) ** (self.n)
-                 + ( -1.0 - O_gamma_B )**(2*self.m-1) * ( 1.0 - O_gamma_B**2 ) * (self.d_B(alpha)) ** (self.n))
-    
-    
-    def PN_dt_l_0(self, alpha, l_0):
-        PN_dt_l_0 = ((1.0 - self.O_A(alpha, l_0))**(2*self.m-1)  * (1.0 - (self.O_A(alpha, l_0))**2) * (self.d_A(alpha))**(self.n)
-                     - (1.0 + self.O_B(alpha, l_0))**(2*self.m-1)  * (1.0 - (self.O_B(alpha, l_0))**2) * (self.d_B(alpha))**(self.n))
-        
-        return PN_dt_l_0
+        nabla_A = self.calc_nabla_A(alpha, ell)
+        nabla_B = self.calc_nabla_B(alpha, ell)
+
+        norm_qtty =  (np.abs(alpha)/alpha)  *  nabla_A  +  (np.abs(beta)/beta)  *  nabla_B
+
+        dt_alpha = ( nabla_A - alpha*(norm_qtty) ) / ( np.abs(nabla_A) + np.abs(nabla_B) )  # We are assuming norm_qtty > 0 i.e. looking only at nullclines
+
+        return dt_alpha
 
 
-    def get_dt(self, alpha, l_0):
-        PN_dt_alpha = self.PN_dt_alpha(alpha, l_0)
-        PN_dt_beta = self.PN_dt_beta(alpha, l_0)
+    def calc_d_ell_dt(self, alpha, ell):
 
-        interaction = (alpha/np.abs(alpha)) * PN_dt_alpha + (self.beta(alpha)/np.abs(self.beta(alpha)) ) * PN_dt_beta
-        
-        interaction = np.maximum(interaction, 0)
-        
-        
-        dt_alpha = PN_dt_alpha - ( interaction )*alpha
-        dt_beta = PN_dt_beta - ( interaction )*self.beta(alpha)
-                
-        
-        norm = np.abs(PN_dt_alpha) + np.abs(PN_dt_beta)#, 1)
+        # Non normalized
 
-        dt_alpha /= norm
-        dt_beta /= norm
+        nabla_ell = self.calc_nabla_ell(alpha, ell)
+        nabla_gamma = self.calc_nabla_gamma(alpha, ell)
         
-        dt_l_0 = self.PN_dt_l_0(alpha, l_0)
+        dt_ell = nabla_ell  /  np.maximum( np.abs(nabla_ell) , np.abs(nabla_gamma)  )
 
+        # deal with normalized with ell == 1 and ell = -1
+        dt_ell_sat_p = np.ones_like(dt_ell)
+        dt_ell_sat_m = np.ones_like(dt_ell)
         
-        dt_l_0 /= np.maximum(np.abs(self.PN_dt_l_gamma(alpha)), np.abs(dt_l_0))
+        dt_ell_sat_p = np.where((ell == 1) * (dt_ell >= 0), 0, 1)
+        dt_ell_sat_m = np.where((ell == -1) * (dt_ell <= 0), 0, 1)
         
-        return interaction*dt_l_0, interaction*dt_alpha
-    
+        return dt_ell, dt_ell_sat_p, dt_ell_sat_m
 
-    # The alpha nullcine when == 0
-    def alpha_nullcline(self, alpha, l_0):
-
-        PN_dt_alpha = self.PN_dt_alpha(alpha, l_0)
-        PN_dt_beta = self.PN_dt_beta(alpha, l_0)
-
-        condition = np.sign(alpha) * PN_dt_alpha + np.sign(self.beta(alpha))*PN_dt_beta
-
-        alpha_nullcline = PN_dt_alpha/alpha - PN_dt_beta/self.beta(alpha)
-        
-        #This may lead to messy plots; require to much precision :/
-        #alpha_nullcline[condition < 0] = -np.max(np.abs(alpha_nullcline)) # If it doesn't satisfy the condition set it to a suuuper high value so it never returns a nullcline!
-        
-        
-        return alpha_nullcline
-
-    
-        
-    # The l_0 nullcline when == 0
-    def l_0_nullcline(self, alpha, l_0):
-        PN_dt_l_0 = self.PN_dt_l_0(alpha, l_0)
-
-        l_0_nullcline = PN_dt_l_0
-        
-        return l_0_nullcline
