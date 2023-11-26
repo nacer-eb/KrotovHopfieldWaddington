@@ -109,8 +109,7 @@ class GatherNullClines:
         )
 
 
-        return nabla_gamma
-    
+        return nabla_gamma 
 
        
     
@@ -125,9 +124,10 @@ class GatherNullClines:
 
         dt_alpha = ( nabla_A - alpha*(norm_qtty) ) / ( np.abs(nabla_A) + np.abs(nabla_B) )  # We are assuming norm_qtty > 0 i.e. looking only at nullclines
 
-        return dt_alpha
+        return dt_alpha, norm_qtty > 0
 
 
+    
     def calc_d_ell_dt(self, alpha, ell):
 
         # Non normalized
