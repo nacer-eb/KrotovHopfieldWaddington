@@ -12,8 +12,6 @@ matplotlib.rc('font', **font)
 import matplotlib.pyplot as plt
 import matplotlib.animation as anim
 
-from nullcline_gather.GatherNullClines import *
-
 from Figure_5_functions import *
 
 
