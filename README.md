@@ -37,7 +37,7 @@ the KrotovNet class contains 15 optional parameters (see demo/ for a working exa
 
 `n_deg` is the power on the dot product; $\langle M \vert A \rangle ^n$. (DEFAULT: 30)
 
-`m_deg` is the power on the cost function. Generally, `m_deg` is set to the same value as `n_deg`.
+`m_deg` is the power on the cost function. Generally, `m_deg` is set to the same value as `n_deg`. (DEFAULT: 30)
 
 `M` is the number of training samples per miniBatchs. (DEFAULT: 1000)
 
@@ -64,6 +64,12 @@ it uses Gaussian random initial condition. (DEFAULT: None)
 `useClipping` is a boolean which specifies whether you want to use clipping on the memory. If False, memories are normalized, by dividing by the largest pixel greater than one, this is more practical analytically. (DEFAULT: False - i.e. uses normalization)
 
 #### Training, plotting and saving
+
+To train the network, use 
+
+    net.train_plot_update(3500)
+
+the only required argument is the number of epochs of training (for instance, 3500). Alternately, the following are the main optional arguments `isPlotting` plots the network at each epoch if True (DEFAULT: True), `isSaving` saves the network data (includes all epochs) if True (DEFAULT: False), `saving_dir` the directory in which to save the network (DEFAULT: None).
 
 
 ### The viewer module
