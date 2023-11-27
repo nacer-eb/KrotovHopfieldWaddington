@@ -35,7 +35,7 @@ the KrotovNet class contains 15 optional parameters (see demo/ for a working exa
 
 `Kx, Ky` define the size of your network; `Kx*Ky` is the total number of memories, individual `Kx` and `Ky` are used to plot the grid of memories.
 
-`n_deg` is the power on the dot product; $\sqrt{x}$
+`n_deg` is the power on the dot product; $\langle M \vert A \langle ^n$
 
 
 #### Training, plotting and saving
