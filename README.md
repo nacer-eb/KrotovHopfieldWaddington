@@ -14,20 +14,26 @@ Contains all the code necessary to run the network.
 
 If you are not inside the main_module directory, you must append the main_module directory to your path. For instance, if your working directory is on the same level as the main_module directory.
 
-    import sys
-    sys.path.append('../')
+```python
+import sys
+sys.path.append('../')
+```
 
 Then, use
-    
-    from main_module.KrotovV2 import *
-    
+
+```python
+from main_module.KrotovV2 import *
+```
+
 to import network class.
 
 #### Generating the network object
 
 To generate the network object, use,
 
+```python
     net = KrotovNet()
+```
     
 the KrotovNet class contains 15 optional parameters (see demo/ for a working example).
 
@@ -67,7 +73,9 @@ it uses Gaussian random initial condition. (DEFAULT: None)
 
 To train the network, use 
 
-    net.train_plot_update(3500)
+```python
+net.train_plot_update(3500)
+```
 
 the only required argument is the number of epochs of training (for instance, 3500). Alternately, the following are the main optional arguments `isPlotting` plots the network at each epoch if True (DEFAULT: True), `isSaving` saves the network data (includes all epochs) if True (DEFAULT: False), `saving_dir` the directory in which to save the network (DEFAULT: None).
 
@@ -75,8 +83,10 @@ the only required argument is the number of epochs of training (for instance, 35
 ### The viewer module
 
 If you choose to save the network data, the resulting .npz file can be read using the viewer module. 
-    
-    python KV_window.py 
+
+```bash
+python KV_window.py
+```
 
 The above (or equivalent for your python environment) starts the GUI. 
 
@@ -85,6 +95,7 @@ The above (or equivalent for your python environment) starts the GUI.
 You can open any network training file using the "Open file..." button. The player allows for jump to the beginning of training (⏮), move back by one frame (affected by speed) (⏴), play/pause (⏯), move forward by a frame (affected by speed) (⏵), or jump to the end (⏭). On the right, a slider can be used to change the speed at which training is played back.
 
 ### The nullcline module
+
 
 ### The simplified system module
 
