@@ -127,9 +127,13 @@ d_ell_dt, d_ell_dt_p_sat, d_ell_dt_m_sat = GNC.calc_d_ell_dt(alpha_mesh, l_0_mes
 ax[0].contour(l_0_mesh, alpha_mesh, d_alpha_dt, [0], colors="purple", linewidths=7, alpha=0.5)
 ax[0].contour(l_0_mesh, alpha_mesh, d_ell_dt, [0], colors="orange", linewidths=7, alpha=0.5)
 
+ax[0].set_ylabel(r"$\alpha$")
+ax[0].set_xlabel(r"$\ell$")
 
+ax[1].set_ylabel(r"$\delta\alpha$")
+ax[1].set_xlabel(r"$\delta\ell$")
 
-
+plt.subplots_adjust(top=0.952, bottom=0.114, left=0.071, right=0.963, hspace=0.2, wspace=0.4)
 plt.show()
 
 
