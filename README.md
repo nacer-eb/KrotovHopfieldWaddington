@@ -32,7 +32,7 @@ to import network class.
 To generate the network object, use,
 
 ```python
-    net = KrotovNet()
+net = KrotovNet()
 ```
     
 the KrotovNet class contains 15 optional parameters (see demo/ for a working example).
@@ -100,6 +100,6 @@ The nullcline module calculates the $\nabla$ quantities, and the time derivative
 
 ### The simplified system module
 
-The simplified system module is a more general version of the nullcline module. Unlike the nullcline module which is fixed to $ \vert \alpha_{\vert A \rangle}\vert +  \vert \alpha_{\vert B \rangle}\vert = 1$, this module compute the entire dynamics of a 1-memory system from the initial condition, hyperparameters and training data. This module is here to verify/validate the dynamics derived in the supplemental materials.
+The simplified system module is a more general version of the nullcline module. Unlike the nullcline module which is fixed to $\vert \alpha_{ \vert A \rangle } \vert + \vert \alpha_{\vert B \rangle} \vert = 1$, this module compute the entire dynamics of a 1-memory system from the initial condition, hyperparameters and training data. This module is here to verify/validate the dynamics derived in the supplemental materials.
 
 
