@@ -31,14 +31,14 @@ n = 12
 temp = 800
 
 da, dl = 0.031, -0.2 # Initial perturbation
-max_epoch = 700
+max_epoch = 600
 
 parser = argparse.ArgumentParser(description="This program runs the splitting simulations.")
 parser.add_argument('--n', help="The hyperparameter n, the power on the dot product. [DEFAULT=12]", default=12, type=int)
 parser.add_argument('--temp', help="The hyperparameter T, the 'renormalizes' the dot product. [DEFAULT=800]", default=800, type=int)
 parser.add_argument('--da', help="The initial perturbation on the memories. [DEFAULT=0.031]", default=0.031, type=float)
 parser.add_argument('--dl', help="The initial perturbation on the labels. [DEFAULT=-0.2]", default=-0.2, type=float)
-parser.add_argument('--maxepoch', help="The maxmimum epoch for which to plot and run the 2 splitting dynamics. [DEFAULT=700]", default=700, type=int)
+parser.add_argument('--maxepoch', help="The maxmimum epoch for which to plot and run the 2 splitting dynamics. [DEFAULT=600]", default=600, type=int)
 parse_args = parser.parse_args()
 
 n, temp, da, dl, max_epoch = parse_args.n, parse_args.temp, parse_args.da, parse_args.dl, parse_args.maxepoch
@@ -94,13 +94,14 @@ alphas = data_M @ data_T_inv[:, 0]
 ells = data_L[:, :, selected_digits[0]]
 
 colors = ['k', 'red']
+markers = [matplotlib.markers.CARETUPBASE, matplotlib.markers.CARETDOWNBASE]
 
 for m_i in range(2):
     ax[0].plot(ells[:, m_i], alphas[:, m_i], linewidth=3, color=colors[m_i], alpha=0.5)
-    ax[0].scatter(ells[-1, m_i], alphas[-1, m_i], s=10, color=colors[m_i])
+    ax[0].scatter(ells[-1, m_i], alphas[-1, m_i], s=70, color=colors[m_i], marker=markers[m_i])
 
 ax[1].plot((ells[:, 0] - ells[:, 1])/2.0, (alphas[:, 0] - alphas[:, 1])/2.0, linewidth=3, color="green", alpha=0.5)
-ax[1].scatter((ells[-1, 0] - ells[-1, 1])/2.0, (alphas[-1, 0] - alphas[-1, 1])/2.0, s=20, color="green")
+ax[1].scatter((ells[-1, 0] - ells[-1, 1])/2.0, (alphas[-1, 0] - alphas[-1, 1])/2.0, s=40, color="green")
 
 
 
