@@ -27,7 +27,7 @@ data_T_inv = np.linalg.pinv(data_T)
 # Loading data
 n_range = np.asarray([6, 10, 20, 30, 35, 37, 38, 40]) # You can add more n if you want, this is the strictly necessary for Fig 4
 temp = 700
-tmax = 1000
+tmax = 5000
 
 ell_range = np.asarray([-0.8, 0.8])
 alpha_range = np.asarray([0.2, 0.5, 0.8])
@@ -46,15 +46,7 @@ for i, n in enumerate(n_range):
             data_coefs[i, j, k] = data['M'] @ data_T_inv
             data_ells[i, j, k] = (data['L'][:, :, selected_digits[0]] - data['L'][:, :, selected_digits[1]])/2.0
 
-            #"""
-            epochs = np.arange(0, tmax, 1)
-
-
-            fig, ax = plt.subplots(1, 1, figsize=(16, 9))
-            ax.set_title(r'$\ell$: '+ str(ell) + r', $\alpha$: ' +str(alpha))
-            ax.scatter(epochs, data_coefs[i, j, k, :, 0, 0] + data_coefs[i, j, k, :, 0, 1], color="red", s=1)
-            plt.show()
-            #"""
+           
         
 
 
