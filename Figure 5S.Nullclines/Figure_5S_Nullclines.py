@@ -6,8 +6,6 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 
-from nullcline_gather.GatherNullClines import *
-
 from Figure_5_functions import *
 
 
