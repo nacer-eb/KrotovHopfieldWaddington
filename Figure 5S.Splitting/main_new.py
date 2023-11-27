@@ -5,6 +5,8 @@ sys.path.append('../')
 from main_module.KrotovV2 import *
 from splittingDynamics import *
 
+from nullcline_gather.GatherNullClines import *
+
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
@@ -119,9 +121,11 @@ sample_range = np.linspace(0, 1, 1000)
 l_0_mesh, alpha_mesh = np.meshgrid(sample_range*2-1, sample_range)
 
 GNC = GatherNullClines(A_dot_A, A_dot_B, B_dot_B, n, T_tilde, +1)
-print(n)
-ax[0].contour(l_0_mesh, alpha_mesh, GNC.alpha_nullcline(alpha_mesh, l_0_mesh), [0], colors="purple", linewidths=7, alpha=0.5)
-ax[0].contour(l_0_mesh, alpha_mesh, GNC.l_0_nullcline(alpha_mesh, l_0_mesh), [0], colors="orange", linewidths=7, alpha=0.5)
+d_alpha_dt, norm_condition = GNC.calc_d_alpha_dt(alpha_mesh, l_0_mesh)
+d_ell_dt, d_ell_dt_p_sat, d_ell_dt_m_sat = GNC.calc_d_ell_dt(alpha_mesh, l_0_mesh)
+
+ax[0].contour(l_0_mesh, alpha_mesh, d_alpha_dt, [0], colors="purple", linewidths=7, alpha=0.5)
+ax[0].contour(l_0_mesh, alpha_mesh, d_ell_dt, [0], colors="orange", linewidths=7, alpha=0.5)
 
 
 

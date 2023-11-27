@@ -2,7 +2,6 @@ import sys
 sys.path.append('../')
 
 from main_module.KrotovV2 import *
-from nullcline_gather.GatherNullClines import *
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -31,6 +30,10 @@ class splittingDynamics:
         self.d_delta_alpha_dt = ( self.d_alpha_p_delta_alpha_dt - self.d_alpha_m_delta_alpha_dt  )/2.0
         self.d_delta_ell_dt = ( self.d_ell_p_delta_ell_dt - self.d_ell_m_delta_ell_dt  )/2.0
         
+
+    # Near a non-trivial FP, ReLU is a bit useless...
+    def ReLU(self, x):
+        return (np.abs(x) + x)/2.0
         
     def calc_nabla_A(self, pm):
 
