@@ -18,21 +18,21 @@ from nullcline_gather.GatherNullClines import *
 
 # E here (and in general in this repo) is simply a reference to the cost function.
 def E(l_0, alpha, n, temp):
-    d_AA, d_AB, d_BB = 753/temp, 494/temp, 719/temp
+    d_AA, d_AB, d_BB = 753, 494, 719
 
     l_0 = np.clip(l_0, -1, 1)
     alpha = np.clip(alpha, -1, 1)
     
     beta=1-np.abs(alpha)
     
-    d_A = alpha * d_AA + beta * d_AB
-    d_B = alpha * d_AB + beta * d_BB
+    M_dot_A = (alpha * d_AA   +   beta * d_AB)
+    M_dot_B = (alpha * d_AB   +   beta * d_BB)
 
-    l_A_o_A = np.tanh(l_0 * d_A**n)
-    l_A_o_B = np.tanh(l_0 * d_B**n)
+    l_A_o_A = np.tanh(l_0 * (M_dot_A/temp)**n)
+    l_A_o_B = np.tanh(l_0 * (M_dot_B/temp)**n)
 
-    l_gamma_o_A = -np.tanh(d_A**n)
-    l_gamma_o_B = -np.tanh(d_B**n)
+    l_gamma_o_A = -np.tanh((M_dot_A/temp)**n)
+    l_gamma_o_B = -np.tanh((M_dot_B/temp)**n)
 
     E = 2 * np.abs(1 - l_A_o_A)**(2*n) + 2 * np.abs(1 + l_A_o_B)**(2*n) + 8 * np.abs(1 + l_gamma_o_A)**(2*n) + 8 * np.abs(1 + l_gamma_o_B)**(2*n)
 
@@ -100,12 +100,13 @@ l_0_mesh, alpha_mesh = np.meshgrid(l_range, alpha_range)
 
 n_range = np.asarray([20, 23, 24.2, 25.5]) 
 for n_i, n in enumerate(n_range):
-    GNC = GatherNullClines(753, 494, 719, n, temp/(2.0**(1.0/n)), +1)  
-    alpha_nullcline = GNC.alpha_nullcline(alpha_mesh, l_0_mesh)
-    l_nullcline = GNC.l_0_nullcline(alpha_mesh, l_0_mesh)
     
-    nullcline_axes[n_i].contour(l_0_mesh, alpha_mesh, alpha_nullcline, [0], colors="purple", linewidths=6, alpha=0.5)
-    nullcline_axes[n_i].contour(l_0_mesh, alpha_mesh, l_nullcline, [0], colors="orange", linewidths=6, alpha=0.5)
+    GNC = GatherNullClines(753, 494, 719, n, temp/(2.0**(1.0/n)), +1)  
+    d_alpha_dt, norm_condition = GNC.calc_d_alpha_dt(alpha_mesh, l_0_mesh)
+    d_ell_dt, d_ell_dt_p_sat, d_ell_dt_m_sat = GNC.calc_d_ell_dt(alpha_mesh, l_0_mesh)
+    
+    nullcline_axes[n_i].contour(l_0_mesh, alpha_mesh, d_alpha_dt, [0], colors="purple", linewidths=6, alpha=0.5)
+    nullcline_axes[n_i].contour(l_0_mesh, alpha_mesh, d_ell_dt, [0], colors="orange", linewidths=6, alpha=0.5)
 
     n_mask = data[:, 1] == n
     nullcline_axes[n_i].scatter(data[n_mask, -1][[0, np.sum(n_mask)//2, -1]], data[n_mask, -3][[0, np.sum(n_mask)//2, -1]], s=20, color="k", zorder=10)
