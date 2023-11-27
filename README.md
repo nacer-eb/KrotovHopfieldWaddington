@@ -82,7 +82,7 @@ The above (or equivalent for your python environment) starts the GUI.
 
 ![Screenshot of view_module](viewer_module/Screenshot.png)
 
-You can open any network training file using the "Open file..." button. The player allows for jump to the beginning of training (\u23ea), move back by one frame (affected by speed) (⏴), play/pause (⏯), move forward by a frame (affected by speed) (⏵), or jump to the end (⏭). On the right, a slider can be used to change the speed at which training is played back.
+You can open any network training file using the "Open file..." button. The player allows for jump to the beginning of training (⏮), move back by one frame (affected by speed) (⏴), play/pause (⏯), move forward by a frame (affected by speed) (⏵), or jump to the end (⏭). On the right, a slider can be used to change the speed at which training is played back.
 
 ### The nullcline module
 
