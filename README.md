@@ -61,7 +61,7 @@ it uses Gaussian random initial condition. (DEFAULT: None)
 
 `selected_digits` is an array which specifies the digits you want to include in the training data. (DEFAULT: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
 
-`useClipping` is a boolean which specifies whether you want to use clipping on the memory. If False, memories are normalized, by dividing by the largest pixel greater than one, this is more practical analytically. (DEFAULT: False - i.e. uses normalization)
+`useClipping` is a boolean which specifies whether you want to use clipping on the memory. If False, memories are normalized by dividing by the largest pixel greater than one, this is more practical analytically. (DEFAULT: False - i.e. uses normalization)
 
 #### Training, plotting and saving
 
@@ -73,6 +73,14 @@ the only required argument is the number of epochs of training (for instance, 35
 
 
 ### The viewer module
+
+If you choose to save the network data, the resulting .npz file can be read using the viewer module. 
+    
+    python KV_window.py 
+
+The above (or equivalent for your python environment) starts the GUI. You can open any network training file and play through training, view the training data, etc. Below a screenshot of the viewer GUI. 
+
+![Screenshot of view_module](viewer_module/Screenshot.png)
 
 ### The nullcline module
 
