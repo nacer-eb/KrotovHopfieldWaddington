@@ -4,7 +4,25 @@ Code, figures, movies, and examples for the [Waddington differentiation and sadd
 
 ## Installation
 
+To install simply
+
+    git clone https://github.com/nacer-eb/KrotovHopfieldClean.git
+    
+and
+
+    pip install numpy, matplotlib, scipy, umap-learn, tensorflow
+    
+Note that `tensorflow` is used only to fetch the MNIST data. 
+
 ## Figures
+
+The figure directories are numbered in the same order as the main paper. The directories for main Figures are written as Figure X (e.g. Figure 1). 
+Directories for Supplementary Figures are written as Figure XS.Description (e.g. Figure 5S.Nullclines is a supplementary figure based on Figure 5, which shows more nullcline examples).
+Movies follow a similar naming scheme, by adding 'M' e.g. Figure 3M contains the movie(s) based on Figure 3. 
+
+In all cases, the Figure directories contain both the Figure/Movie, the code necessary to generate the data as well as the code necessary to generate the Figures themselves. Typically, data generating code is contained in "main_gen.py". 
+
+For convenience, the figures and movies referred to in the paper are also in the Figures/ directory and the Movies/ directory.
 
 ## Modules
 
