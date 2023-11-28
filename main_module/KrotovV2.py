@@ -137,7 +137,7 @@ class KrotovNet:
             correlations = np.sum(np.abs(self.miniBatchs_images[0, 0] - self.miniBatchs_images[0, 1]))
             print(correlations, self.miniBatchs_images[0, 0]@self.miniBatchs_images[0, 0], self.miniBatchs_images[0,0]@self.miniBatchs_images[0, 1], self.miniBatchs_images[0, 1]@self.miniBatchs_images[0, 1])
 
-        
+
     def training_diversification(self, tol_min=400, tol_max=700, width_difference=10):
         # Here I make sure the two examples are different enough
         for mb in range(self.nbMiniBatchs):
@@ -153,14 +153,24 @@ class KrotovNet:
                 correlations = self.miniBatchs_images[mb]@self.miniBatchs_images[mb].T
                 cross_correlations = correlations[~np.eye(self.M, dtype=bool)] # ~ is logical not
                 widths = np.sum(self.miniBatchs_images[mb], axis=1)
-        
+
+
+    def find_closest_div(self, p):
+        q = np.floor(np.sqrt(p))
+
+        while p%q > 0:
+            q -= 1
+
+        return int(p//q), int(q)
+
+
     def show_minibatchs(self):
         for mb in range(self.nbMiniBatchs):
-            plt.imshow(merge_data(self.miniBatchs_images[mb], self.M, 1), cmap="bwr")
-            print(self.miniBatchs_images[mb]@self.miniBatchs_images[mb].T)
+            print(self.find_closest_div(self.M))
+            plt.imshow(merge_data(self.miniBatchs_images[mb], *self.find_closest_div(self.M)), cmap="bwr")
             plt.title("Training data: Minibatch number " + str(mb+1) + " out of " + str(self.nbMiniBatchs))
             plt.colorbar(location='left')
-            plt.show()     
+            plt.show()
            
     """  //////////// SPECIAL INIT FUNCTIONS - END \\\\\\\\\\\\\\\\\\\ """
 
@@ -497,13 +507,6 @@ class KrotovNet:
                 M[i, :, :] = self.visibleDetectors
                 L[i, :, :] = self.hiddenDetectors
 
-
-
-            # Remove these next few lines
-            # IMPORTANT REMOVE WHEN DONE: MAKING LAST TWO MEM AND LABELS EQUAL
-            #self.visibleDetectors[2] = self.visibleDetectors[1]
-            #self.hiddenDetectors[2] = self.hiddenDetectors[1]
-            ## End of temporary code - Boy is this dangerous
 
             self.train_cycle(self.miniBatchs_images, self.miniBatchs_labels, noiseMean, noiseStd) #Train
             
