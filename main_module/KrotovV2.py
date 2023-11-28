@@ -128,32 +128,7 @@ class KrotovNet:
 
         
                       
-    """  //////////// SPECIAL INIT FUNCTIONS \\\\\\\\\\\\\\\\\\\ """
-    def training_diversification_2(self, tol=100):
-        correlations = np.sum(np.abs(self.miniBatchs_images[0, 0] - self.miniBatchs_images[0, 1]))
-
-        while correlations > tol:
-            self.miniBatchs_images[0], self.miniBatchs_labels[0] = get_MNIST_train_partitionned(self.M, self.train_batch_images_full, self.train_batch_keys_full, self.selected_digits)
-            correlations = np.sum(np.abs(self.miniBatchs_images[0, 0] - self.miniBatchs_images[0, 1]))
-            print(correlations, self.miniBatchs_images[0, 0]@self.miniBatchs_images[0, 0], self.miniBatchs_images[0,0]@self.miniBatchs_images[0, 1], self.miniBatchs_images[0, 1]@self.miniBatchs_images[0, 1])
-
-
-    def training_diversification(self, tol_min=400, tol_max=700, width_difference=10):
-        # Here I make sure the two examples are different enough
-        for mb in range(self.nbMiniBatchs):
-            correlations = self.miniBatchs_images[mb]@self.miniBatchs_images[mb].T
-            cross_correlations = correlations[~np.eye(self.M, dtype=bool)] # ~ is logical not
-
-            widths = np.sum(self.miniBatchs_images[mb], axis=1)
-                        
-            while np.min(cross_correlations) < tol_min or np.max(cross_correlations) > tol_max or np.std(widths) > width_difference:
-                self.miniBatchs_images[mb], self.miniBatchs_labels[mb] = get_MNIST_train_partitionned(self.M, self.train_batch_images_full, self.train_batch_keys_full, self.selected_digits)
-                print("Diversification...", np.min(cross_correlations), " --- ", np.max(cross_correlations), widths, "(", np.std(widths), ")")
-
-                correlations = self.miniBatchs_images[mb]@self.miniBatchs_images[mb].T
-                cross_correlations = correlations[~np.eye(self.M, dtype=bool)] # ~ is logical not
-                widths = np.sum(self.miniBatchs_images[mb], axis=1)
-
+    """  //////////// PLOTTING THE TRAINING DATA  \\\\\\\\\\\\\\\\\\\ """
 
     def find_closest_div(self, p):
         q = np.floor(np.sqrt(p))
@@ -172,7 +147,7 @@ class KrotovNet:
             plt.colorbar(location='left')
             plt.show()
            
-    """  //////////// SPECIAL INIT FUNCTIONS - END \\\\\\\\\\\\\\\\\\\ """
+    """  //////////// PLOTTING THE TRAINING DATA - END \\\\\\\\\\\\\\\\\\\ """
 
 
     """  //////////// UTILS \\\\\\\\\\\\\\\\\\\ """
