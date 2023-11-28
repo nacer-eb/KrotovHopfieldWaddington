@@ -177,28 +177,24 @@ class KV_window:
         tk.messagebox.showinfo(title="Initial Conditions", message=ic_message)
 
 
-    # Util
-    def get_closest_to_root(self, M):
-        sqrt_M = int(np.ceil(np.sqrt(M)))
-        
-        candidates_m_1 = np.flip(np.arange(1, sqrt_M, 1))
-        
-        for m_1 in candidates_m_1:
-            if M%m_1 == 0:
-                return np.maximum(m_1, int(M/m_1)), np.minimum(m_1, int(M/m_1))
+    def find_closest_div(self, p):
+        q = np.floor(np.sqrt(p))
 
-            
+        while p%q > 0:
+            q -= 1
+
+        return int(p//q), int(q)
+
     def show_minibatchs(self, event=None):        
         M = int(self.player.meta_data[4])
         nbMiniBatchs = int(self.player.meta_data[5])
 
-        m_x, m_y = self.get_closest_to_root(M)
         for i in range(0, nbMiniBatchs):
             window_T = tk.Tk()
             window_T.wm_title("The training data")
         
             fig_T, ax_T = plt.subplots(1, figsize=(16, 9))
-            ax_T.imshow(merge_data(self.player.T_data[i], m_x, m_y), cmap="bwr", vmin=-1, vmax=1)
+            ax_T.imshow(merge_data(self.player.T_data[i], *self.find_closest_div(M)), cmap="bwr", vmin=-1, vmax=1)
 
             canvas_T = FigureCanvasTkAgg(fig_T, window_T)
             canvas_T.draw()
