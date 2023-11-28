@@ -187,6 +187,7 @@ class KrotovNet:
         return t
 
 
+    # This is one way to allow for non-integer n, m - makes no difference if n,m are integers. 
     # All 2m-1 are meant to be 'odd powers'
     def odd_power(self, a, p):
         return np.sign(a) * np.power(np.abs(a), p, dtype="double")
@@ -236,14 +237,9 @@ class KrotovNet:
             
             dV += dV_tmp
 
-        #Normalization to the -1, 1 range
-        #dV /= np.reshape(np.repeat(np.max(dV, axis=1), self.N), (self.K, self.N))
-
-        
-
-        
         return dV
-    
+
+
     # Gradient descent for the hidden layer. (Fast but ugly?)
     def hiddenLayer_train(self, v, t):
         v_ = v[0]
@@ -279,6 +275,7 @@ class KrotovNet:
         
         return dV
 
+
     # Combines gradient descent of both layers (M/L), Normalization per memory and momentum.
     def train_cycle(self, mb_v, mb_t, noiseMean, noiseStd):
 
@@ -289,37 +286,32 @@ class KrotovNet:
             
             self.dV_visibleDetectors = self.dV_visibleDetectors*self.train_momentum - tmp_dV_v
             
-            # MODIFIED THIS TO FORCE QUASISTATIC
-            for k in range(0, 1):
-                tmp_dV_h = self.hiddenLayer_train(mb_v[mb], mb_t[mb])
-                #print("t", -1*tmp_dV_h)
-                tmp_dV_h_norm = np.reshape(np.repeat(np.max(np.abs(tmp_dV_h), axis=1), self.N_C), (self.K, self.N_C))
-                
-                
-                tmp_dV_h = np.divide(tmp_dV_h, tmp_dV_h_norm, out=np.zeros_like(tmp_dV_h), where=tmp_dV_h_norm!=0) #Fixes the divergence when the reaching a stable point (norm->0)
             
-                self.dV_hiddenDetectors = self.dV_hiddenDetectors*self.train_momentum - tmp_dV_h
-
-                ##
-                #Normalization to the -1, 1 range
-                # Fixed for divergences... Kept the old version around just in case
-                V_hidden_norm_factor = np.reshape(np.repeat(np.max(np.abs(self.dV_hiddenDetectors), axis=1), self.N_C), (self.K, self.N_C))
-                
-                V_hidden = np.divide(self.dV_hiddenDetectors, V_hidden_norm_factor, out=np.zeros_like(self.dV_hiddenDetectors), where=V_hidden_norm_factor!=0)
-                #V_hidden = self.dV_hiddenDetectors/V_hidden_norm_factor 
-
-                
-                # Added noise - by default zero
-                self.hiddenDetectors += self.train_rate*V_hidden + np.random.normal(noiseMean, noiseStd, (self.K, self.N_C))
-                self.hiddenDetectors = np.clip(self.hiddenDetectors, -1., 1.)
+            tmp_dV_h = self.hiddenLayer_train(mb_v[mb], mb_t[mb])
+            tmp_dV_h_norm = np.reshape(np.repeat(np.max(np.abs(tmp_dV_h), axis=1), self.N_C), (self.K, self.N_C))
+            
+            tmp_dV_h = np.divide(tmp_dV_h, tmp_dV_h_norm, out=np.zeros_like(tmp_dV_h), where=tmp_dV_h_norm!=0) #Fixes the divergence when the reaching a stable point (norm->0)
+            
+            self.dV_hiddenDetectors = self.dV_hiddenDetectors*self.train_momentum - tmp_dV_h
+            
+            ##
+            #Normalization to the -1, 1 range
+            # Fixed for divergences... 
+            V_hidden_norm_factor = np.reshape(np.repeat(np.max(np.abs(self.dV_hiddenDetectors), axis=1), self.N_C), (self.K, self.N_C))
+            
+            V_hidden = np.divide(self.dV_hiddenDetectors, V_hidden_norm_factor, out=np.zeros_like(self.dV_hiddenDetectors), where=V_hidden_norm_factor!=0)
+            
+            
+            # Added noise - by default zero
+            self.hiddenDetectors += self.train_rate*V_hidden + np.random.normal(noiseMean, noiseStd, (self.K, self.N_C))
+            self.hiddenDetectors = np.clip(self.hiddenDetectors, -1., 1.)
                 
             
             ##
             #Normalization to the -1, 1 range
-            # Fixed for divergences... Kept the old version around just in case
+            # Fixed for divergences... 
             V_visible_norm_factor = np.reshape(np.repeat(np.max(np.abs(self.dV_visibleDetectors), axis=1), self.N), (self.K, self.N))
             V_visible = np.divide(self.dV_visibleDetectors, V_visible_norm_factor, out=np.zeros_like(self.dV_visibleDetectors), where=V_visible_norm_factor!=0)
-            #V_visible = self.dV_visibleDetectors/V_visible_norm_factor
 
             # Added noise - by default zero
             self.visibleDetectors += self.train_rate*V_visible + np.random.normal(noiseMean, noiseStd, (self.K, self.N))
@@ -329,7 +321,6 @@ class KrotovNet:
             if self.useClipping:
                 # THE CLIPPING METHOD:
                 self.visibleDetectors = np.clip(self.visibleDetectors, -1., 1.)
-                # self.hiddenDetectors = np.clip(self.hiddenDetectors, -1., 1.)
 
             else:
                 # THE LINEAR-CONSERVATION METHOD ONLY APPLIES TO MEMORIES:
@@ -339,13 +330,9 @@ class KrotovNet:
                 norm_v = np.repeat(norm_v, np.shape(self.visibleDetectors)[-1], -1)
                 
                 self.visibleDetectors = np.divide(self.visibleDetectors, norm_v)
-                #self.hiddenDetectors = np.divide(self.hiddenDetectors, norm_h)
+
             
             
-            
-            #print(mb, end=', ')
-        #print('Done')
-        
     """  //////////// TRAINING - END \\\\\\\\\\\\\\\\\\\ """
 
 
@@ -394,7 +381,7 @@ class KrotovNet:
             print("Training batch score:", test_batch_score)
     
 
-    def train_plot_update(self, epochs, isPlotting=True, isSaving=False, saving_dir=None, testFreq=100, testingRegiment=[1, 0, 0], isDecay=False, id_mem=None, noiseMean=0, noiseStd=0):
+    def train_plot_update(self, epochs, isPlotting=True, isSaving=False, saving_dir=None, testFreq=100, testingRegiment=[1, 0, 0], isDecay=False, noiseMean=0, noiseStd=0):
         """
         Train & Plot function.
         Trains the network and plots it. It also allows you to test the network on the various digits batchs as per the testingRegiment parameter.
@@ -408,13 +395,10 @@ class KrotovNet:
         testingRegiment (int[3]) : How large the testing pool; [Test with the miniBatchs y/n? (0, 1) (BOOL), Effective test batch size to test on, Effective train batch size to test on]
         
         @return
-        
         """
 
-        # Space saver : using empty? garbagecollector could help or break ... not risking it yet.
-
         
-        # Makes sure the mnist_data_dir exists else creates it.
+        # Makes sure the saving_dir exists else creates it.
         if not saving_dir is None:
             if not path.exists(os.path.dirname(saving_dir)):
                 print(os.path.dirname(saving_dir), "Does not exist. It will be created ...")
@@ -434,21 +418,7 @@ class KrotovNet:
             fig, ax = plt.subplots(1, 1, figsize=(16, 9))        
             im = ax.imshow(merge_data(self.visibleDetectors, self.Kx, self.Ky), cmap="bwr", vmin=-1, vmax=1) #Plots
 
-        i_end = 0
         for i in range(0, epochs):
-
-            # This is cool - generally not implemented only in special**2 cases
-            # Forcing memories to be identical
-            if id_mem is not None:
-                for d in id_mem[1:]:
-                    self.visibleDetectors[d] = self.visibleDetectors[id_mem[0]]
-                    self.hiddenDetectors[d] = self.hiddenDetectors[id_mem[0]]
-            
-            i_end += 1
-            #if i%20 == 0 and True: # Removed, too verbose
-            #print("-> %d / %d" % (i, epochs) )
-            #print("Rank: ", np.linalg.matrix_rank(self.visibleDetectors), np.linalg.matrix_rank(self.hiddenDetectors))
-            
             if isDecay:
                 decayRate = 0.998
                 self.train_rate *= decayRate
@@ -470,21 +440,19 @@ class KrotovNet:
             self.train_cycle(self.miniBatchs_images, self.miniBatchs_labels, noiseMean, noiseStd) #Train
             
             
-
-                
-        print(i_end)   
+ 
         if isPlotting:
             plt.cla()
             plt.clf()
             plt.close()
         
-        # Before saving I want to reset the train_rate to what it was before training
+        # Before saving I want to reset the train_rate to what it was before training 
         if isDecay:
             self.train_rate /= np.power(decayRate, epochs, dtype="double")
 
         if isSaving:
             print("Saving to", saving_dir, "...")
-            np.savez_compressed(saving_dir, init_array=self.get_init_array(), selected_digits=self.selected_digits, M=M[:i_end], L=L[:i_end], miniBatchs_images=self.miniBatchs_images, miniBatchs_labels=self.miniBatchs_labels)
+            np.savez_compressed(saving_dir, init_array=self.get_init_array(), selected_digits=self.selected_digits, M=M, L=L, miniBatchs_images=self.miniBatchs_images, miniBatchs_labels=self.miniBatchs_labels)
             print("Save completed.")
 
             
