@@ -3,37 +3,36 @@ import numpy as np
 class GatherNullClines:
     def __init__(self, A_dot_A, A_dot_B, B_dot_B, n, T, pm):
 
-
         self.A_dot_A, self.A_dot_B, self.B_dot_B, self.n, self.T, self.pm = A_dot_A, A_dot_B, B_dot_B, n, T, pm
         self.m = n # by default.
 
     
     # I use beta here, but this is the same as alpha_B, and alpha_A = alpha.
-    def beta(self, alpha):
+    def alpha_B(self, alpha_A):
         if self.pm == 1:
-            return 1 - np.abs(alpha)
+            return 1 - np.abs(alpha_A)
 
         if self.pm == -1:
-            return -1 + np.abs(alpha)
+            return -1 + np.abs(alpha_A)
 
         # else
         print("Garbage in, garbage out. pm was set to", pm, "it should be either +1 or -1 and represents the sign of beta.")
         exit(-1)
 
 
-    # In case you're in a weird region of the (alpha,beta)-space
-    # For now not used; I assume you don't run this when both alpha and beta are negative
+    # In case you're in a weird region of the (alpha_A, alpha_B)-space
     def ReLU(self, x):
         return (np.abs(x) + x)/2.0
 
 
-    def calc_nabla_A(self, alpha, ell):
+    # Todo: remove references to beta and replace with alpha_A and alpha_B
+    def calc_nabla_A(self, alpha_A, ell):
 
         A_dot_A, A_dot_B, B_dot_B, n, T, pm = self.A_dot_A, self.A_dot_B, self.B_dot_B, self.n, self.T, self.pm
 
-        beta = self.beta(alpha)
+        alpha_B = self.alpha_B(alpha_A)
 
-        M_dot_A = self.ReLU(alpha*A_dot_A + beta*A_dot_B)
+        M_dot_A = self.ReLU(alpha_A*A_dot_A + alpha_B*A_dot_B)
         
         l_A_o_A = np.tanh( ell * (M_dot_A/T)**n )
         l_gamma_o_A = -np.tanh( (M_dot_A/T)**n )
@@ -46,14 +45,14 @@ class GatherNullClines:
 
         return nabla_A
 
-
-    def calc_nabla_B(self, alpha, ell):
+        
+    def calc_nabla_B(self, alpha_A, ell):
 
         A_dot_A, A_dot_B, B_dot_B, n, T, pm = self.A_dot_A, self.A_dot_B, self.B_dot_B, self.n, self.T, self.pm
 
-        beta = self.beta(alpha)
+        alpha_B = self.alpha_B(alpha_A)
 
-        M_dot_B = self.ReLU(alpha*A_dot_B + beta*B_dot_B)
+        M_dot_B = self.ReLU(alpha_A*A_dot_B + alpha_B*B_dot_B)
         
         l_A_o_B = np.tanh( ell * (M_dot_B/T)**n )
         l_gamma_o_B = -np.tanh( (M_dot_B/T)**n )
@@ -67,15 +66,15 @@ class GatherNullClines:
         return nabla_B
 
 
-    def calc_nabla_ell(self, alpha, ell):
+    def calc_nabla_ell(self, alpha_A, ell):
         
         A_dot_A, A_dot_B, B_dot_B, n, T, pm = self.A_dot_A, self.A_dot_B, self.B_dot_B, self.n, self.T, self.pm
     
-        beta = self.beta(alpha)
+        alpha_B = self.alpha_B(alpha_A)
 
         
-        M_dot_A = self.ReLU(alpha*A_dot_A + beta*A_dot_B)
-        M_dot_B = self.ReLU(alpha*A_dot_B + beta*B_dot_B)
+        M_dot_A = self.ReLU(alpha_A*A_dot_A + alpha_B*A_dot_B)
+        M_dot_B = self.ReLU(alpha_A*A_dot_B + alpha_B*B_dot_B)
 
         l_A_o_A = np.tanh( ell * (M_dot_A/T)**n )        
         l_A_o_B = np.tanh( ell * (M_dot_B/T)**n )
@@ -90,14 +89,14 @@ class GatherNullClines:
 
         return nabla_ell
 
-    def calc_nabla_gamma(self, alpha, ell):
+    def calc_nabla_gamma(self, alpha_A, ell):
 
         A_dot_A, A_dot_B, B_dot_B, n, T, pm = self.A_dot_A, self.A_dot_B, self.B_dot_B, self.n, self.T, self.pm
     
-        beta = self.beta(alpha)
+        alpha_B = self.alpha_B(alpha_A)
 
-        M_dot_A = self.ReLU(alpha*A_dot_A + beta*A_dot_B)
-        M_dot_B = self.ReLU(alpha*A_dot_B + beta*B_dot_B)
+        M_dot_A = self.ReLU(alpha_A*A_dot_A + alpha_B*A_dot_B)
+        M_dot_B = self.ReLU(alpha_A*A_dot_B + alpha_B*B_dot_B)
         
         l_gamma_o_A = -np.tanh( (M_dot_A/T)**n )
         l_gamma_o_B = -np.tanh( (M_dot_B/T)**n )
@@ -113,27 +112,28 @@ class GatherNullClines:
 
        
     
-    def calc_d_alpha_dt(self, alpha, ell):
+    def calc_d_alpha_dt(self, alpha_A, ell):
 
-        beta = self.beta(alpha)
+        alpha_B = self.alpha_B(alpha_A)
         
-        nabla_A = self.calc_nabla_A(alpha, ell)
-        nabla_B = self.calc_nabla_B(alpha, ell)
+        nabla_A = self.calc_nabla_A(alpha_A, ell)
+        nabla_B = self.calc_nabla_B(alpha_A, ell)
 
-        norm_qtty =  (np.abs(alpha)/alpha)  *  nabla_A  +  (np.abs(beta)/beta)  *  nabla_B
 
-        dt_alpha = ( nabla_A - alpha*(norm_qtty) ) / ( np.abs(nabla_A) + np.abs(nabla_B) )  # We are assuming norm_qtty > 0 i.e. looking only at nullclines
+        norm_qtty =  (np.abs(alpha_A)/alpha_A)  *  nabla_A  +  (np.abs(alpha_B)/alpha_B)  *  nabla_B
+
+        dt_alpha = ( nabla_A - alpha_A*(norm_qtty) ) / ( np.abs(nabla_A) + np.abs(nabla_B) )  # We are assuming norm_qtty > 0 i.e. looking only at nullclines
 
         return dt_alpha, norm_qtty > 0
 
 
     
-    def calc_d_ell_dt(self, alpha, ell):
+    def calc_d_ell_dt(self, alpha_A, ell):
 
         # Non normalized
 
-        nabla_ell = self.calc_nabla_ell(alpha, ell)
-        nabla_gamma = self.calc_nabla_gamma(alpha, ell)
+        nabla_ell = self.calc_nabla_ell(alpha_A, ell)
+        nabla_gamma = self.calc_nabla_gamma(alpha_A, ell)
         
         dt_ell = nabla_ell  /  np.maximum( np.abs(nabla_ell) , np.abs(nabla_gamma)  )
 
