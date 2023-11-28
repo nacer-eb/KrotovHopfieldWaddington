@@ -116,8 +116,8 @@ You can open any network training file using the "Open file..." button. The play
 
 The nullcline module calculates the $\nabla$ quantities, and the time derivative. An example of how to plot the nullclines using countour plots is included in the same directory. Note that the nullclince module is used only for the first saddles; the final states of the 1-memory system. 
 
-### The simplified system module
+### The single_memory_dynamics module
 
-The simplified system module is a more general version of the nullcline module. Unlike the nullcline module which is fixed to $\vert \alpha_{ \vert A \rangle } \vert + \vert \alpha_{\vert B \rangle} \vert = 1$, this module compute the entire dynamics of a 1-memory system from the initial condition, hyperparameters and training data. This module is here to verify/validate the dynamics derived in the supplemental materials.
+This is a more general version of the nullcline module. Unlike the nullcline module which is fixed to $\vert \alpha_{ \vert A \rangle } \vert + \vert \alpha_{\vert B \rangle} \vert = 1$, this module compute the entire dynamics of a 1-memory system from the initial condition, hyperparameters and training data. This module is here to verify/validate the dynamics derived in the supplemental materials. Note for simplicity this module assumes $\ell_{\gamma} = -1$ for initial conditions, but may be generalized.
 
 
