@@ -114,7 +114,7 @@ class KrotovNet:
     """  //////////// SET METHODS - End \\\\\\\\\\\\\\\\\\\ """
 
 
-    
+    # This method recreates a network from a previous save, you can also choose the epoch at which to initiate
     def load_net(self, filename, epoch=0):
         data = np.load(filename)
         
@@ -169,22 +169,6 @@ class KrotovNet:
         
         return init_array
 
-    def save_txt_init_array(self, data_dir, sim_name):
-        init_array = self.get_init_array()
-        np.savetxt(data_dir+"/"+sim_name+".initarray", init_array, delimiter=",")
-
-    def save_txt_visible_detectors(self, data_dir, sim_name):
-        np.savetxt(data_dir+"/"+sim_name+".visible_detectors", self.visibleDetectors, delimiter=",")
-
-
-    def save_txt_hidden_detectors(self, data_dir, sim_name):
-        np.savetxt(data_dir+"/"+sim_name+".hidden_detectors", self.hiddenDetectors, delimiter=",")
-
-    def save_txt_miniBatchs(self, data_dir, sim_name):
-        for mb in range(self.nbMiniBatchs):
-            np.savetxt(data_dir+"/"+sim_name+".miniBatchs_images_"+str(mb), self.miniBatchs_images[mb], delimiter=",")
-            np.savetxt(data_dir+"/"+sim_name+".miniBatchs_labels_"+str(mb), self.miniBatchs_labels[mb], delimiter=",")
-    
     
     # The Rectified Polynomial
     def f_n(self, x, n):
