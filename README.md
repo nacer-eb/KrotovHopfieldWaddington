@@ -1,4 +1,4 @@
-# Generalized Hopfield Network + Waddington differentiation
+# Generalized Hopfield Network + Waddington
 
 Code, figures, movies, and examples for the [Waddington differentiation and saddle bifurcation for prototype learning](https://arxiv.org/) paper. 
 
