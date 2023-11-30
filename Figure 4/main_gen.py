@@ -20,7 +20,7 @@ prefix = str(selected_digits)+"/"
 # The number of processes to run in parralel, defaults to 1
 poolsize = 1
 
-parser = argparse.ArgumentParser(description="This program runs the simulations for Figure 1.")
+parser = argparse.ArgumentParser(description="This program runs the simulations for Figure 4.")
 parser.add_argument('--poolsize', help="The number of processes to run at once. [DEFAULT=1]", default=1, type=int)
 parse_args = parser.parse_args()
 
@@ -46,10 +46,11 @@ def single_n(nT_merge):
 
     net.miniBatchs_images[0] = data_T[train_mask]
 
-    
+
+    # Saves initial conditions in case we need to debug
     net.train_plot_update(1, isPlotting=False, isSaving=True, saving_dir=data_dir+prefix+"trained_net_ic_n"+str(n)+"_T"+str(temp)+".npz", testFreq=500)
 
-    # 3500 seems to be good enough and saves space
+     # Trains the network - 3500 seems to be good enough and saves space 
     net.train_plot_update(3500, isPlotting=False, isSaving=True, saving_dir=data_dir+prefix+"trained_net_n"+str(n)+"_T"+str(temp)+".npz", testFreq=500)
     
     # This needs a fix 
