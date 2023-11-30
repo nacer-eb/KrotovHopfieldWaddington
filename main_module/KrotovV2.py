@@ -365,6 +365,12 @@ class KrotovNet:
 
 
     def output_test_results(self, testingRegiment):
+        """
+        Compute and Output the test results
+        
+        @params
+        testingRegiment (int[3]) : How large the testing pool; [Test with the miniBatchs y/n? (0, 1) (BOOL), Effective test batch size to test on, Effective train batch size to test on]
+        """
         if testingRegiment[0] > 0:
             print("Minibatchs score: ")
             for mb in range(0, self.nbMiniBatchs):
@@ -393,7 +399,10 @@ class KrotovNet:
         saving_dir (String) : Where to save the network. (DFLT: None)
         testFreq (int) : How frequently to test the network. (DFLT: 50)
         testingRegiment (int[3]) : How large the testing pool; [Test with the miniBatchs y/n? (0, 1) (BOOL), Effective test batch size to test on, Effective train batch size to test on]
-        
+        isDecay (Boolean): Do you want your training rate to decay? Would do so by a factor of 0.998 per epoch. [DFLT: False]
+        noiseMean (float) : The mean noise you want to add at each training epoch [DFLT: 0].
+        noiseStd (float) : The standard deviation of the noise you want to add at each training epoch [DFLT: 0].
+
         @return
         """
 
