@@ -129,15 +129,3 @@ def merge_data(initial_data, Kx, Ky):
 
     return merged_data
 
-def merge_data_v2(initial_data, Kx, Ky):
-    merged_data = np.zeros((28*Ky, 28*Kx))
-
-    for i in range(0, Kx):
-        for j in range(0, Ky):
-            merged_data[28*i: 28*(i+1), 28*j: 28*(j+1)] = initial_data.reshape(Kx, Ky, 28, 28)[i, j]
-    
-    return merged_data
-
-
-def rectified_poly(x, n):
-        return np.power((x + np.abs(x))/2.0, n)
