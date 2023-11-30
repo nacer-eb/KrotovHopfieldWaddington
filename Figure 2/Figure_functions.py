@@ -34,7 +34,7 @@ umap_model = "../defaults/umap_model_correlation.sav"
 data_T = np.load(dataset)[0]
 data_T_inv = np.linalg.pinv(data_T)
 
-isFirstRun = True # If you turn this to false it uses the preloaded data (faster)
+isFirstRun = True # If you turn this to false it uses the preloaded data (faster, but you need to run True at least once)
 if isFirstRun:
     for h, temp in enumerate(temp_range):
         for i, n in enumerate(n_range):
@@ -147,7 +147,7 @@ def plot_mem_samples(ax, t_i, n_i, samples=np.random.randint(0, 100, 8)):
 
 
 
-import pickle
+import pickle 
 import umap
 
 M = len(data_T)
