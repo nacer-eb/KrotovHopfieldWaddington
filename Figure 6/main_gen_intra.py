@@ -10,14 +10,14 @@ from main_module.KrotovV2 import *
 data_dir = "data/"
 
 # The digit classes to include in the training
-selected_digits = [4, 4]  # Do I need duplicate here?
+selected_digits = [4, 4]  # Again these should be the same as the first digit in the intercase, because of how my plotting code is written
 prefix = str(selected_digits)+"_intra/"
  
 
 # The number of processes to run in parralel, defaults to 1
 poolsize = 1
 
-parser = argparse.ArgumentParser(description="This program runs the simulations for Figure 1.")
+parser = argparse.ArgumentParser(description="This program runs the simulations for Figure 8.")
 parser.add_argument('--poolsize', help="The number of processes to run at once. [DEFAULT=1]", default=1, type=int)
 parse_args = parser.parse_args()
 
@@ -31,13 +31,18 @@ def single_n(nT_merge):
     print(n, temp)
     
     net = KrotovNet(Kx=1, Ky=1, n_deg=n, m_deg=n, M=2, nbMiniBatchs=1, momentum=0*0.6, rate=0.001, temp=temp, rand_init_mean=-0.003, rand_init_std=initial_noise, selected_digits=selected_digits)
-            
-           
+    
+    
     net.miniBatchs_images[0] = np.load(data_dir+prefix+"miniBatchs_images.npy")[0]
     
-    
+
+    # Save initial conditions for debugging (just in case)
     net.train_plot_update(1, isPlotting=False, isSaving=True, saving_dir=data_dir+prefix+"trained_net_ic_n"+str(n)+"_T"+str(temp)+".npz", testFreq=500)
+
+    # Train the network
     net.train_plot_update(10000, isPlotting=False, isSaving=False, saving_dir=data_dir+prefix+"trained_net_n"+str(n)+"_T"+str(temp)+".npz", testFreq=500)
+
+    # Save the final state
     net.train_plot_update(1, isPlotting=False, isSaving=True, saving_dir=data_dir+prefix+"trained_net_end_n"+str(n)+"_T"+str(temp)+".npz", testFreq=500)
     
     
@@ -84,7 +89,7 @@ if __name__ == '__main__':
                         temp=600, rand_init_mean=-0.001, rand_init_std=0.01, selected_digits=selected_digits)
         np.save(data_dir+prefix+"miniBatchs_images.npy", net.miniBatchs_images);
 
-    # The number of cores should be changeable
+    # Multiprocessing run 
     with Pool(poolsize) as p:
         p.map(single_n, nT_merge)
 

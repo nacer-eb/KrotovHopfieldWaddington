@@ -11,13 +11,13 @@ from main_module.KrotovV2 import *
 data_dir = "data/"
 
 # The digit classes to include in the training
-selected_digits = [4, 9]
+selected_digits = [4, 9] # It's important (because of how my code is written) that the first class is the same as the class used in the intra case.
 prefix = str(selected_digits)+"_mean_inter/"
 
 # The number of processes to run in parralel, defaults to 1
 poolsize = 1
 
-parser = argparse.ArgumentParser(description="This program runs the simulations for Figure 1.")
+parser = argparse.ArgumentParser(description="This program runs the simulations for Figure 8.")
 parser.add_argument('--poolsize', help="The number of processes to run at once. [DEFAULT=1]", default=1, type=int)
 parse_args = parser.parse_args()
 
@@ -32,20 +32,33 @@ def single_n(nT_merge):
     
     net = KrotovNet(Kx=2, Ky=1, n_deg=n, m_deg=n, M=2, nbMiniBatchs=1, momentum=0*0.6, rate=0.001,
                     temp=temp, rand_init_mean=-0.003, rand_init_std=initial_noise, selected_digits=selected_digits)
-            
-        
+    
+
+    # Load the training dataset
     net.miniBatchs_images = np.load(data_dir+prefix+"miniBatchs_images.npy")
 
+
+    # Initial conditions
     net.hiddenDetectors[:, :] = -1
+
+    # Initialize the memories as each near a different digit, helps make the analysis code simpler, but has no effect on the results (we tried it with fully random conditions)
     net.visibleDetectors[0, :] = 0.5*net.miniBatchs_images[0, 0] - 0.2*net.miniBatchs_images[0, 1]
     net.visibleDetectors[1, :] = 0.5*net.miniBatchs_images[0, 1] - 0.2*net.miniBatchs_images[0, 0]
 
+    # Same for the Labels
     net.hiddenDetectors[0, net.selected_digits[0]] = 1; net.hiddenDetectors[1, net.selected_digits[1]] = 1
 
+
+
+    # Save initial conditons for debugging
     net.train_plot_update(1, isPlotting=False, isSaving=True, saving_dir=data_dir+prefix+"trained_net_ic_n"+str(n)+"_T"+str(temp)+".npz", testFreq=500)
+
+    # Train the network
     net.train_plot_update(10000, isPlotting=False, isSaving=False, saving_dir=data_dir+prefix+"trained_net_n"+str(n)+"_T"+str(temp)+".npz", testFreq=500)
+
+    # Save the final state for the analysis
     net.train_plot_update(1, isPlotting=False, isSaving=True, saving_dir=data_dir+prefix+"trained_net_end_n"+str(n)+"_T"+str(temp)+".npz", testFreq=500)
-    
+
 
 
 
@@ -82,7 +95,7 @@ if __name__ == '__main__':
         details_file.write(details)               
 
     
-
+    # If this is the first run and the training data doesn't exist, creates it!
     if not os.path.isfile(data_dir+prefix+"miniBatchs_images.npy"):
         net = KrotovNet(Kx=1, Ky=1, n_deg=30, m_deg=30, M=2*50, nbMiniBatchs=1, momentum=0*0.6, rate=0.001, temp=600,
                         rand_init_mean=-0.001, rand_init_std=0.01, selected_digits=selected_digits)
@@ -94,7 +107,7 @@ if __name__ == '__main__':
 
         np.save(data_dir+prefix+"miniBatchs_images.npy", miniBatchs_images_mean);
 
-    # The number of cores should be changeable
+    # Creates the pool for multiprocessing
     with Pool(poolsize) as p:
         p.map(single_n, nT_merge)
 
