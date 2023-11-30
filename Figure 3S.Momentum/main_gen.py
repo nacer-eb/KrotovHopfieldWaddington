@@ -20,7 +20,7 @@ prefix = str(selected_digits)+"/"
 # The number of processes to run in parralel, defaults to 1
 poolsize = 1
 
-parser = argparse.ArgumentParser(description="This program runs the simulations for Figure 1.")
+parser = argparse.ArgumentParser(description="This program runs the simulations for Figure 3.")
 parser.add_argument('--poolsize', help="The number of processes to run at once. [DEFAULT=1]", default=1, type=int)
 parse_args = parser.parse_args()
 
