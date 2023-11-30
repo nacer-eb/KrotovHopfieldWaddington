@@ -15,7 +15,12 @@ if not path.exists(mnist_data_dir):
     os.mkdir(mnist_data_dir)
     print(mnist_data_dir, "Created!")
 
+
 def get_MNIST_train_images():
+    """
+    Fetchs all the training images in MNIST
+    """
+
     filename = mnist_data_dir + "/mnist_train_images.npy"
 
     if not path.exists(filename):
@@ -33,6 +38,10 @@ def get_MNIST_train_images():
 
 
 def get_MNIST_train_labels():
+    """
+    Fetchs all the training labels (actually keys) in MNIST
+    """
+
     filename = mnist_data_dir + "/mnist_train_labels.npy"
 
     if not path.exists(filename):
@@ -50,6 +59,10 @@ def get_MNIST_train_labels():
     
 
 def get_MNIST_test_images():
+    """
+    Fetchs all the test images in MNIST
+    """
+
     filename = mnist_data_dir + "/mnist_test_images.npy"
     
     if not path.exists(filename):
@@ -67,6 +80,10 @@ def get_MNIST_test_images():
 
 
 def get_MNIST_test_labels():
+    """
+    Fetchs all the test labels (actually keys) in MNIST
+    """
+
     filename = mnist_data_dir + "/mnist_test_labels.npy"
 
     if not path.exists(filename):
@@ -83,6 +100,10 @@ def get_MNIST_test_labels():
     return MNIST_test_labels
 
 def get_MNIST_train_partitionned(totalPartitionSize, train_images, train_labels, selected_digits, randomize=False):
+    """
+    Fetchs all the training images and labels that are randomly sampled and partitioned i.e. same number of each class.
+    """
+
     digits_dims = len(selected_digits)
     sample_size = totalPartitionSize//digits_dims
         
@@ -120,6 +141,10 @@ def get_MNIST_train_partitionned(totalPartitionSize, train_images, train_labels,
 
 
 def merge_data(initial_data, Kx, Ky):
+    """
+    Plots a (Kx*Ky, 784) array of memories into a Kx, Ky images.
+    """
+
     merged_data = np.zeros((28*Ky, 28*Kx))
     
     for k in range(0, Ky):
