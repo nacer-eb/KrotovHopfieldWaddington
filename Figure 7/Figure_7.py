@@ -31,7 +31,7 @@ data_Ms = np.zeros((N_runs, len(temp_range), len(n_range), 3, N_mem, 784))
 data_M_saddles = np.zeros((len(temp_range), len(n_range), 3, 784))
 data_Ls = np.zeros((N_runs, len(temp_range), len(n_range), 3, N_mem, 10))
 
-isFirstRun = False # Set this to True if you've already preloaded files
+isFirstRun = True # Set this to False if you've already preloaded files
 
 # Loads files and saves a preload
 if isFirstRun:
