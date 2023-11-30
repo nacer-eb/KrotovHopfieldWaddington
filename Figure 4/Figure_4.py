@@ -62,7 +62,7 @@ class Figure_4_panel:
             self.indices[i] =  all_indices[np.random.randint(len(all_indices))] # -> Pick randomly when Label is mostly # digit class i//2 $
         self.indices = np.asarray(self.indices, dtype=int)
 
-        # Use the time stamps file or manually get timestamps from UMAP movies.
+        # Use the time stamps or manually get timestamps from UMAP movies.
         # Handpicked, notice this is /10 because of the UMAP timesteps
         self.t_s = t_s
         self.t_samples = np.asarray(self.t_s)*10

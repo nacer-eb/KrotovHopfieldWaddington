@@ -61,7 +61,7 @@ def generate_umap_embedding(data_dir, prefix, n, temp, isUMAPObjAlreadyGenerated
     if not verbose:
        return;
 
-   # else
+    # else
     M_embedding = np.load(data_dir+prefix+"memory_umap_embed_correlation_n"+str(n)+"_T"+str(temp)+".npy")
     t = 0 
     pts, = ax.plot(M_embedding[t, :, 0], M_embedding[t, :, 1], marker=".", markersize=5, linestyle="", color="k")
@@ -73,6 +73,6 @@ def generate_umap_embedding(data_dir, prefix, n, temp, isUMAPObjAlreadyGenerated
         text.set_text("t="+str(t)) 
         return pts, text,
 
-    ani = anim.FuncAnimation(fig, update, frames=len(M_embedding)-2, interval=100, blit=True, repeat=False)
+    ani = anim.FuncAnimation(fig, update, frames=len(M_embedding)-2, interval=100, blit=True, repeat=False) # This crashes sometimes not sure why...
     ani.save(data_dir+prefix+"UMAP_movie_n"+str(n)+"_T"+str(temp)+".mp4", writer="ffmpeg")
 

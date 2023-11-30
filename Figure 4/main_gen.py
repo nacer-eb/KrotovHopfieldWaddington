@@ -34,8 +34,8 @@ def single_n(nT_merge):
     print(n, temp)
     
     net = KrotovNet(Kx=10, Ky=10, n_deg=n, m_deg=n, M=20*len(selected_digits), nbMiniBatchs=1, momentum=0*0.6, rate=0.005, temp=temp, rand_init_mean=-0.003, rand_init_std=initial_noise, selected_digits=selected_digits)
-            
-        
+    
+    
     # Taking only the digits we need from the full training set
     data_T = np.load(dataset)[0]
     train_mask = np.zeros(200)
@@ -53,7 +53,7 @@ def single_n(nT_merge):
      # Trains the network - 3500 seems to be good enough and saves space 
     net.train_plot_update(3500, isPlotting=False, isSaving=True, saving_dir=data_dir+prefix+"trained_net_n"+str(n)+"_T"+str(temp)+".npz", testFreq=500)
     
-    # This needs a fix 
+    # This crashes sometimes but still saves... (if it crashes before saving see the README for known issues/fixes)
     generate_umap_embedding(data_dir, prefix, n, temp, verbose=True)
     
 
