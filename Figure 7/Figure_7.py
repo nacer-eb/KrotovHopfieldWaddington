@@ -31,9 +31,10 @@ data_Ms = np.zeros((N_runs, len(temp_range), len(n_range), 3, N_mem, 784))
 data_M_saddles = np.zeros((len(temp_range), len(n_range), 3, 784))
 data_Ls = np.zeros((N_runs, len(temp_range), len(n_range), 3, N_mem, 10))
 
-isFirstRun = False
-if isFirstRun:
+isFirstRun = False # Set this to True if you've already preloaded files
 
+# Loads files and saves a preload
+if isFirstRun:
     for i, temp in enumerate(temp_range):
         for j, n in enumerate(n_range):
             for k in range(3):
@@ -58,27 +59,32 @@ if isFirstRun:
                     
         print(temp)
 
+    # Saves Preload
     np.save(data_dir+prefix+"data_Ms.npy", data_Ms)
     np.save(data_dir+prefix+"data_M_saddles.npy", data_M_saddles)
     np.save(data_dir+prefix+"data_Ls.npy", data_Ls)
 
 
-# Then
+# Then loads the "preload"
 data_Ms = np.load(data_dir+prefix+"data_Ms.npy")
 data_M_saddles = np.load(data_dir+prefix+"data_M_saddles.npy")
 data_Ls = np.load(data_dir+prefix+"data_Ls.npy")
 
+# Loads the training data (uses the default training miniBatch)
 data_T = np.load(data_dir+prefix+"miniBatchs_images.npy")[0]
 data_T_inv = np.linalg.pinv(data_T)
 
-
+# Gets coefficients using the inverse
 data_M_saddles_coefs = data_M_saddles@data_T_inv
 
-
+# Obtain marginal coefficients
 data_M_saddles_coefs = (data_M_saddles_coefs.reshape(len(temp_range), len(n_range), 3, 10, 20)).sum(axis=-1)
+
+# Keep only marginal coefficients from selected digits; digits present in training
 data_M_saddles_coefs = data_M_saddles_coefs[:, :, :, selected_digits]
 
 
+# Create an array to store population proportions per run and mean
 data_Ms_pop_run = np.zeros((N_runs, len(temp_range), len(n_range), 3, 3)) # Population proportion
 data_Ms_pop = np.zeros((len(temp_range), len(n_range), 3, 3)) # Population proportion
 
@@ -88,13 +94,13 @@ for r in range(N_runs):
             for k in range(3):
                 for l in range(3):
                     #data_Ms_pop_run[r, i, j, k, l] = np.sum(np.argmax(data_Ls[r, i, j, k], axis=-1) == selected_digits[l], axis=-1) # not strict
-                    data_Ms_pop_run[r, i, j, k, l] = np.sum( (data_Ls[r, i, j, k, :, selected_digits[l]] >= 0.9), axis=-1 ) # stricter
+                    data_Ms_pop_run[r, i, j, k, l] = np.sum( (data_Ls[r, i, j, k, :, selected_digits[l]] >= 0.9), axis=-1 ) # Stricter way to calculate population proportion
 
 
 # Standard mean
 data_Ms_pop = np.mean(data_Ms_pop_run, axis=0)
 
-
+# Plotting stuff ...
 tab10_cmap = matplotlib.colormaps["tab10"]
 tab10_norm = matplotlib.colors.Normalize(0, 10)
 
