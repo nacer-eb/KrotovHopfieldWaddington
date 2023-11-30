@@ -337,7 +337,8 @@ for digit in [0, 1]:
 
     ax_1d[0].set_ylabel(r"$\alpha$")
     ax_1d[1].set_yticks([])
-        
+
+    # Plot theoretical predictions
     ax[digit, 1].plot(n, T_calc_rescaled, color='white', linewidth=10, path_effects=[pe.Stroke(linewidth=15, foreground='k'), pe.Normal()], label="Theoretical line")
     ax[digit, 1].legend(bbox_to_anchor=(1, -1.6))
 
