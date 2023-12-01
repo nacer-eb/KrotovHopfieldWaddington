@@ -22,7 +22,28 @@ Movies follow a similar naming scheme, by adding 'M' e.g. Figure 3M contains the
 
 In all cases, the Figure directories contain both the Figure/Movie, the code necessary to generate the data as well as the code necessary to generate the Figures themselves. Typically, data generating code is contained in "main_gen.py". 
 
-For convenience, the figures and movies referred to in the paper are also in the Figures/ directory and the Movies/ directory.
+For convenience, the main figures and the movies referred to in the paper are also in the All_Main_Figures/ directory and the All_Movies/ directory.
+
+### Instructions for reproducibility 
+
+To reproduce any figure using UMAP plots, please first generate the UMAP model/embedding first. This can be done by going into the defaults/ folder and running:
+	
+	python generate_umap_model.py
+	
+This must be done only once. It is recommended that you run this script in the same python environment as the one which you use to generate figures. Then, you can go in the 'Figure X' directory of your choice, run the data generation script 
+
+	python main_gen.py --poolsize NUMBER_OF_PROCESSES
+	
+If you to benefit from a multi-core system, you may set NUMBER_OF_PROCESSES to a large number greater than 1. Otherwise simply run
+
+	python main_gen.py
+	
+Then run the figure generating script (generally Figure_X.py).
+
+### Possible issue
+
+When running any figure code for the first time, the KrotovV2_utils module will create a mnist_data directory and fetch the mnist database, by using tensorflow.keras, this generally works with no user input required. However, on some systems there is known [issue](https://github.com/tensorflow/tensorflow/issues/33285) with keras being unable to verify the HTTPS certificates. You can follow [this](https://github.com/tensorflow/tensorflow/issues/33285#issuecomment-541417311) and [this](https://github.com/tensorflow/tensorflow/issues/33285#issuecomment-541417311) to fix it.
+
 
 ## Modules
 
