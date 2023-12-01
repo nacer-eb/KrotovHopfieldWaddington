@@ -51,7 +51,7 @@ When running any figure code for the first time, the KrotovV2_utils module will 
 
 Contains all the code necessary to run the network. 
 
-If you are not inside the main_module directory, you must append the main_module directory to your path. For instance, if your working directory is on the same level as the main_module directory.
+If you are not inside the main_module directory, you must append the main_module directory to your path. For instance, if your working directory is on the same level as the main_module directory. 
 
 ```python
 import sys
