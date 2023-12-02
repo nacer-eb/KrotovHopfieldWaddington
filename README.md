@@ -26,7 +26,7 @@ For convenience, the main figures and the movies referred to in the paper are al
 
 ### Instructions for reproducibility 
 
-To reproduce any figure using UMAP plots, please first generate the UMAP model/embedding first. This can be done by going into the defaults/ folder and running:
+To reproduce any figure using UMAP plots, first generate the UMAP model/embedding. This can be done by going into the defaults/ folder and running:
 	
 	python generate_umap_model.py
 	
@@ -34,7 +34,7 @@ This must be done only once. It is recommended that you run this script in the s
 
 	python main_gen.py --poolsize NUMBER_OF_PROCESSES
 	
-If you to benefit from a multi-core system, you may set NUMBER_OF_PROCESSES to a large number greater than 1. Otherwise simply run
+If you benefit from a multi-core system, you may set NUMBER_OF_PROCESSES to a number proportional to your threadcount. Otherwise simply run
 
 	python main_gen.py
 	
