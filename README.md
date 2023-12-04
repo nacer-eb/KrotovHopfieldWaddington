@@ -12,7 +12,11 @@ and
 
     pip install numpy, matplotlib, scipy, umap-learn, tensorflow
     
-Note that `tensorflow` is used only to fetch the MNIST data. 
+Note that `tensorflow` is used only to fetch the MNIST data. If you want to run the C numerical solver, run 
+	
+	make
+
+in the C_module directory. 
 
 ## Figures
 
