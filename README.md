@@ -48,7 +48,7 @@ Then run the figure generating script (generally Figure_X.py).
 
 ### Possible issue
 
-When running any figure code for the first time, the KrotovV2_utils module will create a mnist_data directory and fetch the mnist database, by using tensorflow.keras, this generally works with no user input required. However, on some systems there is a known [issue](https://github.com/tensorflow/tensorflow/issues/33285) with keras being unable to verify the HTTPS certificates. You can follow [this](https://github.com/tensorflow/tensorflow/issues/33285#issuecomment-541417311) and [this](https://github.com/tensorflow/tensorflow/issues/33285#issuecomment-541417311) to fix it.
+When running any figure code for the first time, the KrotovV2_utils module will create an mnist_data directory and fetch the mnist database, by using tensorflow.keras, this generally works with no user input required. However, on some systems there is a known [issue](https://github.com/tensorflow/tensorflow/issues/33285) with keras being unable to verify the certificates. The current best fix I found is [here](https://github.com/Rapptz/discord.py/issues/5968#issuecomment-716222434). Otherwise, you can use use [this](https://github.com/tensorflow/tensorflow/issues/33285#issuecomment-541417311) and [this](https://github.com/tensorflow/tensorflow/issues/33285#issuecomment-541417311) to fix it, but it is less secure than the latter.
 
 
 ## Modules
