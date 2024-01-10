@@ -1,6 +1,6 @@
 # Generalized Hopfield Network + Waddington
 
-Code, figures, movies, and examples for the [Waddington differentiation and saddle bifurcation for prototype learning](https://arxiv.org/) paper, by Nacer Eddine Boukacem, Allen Leary, Robin Thériault, Felix Gottlieb, Madhav Mani, and Paul Fran&#231;ois. 
+Code, figures, movies, and examples for the [Waddington differentiation and saddle bifurcation for prototype learning](https://arxiv.org/abs/2312.03012) paper, by Nacer Eddine Boukacem, Allen Leary, Robin Thériault, Felix Gottlieb, Madhav Mani, and Paul Fran&#231;ois. 
 
 ## Installation
 
