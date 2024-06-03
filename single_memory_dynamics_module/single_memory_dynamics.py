@@ -126,7 +126,7 @@ class single_memory_dynamics:
     def simulate_and_save(self, alpha_A_init, alpha_B_init, ell_init, tmax, dt, savefile):
 
         alpha_As, alpha_Bs, ells = np.zeros((3, tmax))
-
+        
         alpha_As[0], alpha_Bs[0], ells[0] = alpha_A_init, alpha_B_init, ell_init
 
         for t in range(1, tmax):
@@ -138,8 +138,10 @@ class single_memory_dynamics:
             alpha_Bs[t] = alpha_Bs[t-1] + dt*d_alpha_B_dt
             ells[t] = ells[t-1]  +  dt*d_ell_dt
 
-
+        
         np.savez(savefile, alpha_As=alpha_As, alpha_Bs=alpha_Bs, ells=ells)
+
+        return ells, alpha_As, alpha_Bs
 
 
 

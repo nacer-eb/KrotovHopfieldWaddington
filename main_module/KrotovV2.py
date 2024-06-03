@@ -15,7 +15,14 @@ sys.path.append('../')
 from main_module.KrotovV2_utils import *
 
 
-    
+def find_closest_div_(p):
+        q = np.floor(np.sqrt(p))
+
+        while p%q > 0:
+            q -= 1
+
+        return int(p//q), int(q)
+
 class KrotovNet:
     def __init__(self, Kx=10, Ky=10, n_deg=30, m_deg=30, M=1000, nbMiniBatchs=60, momentum=0.6, rate=0.0008, temp=600, rand_init_mean=-0.03, rand_init_std=0.03,
                  initHiddenDetectors=None, initVisibleDetectors=None, selected_digits=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9], useClipping=False):
@@ -30,7 +37,7 @@ class KrotovNet:
         #Parameter Setup
         self.N_C = 10 #Number of classification/output neurons
         self.N = 28*28 #Number of visible inputs
-
+        
         self.Kx = int( Kx )
         self.Ky = int( Ky )
         self.K = self.Kx*self.Ky #Number of memories
@@ -93,7 +100,7 @@ class KrotovNet:
         # Organize it into batches.
         for mb in range(0, self.nbMiniBatchs):
             print(mb, end=' ')
-            self.miniBatchs_images[mb], self.miniBatchs_labels[mb] = get_MNIST_train_partitionned(self.M, self.train_batch_images_full, self.train_batch_keys_full, self.selected_digits)
+            self.miniBatchs_images[mb], self.miniBatchs_labels[mb] = get_MNIST_train_partitionned(self.M, self.train_batch_images_full, self.train_batch_keys_full, self.selected_digits, unsupervisedMode=False) # Turns this to false soon
             
 
     """  //////////// SET METHODS \\\\\\\\\\\\\\\\\\\ """
@@ -387,7 +394,7 @@ class KrotovNet:
             print("Training batch score:", test_batch_score)
     
 
-    def train_plot_update(self, epochs, isPlotting=True, isSaving=False, saving_dir=None, testFreq=100, testingRegiment=[1, 0, 0], isDecay=False, noiseMean=0, noiseStd=0):
+    def train_plot_update(self, epochs, isPlotting=True, isSaving=False, saving_dir=None, testFreq=100, testingRegiment=[1, 0, 0], isDecay=False, noiseMean=0, noiseStd=0, pulseTimes=[-1]):
         """
         Train & Plot function.
         Trains the network and plots it. It also allows you to test the network on the various digits batchs as per the testingRegiment parameter.
@@ -423,8 +430,8 @@ class KrotovNet:
         data_T = self.miniBatchs_images[0]
         data_T_inv = np.linalg.pinv(data_T)
         if isPlotting:
-            plt.ion()      
-            fig, ax = plt.subplots(1, 1, figsize=(16, 9))        
+            plt.ion()
+            fig, ax = plt.subplots(1, 1, figsize=(16, 9))
             im = ax.imshow(merge_data(self.visibleDetectors, self.Kx, self.Ky), cmap="bwr", vmin=-1, vmax=1) #Plots
 
         for i in range(0, epochs):
@@ -446,7 +453,12 @@ class KrotovNet:
                 L[i, :, :] = self.hiddenDetectors
 
 
-            self.train_cycle(self.miniBatchs_images, self.miniBatchs_labels, noiseMean, noiseStd) #Train
+            noiseMean_effective, noiseStd_effective = 0, 0
+            if i in pulseTimes:
+                noiseMean_effective, noiseStd_effective = noiseMean, noiseStd # outside of the pulse period don't apply noise # This only used in one supplemental figure
+
+
+            self.train_cycle(self.miniBatchs_images, self.miniBatchs_labels, noiseMean_effective, noiseStd_effective) #Train
             
             
  
@@ -461,7 +473,10 @@ class KrotovNet:
 
         if isSaving:
             print("Saving to", saving_dir, "...")
-            np.savez_compressed(saving_dir, init_array=self.get_init_array(), selected_digits=self.selected_digits, M=M, L=L, miniBatchs_images=self.miniBatchs_images, miniBatchs_labels=self.miniBatchs_labels)
+
+            # For reproducibility purposes not using 'compressed' save... Unfortunately it does make a (,small but significant when looking at the details of the dynamics,) difference
+
+            np.savez(saving_dir, init_array=self.get_init_array(), selected_digits=self.selected_digits, M=M, L=L, miniBatchs_images=self.miniBatchs_images, miniBatchs_labels=self.miniBatchs_labels)
             print("Save completed.")
 
             

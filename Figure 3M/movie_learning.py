@@ -33,7 +33,7 @@ dataset = "../defaults/miniBatchs_images.npy"
 data_T = np.load(dataset)[0]
 
 # Setting up the axes geometry
-fig = plt.figure(figsize=(8+2+20+4+20+1, 20))
+fig = plt.figure(figsize=(8+2+20+4+20+1, 20), dpi=50)
 axs = fig.subplot_mosaic("""
 
 00000000..MMMMMMMMMMMMMMMMMMMM....UUUUUUUUUUUUUUUUUUUU!
@@ -73,7 +73,7 @@ cb_UMAP.set_label("Digit class", labelpad=20, fontsize=40)
 order_sort = np.argsort(np.argmax(data_L[-1], axis=-1))
 
 # Preparing the label axes
-t=-1
+t=-10
 for d in range(0, 9):
     axs[str(d)].set_xticks([])
     axs[str(d)].set_yticks([100])
@@ -132,6 +132,9 @@ time_indicator = axs['U'].text(0.95, 0.95, r"epoch "+str(t), transform=axs['U'].
 # Add title for ref
 axs['M'].set_title("100-memory system with n="+str(n) +" and rescaled temperature "+'{0:.2f}'.format(temp/784), fontsize=50, verticalalignment='bottom', ha='center', pad=30, bbox=props)
 
+plt.savefig("tst.png")
+exit()
+
 def update(t):
     # Update Labels
     print(t)
@@ -158,7 +161,7 @@ def update(t):
     return *im_d, im_M, im_UM, time_indicator
 
 ani = anim.FuncAnimation(fig, update, frames=(tmax-1)*10, interval=100, blit=True)
-ani.save("learning_movie_n"+str(n)+".mov", writer="ffmpeg", fps=60)
+ani.save("learning_movie_n"+str(n)+".mp4", writer="ffmpeg", fps=60)
 #plt.show()
 
 

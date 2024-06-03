@@ -3,212 +3,255 @@ sys.path.append('../')
 
 import numpy as np
 
-import matplotlib
+
 import matplotlib.pyplot as plt
+import matplotlib
 
-from Figure_5_functions import *
+import pickle
+import umap
 
-fontsize=44
+from main_module.KrotovV2_utils import *
+
+import matplotlib
+fontsize = 42
 font = {'family' : 'Times New Roman',
         'weight' : 'normal',
         'size'   : fontsize}
 matplotlib.rc('font', **font)
 
 
-fig = plt.figure(figsize=(27, 65-22+1+1 ))
-axs = fig.subplot_mosaic(
-    """
-    1111111.22222222222.3333333
-    1111111.22222222222.3333333
-    1111111.22222222222.3333333
-    1111111.22222222222.3333333
-    1111111.22222222222.3333333
-    1111111.22222222222.3333333
-    1111111.22222222222.3333333
-    1111111.22222222222.3333333
-    1111111.22222222222.3333333
-    ...........................
-    ...........................
-    ...........................
-    aabbcc.ddeeff.gghhii.jjkkll
-    aabbcc.ddeeff.gghhii.jjkkll
-    AAAAAA.BBBBBB.CCCCCC.DDDDDD
-    AAAAAA.BBBBBB.CCCCCC.DDDDDD
-    AAAAAA.BBBBBB.CCCCCC.DDDDDD
-    AAAAAA.BBBBBB.CCCCCC.DDDDDD
-    AAAAAA.BBBBBB.CCCCCC.DDDDDD
-    AAAAAA.BBBBBB.CCCCCC.DDDDDD
-    ...........................
-    ...........................
-    ...........................
-    mmmnnn.oooppp.qqqrrr.sssttt
-    mmmnnn.oooppp.qqqrrr.sssttt
-    mmmnnn.oooppp.qqqrrr.sssttt
-    EEEEEE.FFFFFF.GGGGGG.HHHHHH
-    EEEEEE.FFFFFF.GGGGGG.HHHHHH
-    EEEEEE.FFFFFF.GGGGGG.HHHHHH
-    EEEEEE.FFFFFF.GGGGGG.HHHHHH
-    EEEEEE.FFFFFF.GGGGGG.HHHHHH
-    EEEEEE.FFFFFF.GGGGGG.HHHHHH
-    ...........................
-    ...........................
-    ...........................
-    ...........................
-    IIIIII.JJJJJJ.KKKKKK.LLLLLL
-    IIIIII.JJJJJJ.KKKKKK.LLLLLL
-    IIIIII.JJJJJJ.KKKKKK.LLLLLL
-    IIIIII.JJJJJJ.KKKKKK.LLLLLL
-    IIIIII.JJJJJJ.KKKKKK.LLLLLL
-    IIIIII.JJJJJJ.KKKKKK.LLLLLL
-    uuuvvv.wwwxxx.yyyzzz.!!!@@@
-    uuuvvv.wwwxxx.yyyzzz.!!!@@@
-    uuuvvv.wwwxxx.yyyzzz.!!!@@@
-    """
-)
+dataset = "../defaults/miniBatchs_images.npy"
+umap_model_path = "../defaults/umap_model_correlation.sav"
 
-f3 = Figure_5("run_[1, 4]_n15_T700_alpha0.8_l_00.5.npz") 
+class Figure_4_panel:
+    def __init__(self, n, temp=800, data_dir="data/", selected_digits = [1, 4, 7], t_s = [20, 200, 250, 300, 344] ):
 
-default_pos_ax2 = axs['2'].get_position()
-axs['2'].remove()
+        self.n = n
+        self.temp = temp
+        self.data_dir = data_dir
+        self.selected_digits = selected_digits
 
-axs['1'].set_xlabel(r'$\alpha_1$', labelpad=10); axs['3'].set_xlabel(r'$\ell$', labelpad=20);
-axs['1'].set_ylabel('n-power', labelpad=20); axs['3'].set_ylabel('n-power', labelpad=20);
+        self.subdir = str(selected_digits) + "/" 
 
-sample_axis_letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '!', '@']
-for c in sample_axis_letters:
-    axs[c].set_xticks([]); axs[c].set_yticks([])
+        self.saving_dir = self.data_dir+self.subdir+"trained_net_n"+str(self.n)+"_T"+str(self.temp)+".npz"
 
 
-# Creating the colormap for n
-norm = plt.Normalize(np.min(f3.FP_data[:, 1]), np.max(f3.FP_data[:, 1])) # Norm map for n-power
-c1 = np.asarray([191/256.0, 127/256.0, 191/256.0, 1]) # purple
-c2 = np.asarray([255/256.0, 209/256.0, 127/256.0, 1]) # golden yellow
-
-k = np.linspace(0, 1, 256)
-vals = np.zeros((256, 4))
-for i in range(0, 256):
-    vals[i] = c1*(1 - k[i]) + c2*k[i]
-cmap = matplotlib.colors.ListedColormap(vals)
-
-# Define nullcline axes
-nullcline_axes = np.asarray([axs['A'], axs['B'], axs['C'], axs['D']])
-# Cosmetics
-for i in range(0, len(nullcline_axes)):
-    nullcline_axes[i].set_xlabel(r'$\ell$', labelpad=20);
-    if i >= 1:
-        nullcline_axes[i].set_yticks([]);
-axs['A'].set_ylabel(r'$\alpha_1$', labelpad=20)
+        # Loading data - will improve dir struct soon..
+        self.data_M = np.load(self.saving_dir)['M']
+        self.data_L = np.load(self.saving_dir)['L']
+        self.data_T = np.load(dataset)[0]
 
 
-# The snapshot of memories at fixed points
-mem_snapshots_axs = np.asarray( [ [axs['a'], axs['b'], axs['c']],
-                                  [axs['d'], axs['e'], axs['f']],
-                                  [axs['g'], axs['h'], axs['i']],
-                                  [axs['j'], axs['k'], axs['l']]] )
+        self.mapper = pickle.load((open(umap_model_path, 'rb')))
 
-n_range = np.asarray([6, 20, 30, 40])
-for i, n in enumerate(n_range):
-    alphas, betas = f3.plot_nullclines(nullcline_axes[i], n)
-     
-    for j in range(3):
-        f3.plot_snapshot(mem_snapshots_axs[i, j], alphas[j], betas[j], isStable=int(j!=1)+int(i==2), fontsize=30) # if j==1 it's unstable unless i==2 in which case the center point is stable
-
-
-# Cosmetics - remove duplicates for single FPs
-mem_snapshots_axs[2, 0].remove()
-mem_snapshots_axs[2, -1].remove()
-
-# Now plotting the center 3d axis
-dx_adjust = 0.02
-dy_adjust = 0.0
-center_ax_3d = fig.add_axes([default_pos_ax2.x0 + dx_adjust-0.02,
-                             default_pos_ax2.y0 + dy_adjust,
-                             default_pos_ax2.x1-default_pos_ax2.x0-2*dx_adjust,
-                             default_pos_ax2.y1 - default_pos_ax2.y0-2*dy_adjust],
-                            projection='3d')
-
-
-center_ax_3d.set_xlabel(r"$\alpha_1$", labelpad=30); center_ax_3d.set_ylabel(r"$\ell$", labelpad=30); center_ax_3d.set_zlabel(r"$n$", labelpad=15)
-center_ax_3d.set_xticks([0, 0.5, 1])
-center_ax_3d.set_xticklabels([0, 0.5, 1])
-center_ax_3d.set_yticks([-1, 0, 1])
-center_ax_3d.set_yticklabels([-1, 0, 1])
-center_ax_3d.set_zticks([10, 60])
-center_ax_3d.set_zticklabels([10, 60])
-center_ax_3d.locator_params(axis='x', nbins=5)
-center_ax_3d.locator_params(axis='y', nbins=5)
-
-
-ns = f3.FP_data[:, 1]
-alphas = np.zeros((len(ns), 3))
-l_0s = np.zeros((len(ns), 3))
-for i, n in enumerate(ns):
-    n_mask = f3.FP_data[:, 1]==n
-    index_sort = np.argsort(f3.FP_data[n_mask, -1])
+        self.embedding = self.mapper.transform(self.data_T)
+        self.M_embedding = np.load(self.data_dir+self.subdir+"/memory_umap_embed_correlation_n"+str(self.n)+"_T"+str(self.temp)+".npy")
     
-    alphas[i] = f3.FP_data[n_mask, -3][index_sort][[0, np.sum(n_mask)//2, -1]]
-    l_0s[i] = f3.FP_data[n_mask, -1][index_sort][[0, np.sum(n_mask)//2, -1]]
-
-for i in range(3):
-    axs['1'].scatter(alphas[:, i], ns, c=ns, cmap=cmap, norm=norm, s=3)
-    axs['3'].scatter(l_0s[:, i], ns, c=ns, cmap=cmap, norm=norm, s=3)
-    center_ax_3d.scatter(alphas[:, i], l_0s[:, i], ns, c=ns, cmap=cmap, norm=norm, s=2.5)
-
-
-
-# Dynamics
-
-n_range = np.asarray([39, 15])
-t_range = np.asarray([[0, 1000, 2000, 3000], [0, 1000, 2000, 3000]])
-
-# Fetch all nullcline axes
-dynamics_nullcline_axes = np.asarray([[axs['E'], axs['F'], axs['G'], axs['H']],
-                                      [axs['I'], axs['J'], axs['K'], axs['L']]])
-
-
-# Cosmetics
-props = dict(boxstyle='round', facecolor='whitesmoke', alpha=0.5)
-
-for i in range(0, 2):
-    for j in range(0, 4):
-        dynamics_nullcline_axes[i, j].set_xlabel(r'$\ell$', labelpad=10);
         
-        if i == 1:
-            dynamics_nullcline_axes[i, j].xaxis.tick_top()
-            dynamics_nullcline_axes[i, j].xaxis.set_label_position('top')
-            dynamics_nullcline_axes[i, j].set_xlabel(r'$\ell$', labelpad=10)
-    
-        if j != 0:
-            dynamics_nullcline_axes[i, j].set_yticks([]);
-            continue
+        self.indices = np.zeros(5*3)
+        for i in range(len(self.indices)):
+            strictness = 0.99
+            all_indices = np.argwhere(self.data_L[-1, :, self.selected_digits[i//5]] >= strictness )
+            while len(all_indices) == 0:
+                strictness -= 0.1
+                all_indices = np.argwhere(self.data_L[-1, :, self.selected_digits[i//5]] >= strictness )
+                print(self.selected_digits[i//5], len(all_indices), strictness)
         
-        dynamics_nullcline_axes[i, j].set_ylabel(r'$\alpha_1$', labelpad=20)
-        dynamics_nullcline_axes[i, j].text(-0.5, 0.5, r"$n=$"+str(n_range[i]), transform=dynamics_nullcline_axes[i, j].transAxes, fontsize=fontsize, verticalalignment='center', horizontalalignment='right', rotation=90, bbox=props)
+        
+    
+            self.indices[i] =  all_indices[np.random.randint(len(all_indices))] # -> Pick randomly when Label is mostly # digit class i//2 $
+        self.indices = np.asarray(self.indices, dtype=int)
+
+        # Use the time stamps or manually get timestamps from UMAP movies.
+        # Handpicked, notice this is /10 because of the UMAP timesteps
+        self.t_s = t_s
+        self.t_samples = np.asarray(self.t_s)*10
+
+        self.props = dict(boxstyle='round', facecolor='whitesmoke', alpha=0.5)
 
 
-# Fetching all the memory snapshot axes - The snapshot of memories at fixed points
-dynamics_mem_snapshots_axs = np.asarray( [[ [axs['m'], axs['n']],
-                                  [axs['o'], axs['p']],
-                                  [axs['q'], axs['r']],
-                                  [axs['s'], axs['t']]],
-                                  [[axs['u'], axs['v']],
-                                  [axs['w'], axs['x']],
-                                  [axs['y'], axs['z']],
-                                  [axs['!'], axs['@']]]] )
+    def memory_sample_plot(self, ax):
+        tmax = len(self.data_M)
+            
+        for t_i, t in enumerate(self.t_samples):
+            im = ax[t_i].imshow(merge_data(self.data_M[t, self.indices], 5, 3), cmap="bwr", vmin=-1, vmax=1, aspect=5.0/4.0) # Plotting the selected memory samples 
+            ax[t_i].set_title(r"Epoch: "+str(t), pad=30, fontsize=fontsize, bbox=self.props) # Time stamps / Cosmetics
+            ax[t_i].axis('off')
 
 
+
+    def UMAP_plot(self, ax):
+
+
+        M = len(self.data_T)
+        keys = np.zeros((M))
+        for d in range(0, 10):
+            keys[d*M//10:(d+1)*M//10] = d
+            
+        tmax, N_mem = np.shape(self.M_embedding)[0], np.shape(self.M_embedding)[1]
+        
+        for t_i in range(0, len(self.t_s)-1):
+            im = ax[t_i].scatter(self.embedding[:, 0], self.embedding[:, 1], c=keys, cmap="tab10", s=10, marker="*") # Plotting the UMAP training data
+            
+            for i in range(0, N_mem-1):
+                data_pnts = self.M_embedding[self.t_s[0]:self.t_s[t_i+1], i, :]
+                ax[t_i].plot(data_pnts[:, 0], data_pnts[:, 1], linewidth=1, alpha=0.3, color="k") # Plotting the trajectories of the memories on UMAP
+                
+                
+            # Time stamps / Cosmetics
+            ax[t_i].text(0.5, 0.95, r"Epoch: "+str(self.t_s[t_i+1]*10), transform=ax[t_i].transAxes, fontsize=fontsize, verticalalignment='top', ha='center', bbox=self.props)
+            
+            # Plotting the memories as white points for each time point.
+            ax[t_i].plot(self.M_embedding[self.t_s[t_i+1], :, 0], self.M_embedding[self.t_s[t_i+1], :, 1], marker="o",
+                         linestyle="", alpha=1, markeredgecolor="k", markerfacecolor="white", markeredgewidth=1, markersize=4)
+            
+            # Cosmetics
+            if t_i != 0 and t_i != 2:
+                ax[t_i].set_yticks([])
+                
+            if t_i < 2:
+                ax[t_i].set_xticks([])
+
+            ax[t_i].set_xticks([])
+            ax[t_i].set_yticks([])
+            
+            ax[t_i].set_ylim(-5, 21)
+            
+            # Labels / cosmetics
+            ax[0].set_ylabel("UMAP 2"); ax[2].set_ylabel("UMAP 2"); ax[2].set_xlabel("UMAP 1", labelpad=7); ax[3].set_xlabel("UMAP 1", labelpad=7)
+
+
+
+    def split_plot(self, ax, t_start, t_stop):
+        tmax, N_max, tmp = np.shape(self.data_M)
+            
+        # Invert using 1, 7, 9 only 
+        train_mask = np.zeros(200)
+        for d in self.selected_digits:
+            train_mask[d*20: (d+1)*20] = 1
+        train_mask = np.asarray(train_mask, dtype=bool)
+
+        tmax, N_max, tmp = np.shape(self.data_M)
+        data_coefs = np.sum((self.data_M@np.linalg.pinv(self.data_T[train_mask])).reshape(tmax, N_max, len(self.selected_digits), 20), axis=-1)
 
     
-for i, n in enumerate(n_range):
-    # Create Figure 5 Obj
-    f3 = Figure_5("run_[1, 4]_n"+str(n)+"_T700_alpha0.8_l_00.5.npz")
-    
-    for j, t in enumerate(t_range[i]):
-        alphas, betas = f3.plot_nullclines(dynamics_nullcline_axes[i, j], n, t_0=t_range[i, j-1], t=t, plotDynamics=True, density=(j<2))
+        tab10_cmap = matplotlib.cm.tab10
+        tab10_norm = matplotlib.colors.Normalize(vmin=0, vmax=10)
+        
+        for n in range(N_max):
+            ax[0].plot(data_coefs[t_start:t_stop, n, 0], data_coefs[t_start:t_stop, n, 1], c=tab10_cmap(tab10_norm(np.argmax(self.data_L[-1, n]))), lw=2)
+            ax[0].scatter(data_coefs[t_start, n, 0], data_coefs[t_start, n, 1], marker=".", color="k", s=400)
+            
+            
+            ax[1].plot(data_coefs[t_start:t_stop, n, 0], data_coefs[t_start:t_stop, n, 2], c=tab10_cmap(tab10_norm(np.argmax(self.data_L[-1, n]))), lw=2)
+            ax[1].scatter(data_coefs[t_start, n, 0], data_coefs[t_start, n, 2], marker=".", color="k", s=400)        
+            
+            
+            
+        ax[0].set_xlabel(r"$\bar{\alpha}_"+str(self.selected_digits[0])+"$"); ax[1].set_xlabel(r"$\bar{\alpha}_"+str(self.selected_digits[0])+"$");
+        ax[0].set_ylabel(r"$\bar{\alpha}_"+str(self.selected_digits[1])+"$"); ax[1].set_ylabel(r"$\bar{\alpha}_"+str(self.selected_digits[2])+"$");
 
-        for k in range(2):
-            f3.plot_snapshot(dynamics_mem_snapshots_axs[i, j, k], alphas[k], betas[k], hasStabilityTitle=False) # if j==1 it's unstable unless i==2 in which case the center point is stable
+        
+fig = plt.figure(figsize=(31+1, 38))#(figsize=(25, 15.7*2))
+axs = fig.subplot_mosaic("""
+................................
+................................
+AAAAAAAA..BBBBBBBB.1111112222220
+AAAAAAAA..BBBBBBBB.1111112222220
+AAAAAAAA..BBBBBBBB.1111112222220
+AAAAAAAA..BBBBBBBB.1111112222220
+AAAAAAAA..BBBBBBBB.3333334444440
+AAAAAAAA..BBBBBBBB.3333334444440
+AAAAAAAA..BBBBBBBB.3333334444440
+AAAAAAAA..BBBBBBBB.3333334444440
+................................
+................................
+aaaaaabbbbbbccccccddddddeeeeeex.
+aaaaaabbbbbbccccccddddddeeeeeex.
+aaaaaabbbbbbccccccddddddeeeeeex.
+................................
+................................
+CCCCCCCC..DDDDDDDD.555555666666O
+CCCCCCCC..DDDDDDDD.555555666666O
+CCCCCCCC..DDDDDDDD.555555666666O
+CCCCCCCC..DDDDDDDD.555555666666O
+CCCCCCCC..DDDDDDDD.777777888888O
+CCCCCCCC..DDDDDDDD.777777888888O
+CCCCCCCC..DDDDDDDD.777777888888O
+CCCCCCCC..DDDDDDDD.777777888888O
+................................
+................................
+ffffffgggggghhhhhhiiiiiijjjjjjX.
+ffffffgggggghhhhhhiiiiiijjjjjjX.
+ffffffgggggghhhhhhiiiiiijjjjjjX.
+................................
+""")
+
+panel_top = Figure_4_panel(30, t_s=[20, 90, 190, 236, 343]) # 147
+
+ax_mem_1 = np.asarray([axs['a'], axs['b'], axs['c'], axs['d'], axs['e']])
+panel_top.memory_sample_plot(ax_mem_1)
+
+ax_UMAP_1 = np.asarray([axs['1'], axs['2'], axs['3'], axs['4']])
+panel_top.UMAP_plot(ax_UMAP_1)
+
+ax_split_1 = np.asarray([axs['A'], axs['B']])
+panel_top.split_plot(ax_split_1, 900, 3400)
+
+ax_cb_UMAP = axs['0']
+tab10_cmap = matplotlib.cm.tab10
+tab10_norm = matplotlib.colors.Normalize(vmin=0, vmax=10)
+cb_UMAP = matplotlib.colorbar.ColorbarBase(ax_cb_UMAP, cmap=tab10_cmap, norm=tab10_norm, orientation='vertical')
+cb_UMAP.set_ticks(np.arange(0, 10, 1) + 0.5) # Finally found how to center these things 
+cb_UMAP.set_ticklabels(np.arange(0, 10, 1))
+cb_UMAP.set_label("Digit class")
 
 
+ax_cb_mem = axs['x']
+bwr_cmap = matplotlib.cm.bwr
+bwr_norm = matplotlib.colors.Normalize(vmin=-1, vmax=1)
+cb_mem = matplotlib.colorbar.ColorbarBase(ax_cb_mem, cmap=bwr_cmap, norm=bwr_norm, orientation='vertical')
+cb_mem.set_label("Pixel value")
 
+
+# The n text
+ax_split_1[1].text(0.5, 1.1, r"n = 30", transform=ax_split_1[1].transAxes, fontsize=fontsize*1.3, rotation=0, verticalalignment='bottom', ha='center', bbox=panel_top.props)
+
+########################################
+
+panel_bot = Figure_4_panel(3, t_s=[20, 22, 30, 50, 344]) # 147
+
+ax_mem_2 = np.asarray([axs['f'], axs['g'], axs['h'], axs['i'], axs['j']])
+panel_bot.memory_sample_plot(ax_mem_2)
+
+ax_UMAP_2 = np.asarray([axs['5'], axs['6'], axs['7'], axs['8']])
+panel_bot.UMAP_plot(ax_UMAP_2)
+
+ax_split_2 = np.asarray([axs['C'], axs['D']])
+panel_bot.split_plot(ax_split_2, 0, 1400)
+
+ax_cb_UMAP_2 = axs['O']
+cb_UMAP_2 = matplotlib.colorbar.ColorbarBase(ax_cb_UMAP_2, cmap=tab10_cmap, norm=tab10_norm, orientation='vertical')
+cb_UMAP_2.set_ticks(np.arange(0, 10, 1) + 0.5) # Finally found how to center these things 
+cb_UMAP_2.set_ticklabels(np.arange(0, 10, 1))
+cb_UMAP_2.set_label("Digit class")
+
+
+ax_cb_mem_2 = axs['X']
+cb_mem_2 = matplotlib.colorbar.ColorbarBase(ax_cb_mem_2, cmap=bwr_cmap, norm=bwr_norm, orientation='vertical')
+cb_mem_2.set_label("Pixel value")
+
+# The n text
+ax_split_2[1].text(0.5, 1.1, r"n = 3", transform=ax_split_2[1].transAxes, fontsize=fontsize*1.3, rotation=0, verticalalignment='bottom', ha='center', bbox=panel_top.props)
+
+
+alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+rx = [5.0/8.0, 1.0, 5.0/8.0, 1.0]
+ry = [3.0/8.0, 1.0, 3.0/8.0, 1.0]
+for i, char in enumerate(['A', 'a', 'C', 'f']):
+    axs[char].text(-0.3*rx[i], 1.0+0.1*ry[i], alphabet[i], transform=axs[char].transAxes, fontsize=83, verticalalignment='bottom', ha='right', fontfamily='Times New Roman', fontweight='bold')
+
+
+rx = 32.0/25.0
+plt.subplots_adjust(top=0.99, bottom=0.01, wspace=2.0, hspace=0.8)
 plt.savefig("Figure_5_tmp.png")

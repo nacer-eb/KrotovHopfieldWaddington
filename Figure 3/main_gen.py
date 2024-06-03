@@ -59,7 +59,7 @@ def single_n(nT_merge):
 
 
 if __name__ == '__main__':
-    n_range = np.asarray([3, 15, 30, 40])
+    n_range = np.asarray([30, 40]) #15, 3,
     temp_range = np.asarray([670])    
     
     n, T = np.meshgrid(n_range, temp_range)

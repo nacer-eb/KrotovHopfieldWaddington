@@ -2,168 +2,216 @@ import sys
 sys.path.append('../')
 
 import numpy as np
+import sys
 
 from main_module.KrotovV2 import *
-from main_module.KrotovV2_utils import *
+
+import matplotlib.pyplot as plt
 
 import matplotlib
 font = {'family' : 'Times New Roman',
         'weight' : 'normal',
-        'size'   : 65}
+        'size'   : 54}
 matplotlib.rc('font', **font)
 
-import matplotlib.animation as anim
 
 data_dir = "data/"
+selected_digits = [1, 7, 8]#
+prefix = str(selected_digits)+"/" # _coarse_stable
 
-selected_digits = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]#
-prefix = str(selected_digits)+"/" # I used main,and momentum #"main"#
+N_runs = 10
 
-tmax = 10000
+temp_range = [550, 750, 800]
+n_range = np.arange(2, 60, 1)
+
+
 N_mem = 100
 
-n = 25
+data_Ms = np.zeros((N_runs, len(temp_range), len(n_range), 3, N_mem, 784))
+data_M_saddles = np.zeros((len(temp_range), len(n_range), 3, 784))
+data_Ls = np.zeros((N_runs, len(temp_range), len(n_range), 3, N_mem, 10))
 
-temp_range = np.arange(650, 900, 3)
-temp_range_rescaled = temp_range/784.0
-Nt = len(temp_range)
+isFirstRun = True # Set this to False if you've already preloaded files
 
-data_Ms = np.zeros((Nt, N_mem, 784))
-data_Ls = np.zeros((Nt, N_mem, 10))
+# Loads files and saves a preload
+if isFirstRun:
+    for i, temp in enumerate(temp_range):
+        for j, n in enumerate(n_range):
+            for k in range(3):
+                for r in range(N_runs):
+                    
+                    run_prefix = "end_states_" + str(r) + "/"
+                    saving_dir=data_dir+prefix+run_prefix+"trained_net_end_n"+str(n)+"_T"+str(temp)+"ic"+str(selected_digits[k])+".npz"
+                    
+                    if os.path.isfile(saving_dir):
+                        data_Ms[r, i, j, k] = np.load(saving_dir)['M']
+                        data_Ls[r, i, j, k] = np.load(saving_dir)['L']
+                    else:
+                        print("WARNING: File not found, ", saving_dir)
 
-dataset = "../defaults/miniBatchs_images.npy"
-data_T = np.load(dataset)[0]
+                saving_dir=data_dir+prefix+"saddles/net_saddle_n"+str(n)+"_T"+str(temp)+"ic"+str(selected_digits[k])+".npz"
+                
+                if os.path.isfile(saving_dir):
+                    data_M_saddles[i, j, k] = np.load(saving_dir)['M'][0]
+                    
+                else:
+                    print("WARNING: File not found, ", saving_dir)
+                    
+        print(temp)
+
+    # Saves Preload
+    np.save(data_dir+prefix+"data_Ms.npy", data_Ms)
+    np.save(data_dir+prefix+"data_M_saddles.npy", data_M_saddles)
+    np.save(data_dir+prefix+"data_Ls.npy", data_Ls)
+
+
+# Then loads the "preload"
+data_Ms = np.load(data_dir+prefix+"data_Ms.npy")
+data_M_saddles = np.load(data_dir+prefix+"data_M_saddles.npy")
+data_Ls = np.load(data_dir+prefix+"data_Ls.npy")
+
+# Loads the training data (uses the default training miniBatch)
+data_T = np.load(data_dir+prefix+"miniBatchs_images.npy")[0]
 data_T_inv = np.linalg.pinv(data_T)
 
+# Gets coefficients using the inverse
+data_M_saddles_coefs = data_M_saddles@data_T_inv
 
-isFirstRun = True # Set this to False if you've already preloaded the data
-if isFirstRun: # Then preload the data for the first time
-    for h, temp in enumerate(temp_range):
-        print(n, temp)
-    
-        saving_dir = data_dir+prefix+"trained_net_end_n"+str(n)+"_T"+str(temp)+".npz"
-        
-        data = np.load(saving_dir)
-        data_Ms[h] = data['M'][-1]
-        data_Ls[h] = data['L'][-1]
-        
-    data_coefs = (data_Ms@data_T_inv).reshape(Nt, N_mem, 10, 20)
-    
-    np.save(data_dir + prefix + "data_Ms_T.npy", data_Ms)
-    np.save(data_dir + prefix + "data_Ls_T.npy", data_Ls)
-    np.save(data_dir + prefix + "data_Coefs_T.npy", data_coefs)
+# Obtain marginal coefficients
+data_M_saddles_coefs = (data_M_saddles_coefs.reshape(len(temp_range), len(n_range), 3, 10, 20)).sum(axis=-1)
 
-# Fetches preloaded data
-data_Ms = np.load(data_dir + prefix + "data_Ms_T.npy")
-data_Ls = np.load(data_dir + prefix + "data_Ls_T.npy")
-data_coefs = np.load(data_dir + prefix + "data_Coefs_T.npy")
+# Keep only marginal coefficients from selected digits; digits present in training
+data_M_saddles_coefs = data_M_saddles_coefs[:, :, :, selected_digits]
 
 
-cmap_tab10 = matplotlib.cm.tab10
-norm = matplotlib.colors.Normalize(vmin=0, vmax=10)
+# Create an array to store population proportions per run and mean
+data_Ms_pop_run = np.zeros((N_runs, len(temp_range), len(n_range), 3, 3)) # Population proportion
+data_Ms_pop = np.zeros((len(temp_range), len(n_range), 3, 3)) # Population proportion
 
-label_population = np.zeros((Nt, 10))
-for d in range(10):
-    label_population[:, d] = np.sum(data_Ls[:, :, d] > 0.98, axis=-1)
-    
-fig = plt.figure(figsize=(30, 30+12+2))
+for r in range(N_runs):
+    for i, temp in enumerate(temp_range):
+        for j, n in enumerate(n_range):
+            for k in range(3):
+                for l in range(3):
+                    #data_Ms_pop_run[r, i, j, k, l] = np.sum(np.argmax(data_Ls[r, i, j, k], axis=-1) == selected_digits[l], axis=-1) # not strict
+                    data_Ms_pop_run[r, i, j, k, l] = np.sum( (data_Ls[r, i, j, k, :, selected_digits[l]] >= 0.9), axis=-1 ) # Stricter way to calculate population proportion
+
+
+# Standard mean
+data_Ms_pop = np.mean(data_Ms_pop_run, axis=0)
+
+# Plotting stuff ...
+tab10_cmap = matplotlib.colormaps["tab10"]
+tab10_norm = matplotlib.colors.Normalize(0, 10)
+
+fig = plt.figure(figsize=(3+3+3+1+9+1+9+1, 139-107+1))
 
 axs = fig.subplot_mosaic("""
-000000111111222222333333444444.
-000000111111222222333333444444.
-000000111111222222333333444444.
-000000111111222222333333444444.
-000000111111222222333333444444.
-000000111111222222333333444444.
-000000111111222222333333444444.
-000000111111222222333333444444.
-000000111111222222333333444444.
-000000111111222222333333444444.
-000000111111222222333333444444.
-000000111111222222333333444444.
-000000111111222222333333444444.
-000000111111222222333333444444.
-000000111111222222333333444444.
-000000111111222222333333444444.
-000000111111222222333333444444.
-000000111111222222333333444444.
-000000111111222222333333444444.
-000000111111222222333333444444.
-000000111111222222333333444444.
-000000111111222222333333444444.
-000000111111222222333333444444.
-000000111111222222333333444444.
-000000111111222222333333444444.
-000000111111222222333333444444.
-000000111111222222333333444444.
-000000111111222222333333444444.
-000000111111222222333333444444.
-000000111111222222333333444444.
-...............................
-...............................
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAX
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAX
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAX
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAX
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAX
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAX
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAX
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAX
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAX
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAX
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAX
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAX
+
+aaa.bbb...111111111.222222222!
+aaa.bbb...111111111.222222222!
+aaa.bbb...111111111.222222222!
+ccc.ddd...111111111.222222222!
+ccc.ddd...111111111.222222222!
+ccc.ddd...111111111.222222222!
+eee.fff...111111111.222222222!
+eee.fff...111111111.222222222!
+eee.fff...111111111.222222222!
+..............................
+..............................
+..............................
+..ggg.....333333333.444444444@
+..ggg.....333333333.444444444@
+..ggg.....333333333.444444444@
+..hhh.....333333333.444444444@
+..hhh.....333333333.444444444@
+..hhh.....333333333.444444444@
+iii.jjj...333333333.444444444@
+iii.jjj...333333333.444444444@
+iii.jjj...333333333.444444444@
+..............................
+..............................
+..............................
+kkk.lll...555555555.666666666#
+kkk.lll...555555555.666666666#
+kkk.lll...555555555.666666666#
+..mmm.....555555555.666666666#
+..mmm.....555555555.666666666#
+..mmm.....555555555.666666666#
+nnn.ooo...555555555.666666666#
+nnn.ooo...555555555.666666666#
+nnn.ooo...555555555.666666666#
 
 """)
 
+axs_saddles_samples = np.asarray([axs['a'], axs['b'], axs['c'], axs['d'], axs['e'], axs['f'],
+                                axs['g'], axs['h'], axs['i'], axs['j'],
+                                axs['k'], axs['l'], axs['m'], axs['n'], axs['o']])
 
 
+n_top = 58
+n_mid = 30
+n_bot = 5
 
+for ax in axs_saddles_samples:
+    ax.set_xticks([]); ax.set_yticks([])
+
+sample_temp = np.asarray([0, 0, 0, 0, 0, 0,
+                          1, 1, 1, 1,
+                          2, 2, 2, 2, 2])
+
+sample_n = np.asarray([n_top, n_top, n_mid, n_mid, n_bot, n_bot,
+                       n_top, n_mid, n_bot, n_bot,
+                       n_top, n_top, n_mid, n_bot, n_bot])
+
+sample_ic = np.asarray([1, 0, 1, 0, 1, 0,
+                        0, 0, 1, 0,
+                        1, 0, 0, 1, 0])
 
 props = dict(boxstyle='round', facecolor='whitesmoke', alpha=0.5)
-t_samples = np.asarray([0, 25, 40, 46, 55])
 
-# The d here is a time/epoch index to plot samples at specific points in training interesting
-for d in range(5):
-    t_sample = t_samples[d]
-    indices = np.zeros(20)
+for i in range(len(axs_saddles_samples)):
+    axs_saddles_samples[i].imshow((data_M_saddles[sample_temp[i], sample_n[i]-2, sample_ic[i]]).reshape(28, 28), cmap="bwr", vmin=-1, vmax=1)
 
-    # Fetch the number of memories per class
-    for i in range(len(indices)):
-        strictness = 1
-        all_indices = np.argwhere(data_Ls[t_sample, :, i//2] >= strictness ) # Fetch index of all memories in digit class i//2
+    if i in [0, 2, 4, 6, 7, 8, 10, 12, 13]:
+        print(i)
+        axs_saddles_samples[i].set_ylabel(r"$n=$"+str(sample_n[i]), fontsize=41, labelpad=40, verticalalignment='center', ha='center', bbox=props)
 
-        # If you don't find any at first loosen the conditions a bit..
-        while len(all_indices) == 0:
-            strictness -= 0.05
-            all_indices = np.argwhere(data_Ls[t_sample, :, i//2] >= strictness ) 
 
-            # Below a certain value look for saddles instead (This is particularly valid for high enough n - the movie doesn't need this step of course)
-            if strictness < 0.5:
-                all_indices = np.sum(data_Ls[t_sample, :], axis=-1) <= -8.8
+axs_saddles_alphas = np.asarray([axs['1'], axs['3'], axs['5']])
+for t_i, temp in enumerate(temp_range):
+    for ic in [0, 1]:
+        axs_saddles_alphas[t_i].scatter(data_M_saddles_coefs[t_i, :, ic, 0], n_range, color=tab10_cmap(tab10_norm(selected_digits[ic])), s=20*2)
+    axs_saddles_alphas[t_i].set_xlabel(r"$\alpha_1$")
+    axs_saddles_alphas[t_i].set_ylabel(r"$n$-power")
+axs_saddles_alphas[0].set_title("Saddles", pad=40)
+
+axs_pop_proportion = np.asarray([axs['2'], axs['4'], axs['6']])
+for t_i, temp in enumerate(temp_range):
+    for ic in [0, 1]:
+        pop_1s = data_Ms_pop[t_i, :, ic, 0]
+        pop_7s = data_Ms_pop[t_i, :, ic, 1]
+
+        pop_norm = pop_1s + pop_7s
         
-        
-        indices[i] =  all_indices[np.random.randint(len(all_indices))] # -> Pick randomly when Label is mostly # digit class i//2 $
-    indices = np.asarray(indices, dtype=int)
+        axs_pop_proportion[t_i].scatter(pop_1s/pop_norm, n_range, color=tab10_cmap(tab10_norm(selected_digits[ic])), s=20*2)
+    axs_pop_proportion[t_i].set_yticks([])
+    axs_pop_proportion[t_i].set_xlabel(r"Proportion of $1$s")
+
+    axs_pop_proportion[t_i].set_ylabel(r"$T_r$ = "+'{0:.2f}'.format(temp/784.0), labelpad=1300, bbox=props) #Hacky trick
+
+axs_pop_proportion[0].set_title("Population proportion", pad=40)
+
+
+# Set red and green cmap
+rg_cmap = matplotlib.colors.ListedColormap([tab10_cmap(tab10_norm(1)),tab10_cmap(tab10_norm(7))])
+rg_norm = matplotlib.colors.BoundaryNorm([0, 0.5, 1], rg_cmap.N)
     
+axs_cb = np.asarray([axs['!'], axs['@'], axs['#']])
+for ax_cb in axs_cb:
+    cb = matplotlib.colorbar.ColorbarBase(ax_cb, cmap=rg_cmap, norm=rg_norm, orientation='vertical')
+    cb.set_ticks([0.25, 0.75]) # Finally found how to center these things 
+    cb.set_ticklabels(["Near 1", "Near 7"], rotation=90, va='center')
+    cb.set_label("Initial conditions", labelpad=20) 
     
-    axs[str(d)].imshow(merge_data(data_Ms[t_sample, indices], 2, 10), cmap="bwr", vmin=-1, vmax=1)
-    axs[str(d)].set_title(r"$T_r = $"+'{0:.2f}'.format(temp_range_rescaled[t_sample]), pad=55, fontsize=55, bbox=props) # Time stamps / Cosmetics
-    axs[str(d)].set_xticks([]); axs[str(d)].set_yticks([])
-
-
-
-axs['A'].stackplot(temp_range_rescaled, label_population.T, colors=cmap_tab10(norm(np.arange(0, 10, 1))))
-
-
-cb = matplotlib.colorbar.ColorbarBase(axs['X'], cmap=cmap_tab10, norm=norm, orientation='vertical')
-cb.set_ticks(np.arange(0, 10, 1) + 0.5) # Finally found how to center these things 
-cb.set_ticklabels(np.arange(0, 10, 1))
-cb.set_label("Digit class", labelpad=10)
-
-axs['A'].set_xlim(min(temp_range_rescaled), max(temp_range_rescaled))
-axs['A'].set_xlabel("Rescaled Temperature", labelpad=10)
-axs['A'].set_ylabel("Memory population", labelpad=10) #  \n (by label)
-
-plt.savefig("Figure_8_tmp.png")#, transparent="True")
-
+plt.savefig("Figure_8_tmp.png")

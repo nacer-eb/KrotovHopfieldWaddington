@@ -24,7 +24,7 @@ data_Mf = np.zeros((3, 3, 100, 784))
 data_Lf = np.zeros((3, 3, 100, 10))
 
 # Turn this to false to make compilation faster
-isFirstRun = True
+isFirstRun = False
 
 # Fetch all data
 if isFirstRun:
@@ -72,23 +72,30 @@ all_coefs = np.sum((data_Mf@data_T_inv).reshape(3, 3, 100, 10, 20), axis=-1)
 digit_to_observe = 4
 
 # Getting an index list of all memories with 4 labels (can be ill-posed for low-n)
-index = data_Lf[:, :, :, digit_to_observe] >=0.99 
+index = data_Lf[:, :, :, digit_to_observe] >=0.99
+
 
 choices = np.zeros((3, 3, 4), dtype=int) 
 # Choices from the above indices. As of now this is done manually, but you can do random selection or [0, 1, 2, 3] if you want.
-"""
+
+
 choices[0, 0] = np.asarray([7, 8, 9, 10]); choices[0, 1] = np.asarray([1, 2, 3, 4]); choices[0, 2] = np.asarray([-4, -3, -2, -1])
 choices[1, 0] = np.asarray([0, 1, 2, 3]); choices[1, 1] = np.asarray([9, 10, 11, 12]); choices[1, 2] = np.asarray([0, 1, 2, 3])
 choices[2, 0] = np.asarray([0, 1, 2, 3]); choices[2, 1] = np.asarray([4, 5, 6, 7]); choices[2, 2] = np.asarray([0, 1, 2, 3])
-choices = np.asarray(choices, dtype=int)
-"""
 
+choices = np.asarray(choices, dtype=int)
+
+"""
 for i in range(3):
     for j in range(3):
         for c in range(4):
-            choices[i, j] = index[i, j, int(c%int(np.sum(index[i, j], axis=-1)))]
-
+            choices[i, j, c] = np.random.randint(0, int(np.sum(index[i, j], axis=-1)) )
+            #choices[i, j, c] = index[i, j, int(c%int(np.sum(index[i, j], axis=-1)))]
+            
+            
+        
         print(choices[i, j])
+"""
 
 
 
@@ -150,6 +157,7 @@ def memory_coefs_fig(ax):
 
             # Cosmetics
             ax[i, 0].set_ylabel(r"$\alpha_{\vert i \rangle}$", rotation=90, labelpad=20)
+            ax[i, 0].tick_params(axis='y', which='major', length=20, pad=15)
             if j != 0: 
                 ax[i, j].set_yticks([])
 
@@ -162,14 +170,31 @@ def memory_coefs_fig(ax):
                 symmetric_array = np.concatenate((symmetric_array, sorted_array[2::2]), axis=0)
             
                 # The main plot
-                ax[i, j].plot(np.arange(20*d, 20*(d+1), 1), symmetric_array, marker=".", linewidth=10, ms=0, color="k")
+                ax[i, j].plot(np.arange(20*d, 20*(d+1), 1), symmetric_array, marker=".", linewidth=7, ms=0, color="k")
 
-                ax[i, j].fill_betweenx(y=[-0.2, 0.4], x1=[20*d]*2, x2=[20*(d+1)]*2, alpha=0.6)
+                cmap=plt.get_cmap("tab10")
+                norm = matplotlib.colors.Normalize(0, 10)
+                ax[i, j].fill_betweenx(y=[-0.2, 0.4], x1=[20*d]*2, x2=[20*(d+1)]*2, alpha=0.75) # , color=cmap(norm(d))
+
+
+                """
+                for b in range(10):
+                    print(d)
+                    ax[i, j].fill_betweenx(y=[-0.2, 0.4], x1=[b*2 + 20*d]*2, x2=[b*2 + 0.7 + 20*d], alpha=0.75, color=cmap(norm(d)))# color="w")
+                    print(b)
+                """
+                
+                
                  
             # For comparison's sake a sensible fixed yaxis range.
             ax[i, j].set_ylim(-0.15, 0.4)
             ax[i, j].set_xlim(0, 200)
+
             ax[i, j].set_xticklabels([])
+            if i != 0: 
+                ax[i, 2].set_xticks([])
+
+
 
             
 # The sub-figure showing the label
@@ -189,14 +214,15 @@ def label_coefs_fig(ax):
 
             # Cosmetics
             ax[i, j].set_xlim(-0.50, 9.5)
-            ax[i, j].set_ylim(-1.1, 1.1)
+            ax[i, j].set_ylim(-1.2, 1.2)
             ax[i, j].set_yticks([-1, 1])
 
             ax[-1, j].set_xlabel(r"$d$", rotation=00, labelpad=30)          
             ax[i, 0].set_ylabel(r"$l_{d}$", rotation=90, labelpad=20)
+            ax[i, 0].tick_params(axis='y', which='major', length=20, pad=15)
 
             for d in range(10):
-                ax[i, j].fill_betweenx(y=[-1.1, 1.1], x1=[d-0.5]*2, x2=[(d+1)-0.5]*2, alpha=0.6)
+                ax[i, j].fill_betweenx(y=[-1.2, 1.2], x1=[d-0.5]*2, x2=[(d+1)-0.5]*2, alpha=0.750) #0.6
             
             
             ax[i, j].set_xticks([])
@@ -209,7 +235,7 @@ def label_coefs_fig(ax):
 
 # Putting it all together
          
-fig = plt.figure(figsize=(35, 262-192+1))
+fig = plt.figure(figsize=(35, 262-192+1), dpi=300)
 axs = fig.subplot_mosaic(
 """   
 ...AAAAAAAAABBBBBBBBBCCCCCCCCC%...
@@ -306,6 +332,8 @@ for char in ['#', '$']:
     cb_class = matplotlib.colorbar.ColorbarBase(ax_cb_class, cmap=tab10_cmap, norm=tab10_norm, orientation='vertical')
     cb_class.set_ticks(np.arange(0, 10, 1) + 0.5) # Finally found how to center these things 
     cb_class.set_ticklabels(np.arange(0, 10, 1))
+
+    cb_class.ax.tick_params(axis='both', which='major', length=10, width=5, pad=15)
     if char == '#':
         cb_class.set_label(r"Digit class of $\vert i \rangle$", labelpad=20)
     if char == '$':
@@ -316,11 +344,11 @@ for char in ['%']:
     bwr_cmap = matplotlib.cm.bwr
     bwr_norm = matplotlib.colors.Normalize(vmin=-1, vmax=1)
     cb_class = matplotlib.colorbar.ColorbarBase(ax_cb_class, cmap=bwr_cmap, norm=bwr_norm, orientation='vertical')
+    cb_class.ax.tick_params(axis='both', which='major', length=10, width=5, pad=15)
     cb_class.set_label("Pixel value", labelpad=20)
 
 
 # Cosmetics and saving with transparency.
 plt.subplots_adjust(wspace=0.8, hspace=0.8)
-plt.savefig("Figure_1_tmp.png")
-
+plt.savefig("Figure_1_tmp_.png")
 

@@ -7,7 +7,7 @@ from main_module.KrotovV2 import *
 
 
 
-training_datafile = "../defaults/miniBatchs_images_Fig_5.npy"
+training_datafile = "../defaults/miniBatchs_images_Fig_6.npy"
 
 data_T = np.load(training_datafile)[0]
 data_T_inv = np.linalg.pinv(data_T)

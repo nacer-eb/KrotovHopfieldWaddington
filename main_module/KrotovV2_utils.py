@@ -99,7 +99,7 @@ def get_MNIST_test_labels():
         
     return MNIST_test_labels
 
-def get_MNIST_train_partitionned(totalPartitionSize, train_images, train_labels, selected_digits, randomize=False):
+def get_MNIST_train_partitionned(totalPartitionSize, train_images, train_labels, selected_digits, randomize=False, unsupervisedMode=False, N_unsupervised_classes=600):
     """
     Fetchs all the training images and labels that are randomly sampled and partitioned i.e. same number of each class.
     """
@@ -136,8 +136,18 @@ def get_MNIST_train_partitionned(totalPartitionSize, train_images, train_labels,
         
         images = np.take(images, randIndices, axis=0)
         labels = np.take(labels, randIndices, axis=0)
-        
+
+
+    if unsupervisedMode:
+        unsupervised_classes =  np.eye(N_unsupervised_classes)*2-1 # idealy
+        label_keys =  np.arange(0, totalPartitionSize, 1) # np.random.randint(0, N_unsupervised_classes, totalPartitionSize)
+        labels = unsupervised_classes[label_keys]
+        #labels = images
+
     return (images, labels)
+
+
+
 
 
 def merge_data(initial_data, Kx, Ky):
@@ -154,3 +164,10 @@ def merge_data(initial_data, Kx, Ky):
 
     return merged_data
 
+
+def get_tab10():
+
+    tab10_cmap = matplotlib.cm.tab10
+    tab_norm = matplotlib.colors.Normalize(vmin=0, vmax=10)
+
+    return tab10_cmap, tab_norm

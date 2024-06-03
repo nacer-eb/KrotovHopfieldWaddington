@@ -24,7 +24,6 @@ class GatherNullClines:
     def ReLU(self, x):
         return (np.abs(x) + x)/2.0
 
-
     # Todo: remove references to beta and replace with alpha_A and alpha_B
     def calc_nabla_A(self, alpha_A, ell):
 

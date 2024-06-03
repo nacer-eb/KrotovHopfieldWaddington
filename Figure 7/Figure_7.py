@@ -2,216 +2,355 @@ import sys
 sys.path.append('../')
 
 import numpy as np
-import sys
-
-from main_module.KrotovV2 import *
-
-import matplotlib.pyplot as plt
 
 import matplotlib
+import matplotlib.pyplot as plt
+
+from main_module.KrotovV2_utils import *
+
+fontsize=63
 font = {'family' : 'Times New Roman',
         'weight' : 'normal',
-        'size'   : 54}
+        'size'   : fontsize}
 matplotlib.rc('font', **font)
 
 
-data_dir = "data/"
-selected_digits = [1, 7, 8]#
-prefix = str(selected_digits)+"/" # _coarse_stable
 
-N_runs = 10
+fig = plt.figure(figsize=(36, 85-22+1 ))
+axs = fig.subplot_mosaic("""
 
-temp_range = [550, 750, 800]
-n_range = np.arange(2, 60, 1)
+AAAAAAAAAA...........BBBBBBBBBB......
+AAAAAAAAAA...........BBBBBBBBBB......
+AAAAAAAAAA...........BBBBBBBBBB......
+AAAAAAAAAA...........BBBBBBBBBB......
+AAAAAAAAAA...........BBBBBBBBBB......
+.....................................
+.....................................
+.....................................
+.....................................
+.....................................
+.....................................
+.....................................
+.....................................
+CCCCCCCCCC.....FFFFFFFFFF..IIIIIIIIII
+CCCCCCCCCC.....FFFFFFFFFF..IIIIIIIIII
+CCCCCCCCCC.....FFFFFFFFFF..IIIIIIIIII
+CCCCCCCCCC.....FFFFFFFFFF..IIIIIIIIII
+CCCCCCCCCC.....FFFFFFFFFF..IIIIIIIIII
+CCCCCCCCCC.....FFFFFFFFFF..IIIIIIIIII
+CCCCCCCCCC.....FFFFFFFFFF..IIIIIIIIII
+CCCCCCCCCC.....FFFFFFFFFF..IIIIIIIIII
+CCCCCCCCCC.....FFFFFFFFFF..IIIIIIIIII
+CCCCCCCCCC.....FFFFFFFFFF..IIIIIIIIII
+.....................................
+.....................................
+.....................................
+.....................................
+.....................................
+.....................................
+.....................................
+.....................................
+.....................................
+.....................................
+.....................................
+.....................................
+dddddddddd.....gggggggggg..jjjjjjjjjj
+DDDDDDDDDD.....GGGGGGGGGG..JJJJJJJJJJ
+DDDDDDDDDD.....GGGGGGGGGG..JJJJJJJJJJ
+DDDDDDDDDD.....GGGGGGGGGG..JJJJJJJJJJ
+DDDDDDDDDD.....GGGGGGGGGG..JJJJJJJJJJ
+DDDDDDDDDD.....GGGGGGGGGG..JJJJJJJJJJ
+DDDDDDDDDD.....GGGGGGGGGG..JJJJJJJJJJ
+DDDDDDDDDD.....GGGGGGGGGG..JJJJJJJJJJ
+DDDDDDDDDD.....GGGGGGGGGG..JJJJJJJJJJ
+DDDDDDDDDD.....GGGGGGGGGG..JJJJJJJJJJ
+DDDDDDDDDD.....GGGGGGGGGG..JJJJJJJJJJ
+.....................................
+.....................................
+.....................................
+EEEEEEEEEE.....HHHHHHHHHH..KKKKKKKKKK
+EEEEEEEEEE.....HHHHHHHHHH..KKKKKKKKKK
+EEEEEEEEEE.....HHHHHHHHHH..KKKKKKKKKK
+EEEEEEEEEE.....HHHHHHHHHH..KKKKKKKKKK
+EEEEEEEEEE.....HHHHHHHHHH..KKKKKKKKKK
+EEEEEEEEEE.....HHHHHHHHHH..KKKKKKKKKK
+EEEEEEEEEE.....HHHHHHHHHH..KKKKKKKKKK
+EEEEEEEEEE.....HHHHHHHHHH..KKKKKKKKKK
+EEEEEEEEEE.....HHHHHHHHHH..KKKKKKKKKK
+EEEEEEEEEE.....HHHHHHHHHH..KKKKKKKKKK
+.....................................
+.....................................
+.....................................
+.....................................
+.....................................
+""")
 
 
-N_mem = 100
 
-data_Ms = np.zeros((N_runs, len(temp_range), len(n_range), 3, N_mem, 784))
-data_M_saddles = np.zeros((len(temp_range), len(n_range), 3, 784))
-data_Ls = np.zeros((N_runs, len(temp_range), len(n_range), 3, N_mem, 10))
 
-isFirstRun = True # Set this to False if you've already preloaded files
 
-# Loads files and saves a preload
-if isFirstRun:
+#############################################################
+#############################################################
+# Obtain & Plot the training data for intra and inter cases #
+#############################################################
+#############################################################
+
+data_dir_intra =  "data/[4, 4]_intra/"
+
+digit_classes = [4, 9]
+data_dir_inter = "data/[4, 9]_mean_inter/"
+
+data_T_intra = np.load(data_dir_intra+"trained_net_end_n"+str(2)+"_T"+str(400)+".npz")['miniBatchs_images'][0]
+data_T_inter = np.load(data_dir_inter+"trained_net_end_n"+str(2)+"_T"+str(400)+".npz")['miniBatchs_images'][0]
+
+data_T_intra_inv = np.linalg.pinv(data_T_intra)
+data_T_inter_inv = np.linalg.pinv(data_T_inter)
+
+axs['A'].imshow(merge_data(data_T_intra, 2, 1), cmap="bwr", vmin=-1, vmax=1)
+axs['B'].imshow(merge_data(data_T_inter, 2, 1), cmap="bwr", vmin=-1, vmax=1)
+
+axs['A'].set_xticks([]); axs['A'].set_yticks([])
+axs['B'].set_xticks([]); axs['B'].set_yticks([])
+
+
+
+
+#########################################
+#########################################
+# Obtain & Plot data for the 1 mem case #
+#########################################
+#########################################
+
+temp_range = np.arange(400, 900, 20)
+temp_range_rescaled = temp_range/784.0
+n_range = np.arange(2, 31, 1)
+
+data_Ms_intra = np.zeros((len(temp_range), len(n_range), 1, 784))
+
+first_run = True # You can make this false once you preload at least once (doesn't make it that much faster in this case)
+if first_run:
     for i, temp in enumerate(temp_range):
         for j, n in enumerate(n_range):
-            for k in range(3):
-                for r in range(N_runs):
-                    
-                    run_prefix = "end_states_" + str(r) + "/"
-                    saving_dir=data_dir+prefix+run_prefix+"trained_net_end_n"+str(n)+"_T"+str(temp)+"ic"+str(selected_digits[k])+".npz"
-                    
-                    if os.path.isfile(saving_dir):
-                        data_Ms[r, i, j, k] = np.load(saving_dir)['M']
-                        data_Ls[r, i, j, k] = np.load(saving_dir)['L']
-                    else:
-                        print("WARNING: File not found, ", saving_dir)
+            saving_dir=data_dir_intra+"trained_net_end_n"+str(n)+"_T"+str(temp)+".npz"
+            
+            data = np.load(saving_dir)
+            data_Ms_intra[i, j] = data['M']
+            
+    np.save(data_dir_intra + "data_Ms.npy", data_Ms_intra) # Save preload
 
-                saving_dir=data_dir+prefix+"saddles/net_saddle_n"+str(n)+"_T"+str(temp)+"ic"+str(selected_digits[k])+".npz"
-                
-                if os.path.isfile(saving_dir):
-                    data_M_saddles[i, j, k] = np.load(saving_dir)['M'][0]
-                    
-                else:
-                    print("WARNING: File not found, ", saving_dir)
-                    
-        print(temp)
+# Load 'preloaded' file
+data_Ms_intra = np.load(data_dir_intra + "data_Ms.npy")
 
-    # Saves Preload
-    np.save(data_dir+prefix+"data_Ms.npy", data_Ms)
-    np.save(data_dir+prefix+"data_M_saddles.npy", data_M_saddles)
-    np.save(data_dir+prefix+"data_Ls.npy", data_Ls)
+# Obtain all coefs from memory 
+data_coefs_intra = data_Ms_intra @ data_T_intra_inv
 
+# Set the aspect ratio of the future plot
+aspect = (np.min(n_range) - np.max(n_range))/(np.min(temp_range_rescaled) - np.max(temp_range_rescaled))
+extent = [np.min(n_range), np.max(n_range), np.max(temp_range_rescaled), np.min(temp_range_rescaled)]
 
-# Then loads the "preload"
-data_Ms = np.load(data_dir+prefix+"data_Ms.npy")
-data_M_saddles = np.load(data_dir+prefix+"data_M_saddles.npy")
-data_Ls = np.load(data_dir+prefix+"data_Ls.npy")
-
-# Loads the training data (uses the default training miniBatch)
-data_T = np.load(data_dir+prefix+"miniBatchs_images.npy")[0]
-data_T_inv = np.linalg.pinv(data_T)
-
-# Gets coefficients using the inverse
-data_M_saddles_coefs = data_M_saddles@data_T_inv
-
-# Obtain marginal coefficients
-data_M_saddles_coefs = (data_M_saddles_coefs.reshape(len(temp_range), len(n_range), 3, 10, 20)).sum(axis=-1)
-
-# Keep only marginal coefficients from selected digits; digits present in training
-data_M_saddles_coefs = data_M_saddles_coefs[:, :, :, selected_digits]
-
-
-# Create an array to store population proportions per run and mean
-data_Ms_pop_run = np.zeros((N_runs, len(temp_range), len(n_range), 3, 3)) # Population proportion
-data_Ms_pop = np.zeros((len(temp_range), len(n_range), 3, 3)) # Population proportion
-
-for r in range(N_runs):
-    for i, temp in enumerate(temp_range):
-        for j, n in enumerate(n_range):
-            for k in range(3):
-                for l in range(3):
-                    #data_Ms_pop_run[r, i, j, k, l] = np.sum(np.argmax(data_Ls[r, i, j, k], axis=-1) == selected_digits[l], axis=-1) # not strict
-                    data_Ms_pop_run[r, i, j, k, l] = np.sum( (data_Ls[r, i, j, k, :, selected_digits[l]] >= 0.9), axis=-1 ) # Stricter way to calculate population proportion
-
-
-# Standard mean
-data_Ms_pop = np.mean(data_Ms_pop_run, axis=0)
-
-# Plotting stuff ...
+# Predefine the cmap, which is used throughout the paper
 tab10_cmap = matplotlib.colormaps["tab10"]
 tab10_norm = matplotlib.colors.Normalize(0, 10)
 
-fig = plt.figure(figsize=(3+3+3+1+9+1+9+1, 139-107+1))
-
-axs = fig.subplot_mosaic("""
-
-aaa.bbb...111111111.222222222!
-aaa.bbb...111111111.222222222!
-aaa.bbb...111111111.222222222!
-ccc.ddd...111111111.222222222!
-ccc.ddd...111111111.222222222!
-ccc.ddd...111111111.222222222!
-eee.fff...111111111.222222222!
-eee.fff...111111111.222222222!
-eee.fff...111111111.222222222!
-..............................
-..............................
-..............................
-..ggg.....333333333.444444444@
-..ggg.....333333333.444444444@
-..ggg.....333333333.444444444@
-..hhh.....333333333.444444444@
-..hhh.....333333333.444444444@
-..hhh.....333333333.444444444@
-iii.jjj...333333333.444444444@
-iii.jjj...333333333.444444444@
-iii.jjj...333333333.444444444@
-..............................
-..............................
-..............................
-kkk.lll...555555555.666666666#
-kkk.lll...555555555.666666666#
-kkk.lll...555555555.666666666#
-..mmm.....555555555.666666666#
-..mmm.....555555555.666666666#
-..mmm.....555555555.666666666#
-nnn.ooo...555555555.666666666#
-nnn.ooo...555555555.666666666#
-nnn.ooo...555555555.666666666#
-
-""")
-
-axs_saddles_samples = np.asarray([axs['a'], axs['b'], axs['c'], axs['d'], axs['e'], axs['f'],
-                                axs['g'], axs['h'], axs['i'], axs['j'],
-                                axs['k'], axs['l'], axs['m'], axs['n'], axs['o']])
-
-
-n_top = 58
-n_mid = 30
-n_bot = 5
-
-for ax in axs_saddles_samples:
-    ax.set_xticks([]); ax.set_yticks([])
-
-sample_temp = np.asarray([0, 0, 0, 0, 0, 0,
-                          1, 1, 1, 1,
-                          2, 2, 2, 2, 2])
-
-sample_n = np.asarray([n_top, n_top, n_mid, n_mid, n_bot, n_bot,
-                       n_top, n_mid, n_bot, n_bot,
-                       n_top, n_top, n_mid, n_bot, n_bot])
-
-sample_ic = np.asarray([1, 0, 1, 0, 1, 0,
-                        0, 0, 1, 0,
-                        1, 0, 0, 1, 0])
-
-props = dict(boxstyle='round', facecolor='whitesmoke', alpha=0.5)
-
-for i in range(len(axs_saddles_samples)):
-    axs_saddles_samples[i].imshow((data_M_saddles[sample_temp[i], sample_n[i]-2, sample_ic[i]]).reshape(28, 28), cmap="bwr", vmin=-1, vmax=1)
-
-    if i in [0, 2, 4, 6, 7, 8, 10, 12, 13]:
-        print(i)
-        axs_saddles_samples[i].set_ylabel(r"$n=$"+str(sample_n[i]), fontsize=41, labelpad=40, verticalalignment='center', ha='center', bbox=props)
-
-
-axs_saddles_alphas = np.asarray([axs['1'], axs['3'], axs['5']])
-for t_i, temp in enumerate(temp_range):
-    for ic in [0, 1]:
-        axs_saddles_alphas[t_i].scatter(data_M_saddles_coefs[t_i, :, ic, 0], n_range, color=tab10_cmap(tab10_norm(selected_digits[ic])), s=20*2)
-    axs_saddles_alphas[t_i].set_xlabel(r"$\alpha_1$")
-    axs_saddles_alphas[t_i].set_ylabel(r"$n$-power")
-axs_saddles_alphas[0].set_title("Saddles", pad=40)
-
-axs_pop_proportion = np.asarray([axs['2'], axs['4'], axs['6']])
-for t_i, temp in enumerate(temp_range):
-    for ic in [0, 1]:
-        pop_1s = data_Ms_pop[t_i, :, ic, 0]
-        pop_7s = data_Ms_pop[t_i, :, ic, 1]
-
-        pop_norm = pop_1s + pop_7s
-        
-        axs_pop_proportion[t_i].scatter(pop_1s/pop_norm, n_range, color=tab10_cmap(tab10_norm(selected_digits[ic])), s=20*2)
-    axs_pop_proportion[t_i].set_yticks([])
-    axs_pop_proportion[t_i].set_xlabel(r"Proportion of $1$s")
-
-    axs_pop_proportion[t_i].set_ylabel(r"$T_r$ = "+'{0:.2f}'.format(temp/784.0), labelpad=1300, bbox=props) #Hacky trick
-
-axs_pop_proportion[0].set_title("Population proportion", pad=40)
-
-
-# Set red and green cmap
-rg_cmap = matplotlib.colors.ListedColormap([tab10_cmap(tab10_norm(1)),tab10_cmap(tab10_norm(7))])
-rg_norm = matplotlib.colors.BoundaryNorm([0, 0.5, 1], rg_cmap.N)
+# The standard custom cmap from white -> digit color -> black
+def get_custom_cmap(digit_class):
+    custom_cmap = np.zeros((256, 4))
+    colors = np.asarray([np.asarray([1.0, 1.0, 1.0, 1.0]),  np.asarray(tab10_cmap(tab10_norm(digit_class))), np.asarray([0.0, 0.0, 0.0, 1.0])])
     
-axs_cb = np.asarray([axs['!'], axs['@'], axs['#']])
-for ax_cb in axs_cb:
-    cb = matplotlib.colorbar.ColorbarBase(ax_cb, cmap=rg_cmap, norm=rg_norm, orientation='vertical')
-    cb.set_ticks([0.25, 0.75]) # Finally found how to center these things 
-    cb.set_ticklabels(["Near 1", "Near 7"], rotation=90, va='center')
-    cb.set_label("Initial conditions", labelpad=20) 
+    x = np.linspace(0, 1, 128)
+    for i in range(128):
+        custom_cmap[i] = x[i]*colors[1] + (1.0-x[i])*colors[0]
+        custom_cmap[i+128] = x[i]*colors[2] + (1.0-x[i])*colors[1]
+    custom_cmap = matplotlib.colors.ListedColormap(custom_cmap)
     
+    return custom_cmap
+
+# the second color map from color to white
+def get_custom_cmap_2(digit_class):
+    custom_cmap = np.zeros((256, 4))
+    colors = np.asarray([np.asarray(tab10_cmap(tab10_norm(digit_class))), np.asarray([1.0, 1.0, 1.0, 1.0])])
+    
+    x = np.linspace(0, 1, 256)
+    for i in range(256):
+        custom_cmap[i] = x[i]*colors[1] + (1.0-x[i])*colors[0]
+    custom_cmap = matplotlib.colors.ListedColormap(custom_cmap)
+    
+    return custom_cmap
+
+# the second color map from white to color
+def get_custom_cmap_2_inv(digit_class):
+    custom_cmap = np.zeros((256, 4))
+    colors = np.asarray([np.asarray([1.0, 1.0, 1.0, 1.0]), np.asarray(tab10_cmap(tab10_norm(digit_class)))])
+    
+    x = np.linspace(0, 1, 256)
+    for i in range(256):
+        custom_cmap[i] = x[i]*colors[1] + (1.0-x[i])*colors[0]
+    custom_cmap = matplotlib.colors.ListedColormap(custom_cmap)
+    
+    return custom_cmap
+
+
+ax = np.asarray([axs['C'], axs['D']])
+
+# Plotting memory samples (images) per n, T - not for all n,T so the samples are not too small.
+ax[0].imshow(merge_data(data_Ms_intra[::4, ::4, 0, :].reshape(len(n_range[::4])*len(temp_range[::4]), 784), len(n_range[::4]), len(temp_range[::4])  ),
+             cmap="bwr", vmin=-1, vmax=1, extent=extent, aspect=aspect)
+ax[0].set_xlabel(r"$n$")
+ax[0].set_ylabel(r"Rescaled Temperature", labelpad=20)
+    
+cmap_ortho = get_custom_cmap(digit_classes[0]) # By default, I'm assuming that the first training class in interdigit is the training class for the intradigit analysis
+data_ortho = data_coefs_intra[:, :, 0, 1] # This can also be [:, :, 0, 0], it depends on which of the two training samples dominates in the prototype regime, here its the second
+norm_ortho = matplotlib.colors.Normalize(0.4, 1)
+
+# Plotting the coefficent of one of the 4s in the memory (I pick the one which dominates at high n,T for visualization purposes)
+ax[1].imshow(data_ortho, cmap=cmap_ortho, norm=norm_ortho, extent=extent, aspect=aspect) #
+ax[1].set_xlabel(r"$n$")
+ax[1].set_ylabel(r"Rescaled Temperature", labelpad=20)
+
+
+
+# Plotting temperature slices
+colors=["red", "orange", "blue"]
+for t_i, t in enumerate([-1, -3, -5]):
+    ax[1].axhline(y=temp_range_rescaled[t]-0.004, xmax=1, color=colors[t_i], linewidth=10, label=r"$T_r$ = "+'{0:.2f}'.format(temp_range_rescaled[t]))
+    axs['E'].plot(data_ortho[t], marker=".", color=colors[t_i], linewidth=10)
+    axs['E'].set_xlabel(r"$n$")
+    axs['E'].set_ylabel(r"$\alpha$", labelpad=20)
+    axs['E'].set_xlim(0, 30)
+    axs['E'].set_xticks([10, 20, 30])
+    axs['E'].set_xticklabels([10, 20, 30])
+
+import matplotlib.patheffects as pe
+
+# Plotting the theoretical prediction for the 'phase' transition (see supplemental material)
+n = np.arange(np.min(n_range), np.max(n_range), 0.01)
+T_calc = (data_T_intra[0]@data_T_intra[0] + data_T_intra[0]@data_T_intra[1])/( 2 * ( np.arctanh( 1 - (1.0/2.0)**(1.0/(2.0*n)) ) )**(1.0/n) )
+T_calc_rescaled = T_calc/784.0
+ax[1].plot(n, T_calc_rescaled, color='white', linewidth=10, path_effects=[pe.Stroke(linewidth=15, foreground='k'), pe.Normal()], label="Theoretical line")
+ax[1].set_ylim(max(temp_range_rescaled), min(temp_range_rescaled))
+
+# Plotting colorbar
+ax_cb_intra = axs['d']
+cb_bwr = matplotlib.colorbar.ColorbarBase(ax_cb_intra, cmap=cmap_ortho, norm=norm_ortho, orientation='horizontal')
+cb_bwr.set_label(r"$\alpha_{4, 1}$", labelpad=40)
+ax_cb_intra.xaxis.set_ticks_position('top')
+ax_cb_intra.xaxis.set_label_position('top')
+
+ax[1].legend(bbox_to_anchor=(1, -1.6))
+
+
+
+#########################################
+#########################################
+# Obtain & Plot data for the 2 mem case #
+#########################################
+#########################################
+
+
+temp_range = np.arange(400, 900, 20)
+temp_range_rescaled = temp_range/784.0
+n_range = np.arange(2, 31, 1)
+data_Ms_inter = np.zeros((len(temp_range), len(n_range), 2, 784))
+
+first_run = True # Again you can turn this to False for a slightly faster re-run (ONLY AFTER YOU RUN IT ONCE)
+if first_run:
+    for i, temp in enumerate(temp_range):
+        for j, n in enumerate(n_range):
+            saving_dir=data_dir_inter+"trained_net_end_n"+str(n)+"_T"+str(temp)+".npz"
+            
+            data = np.load(saving_dir)
+            data_Ms_inter[i, j] = data['M']
+
+    # Saves preloaded data
+    np.save(data_dir_inter + "data_Ms.npy", data_Ms_inter)
+
+# Load 'preloaded' data
+data_Ms_inter = np.load(data_dir_inter + "data_Ms.npy")
+
+# Obtain coefficients from memories
+data_coefs_inter = data_Ms_inter @ data_T_inter_inv
+
+# Fix the aspect ratio of the memory sample plots and coefficent plots
+aspect = (np.min(n_range) - np.max(n_range))/(np.min(temp_range_rescaled) - np.max(temp_range_rescaled))
+extent = [np.min(n_range), np.max(n_range), np.max(temp_range_rescaled), np.min(temp_range_rescaled)]
+
+# Defining axes that are accessible with integer indices
+ax = np.asarray([[axs['F'], axs['G']], [axs['I'], axs['J']] ])
+ax_1d = np.asarray([axs['H'], axs['K']])
+ax_cb = np.asarray([axs['g'], axs['j']])
+
+# Digit is an index that runs through the 2 memories.
+for digit in [0, 1]:
+
+    # Plot memory samples for memory A and B
+    ax[digit, 0].imshow(merge_data(data_Ms_inter[::4, ::4, digit, :].reshape(len(n_range[::4])*len(temp_range[::4]), 784), len(n_range[::4]), len(temp_range[::4])  ),
+             cmap="bwr", vmin=-1, vmax=1, extent=extent, aspect=aspect)
+
+
+    # Compute color map based on the digit class
+    cmap_ortho = get_custom_cmap_2(digit_classes[digit])
+    data_ortho = data_coefs_inter[:, :, digit, 1-digit] # Get the coefficient which matters - the minor one - to show 'orthogonalization'
+
+    # Normalize
+    norm_ortho = matplotlib.colors.Normalize(vmin=-0.5, vmax=0.5)
+
+    # Plot memory coefficients
+    im = ax[digit, 1].imshow(data_ortho, cmap=cmap_ortho, norm=norm_ortho, extent=extent, aspect=aspect)
+    
+
+    # Compute the theoretical prediction for the phase transition. See supplement.
+    n = np.arange(np.min(n_range), np.max(n_range), 0.01)
+    
+    # I used 1-digit here to deal with potential asymmetry, but it shouldn't matter A@A should be roughly B@B
+    T_calc = (data_T_inter[1-digit]@data_T_inter[1-digit] + data_T_inter[0]@data_T_inter[1])/( 2 * ( np.arctanh( 1 - (1.0/2.0)**(1.0/(2.0*n)) ) )**(1.0/n) )
+    T_calc_rescaled = T_calc/784.0
+    
+
+    # Cosmetics
+    ax[digit, 1].set_ylim(max(temp_range_rescaled), min(temp_range_rescaled))
+
+    ax[1, 0].set_yticks([])
+    ax[1, 1].set_yticks([])
+    
+    ax[digit, 0].set_xlabel(r"$n$", labelpad=10); ax[digit, 1].set_xlabel(r"$n$", labelpad=10)
+    ax[0, 0].set_ylabel("Rescaled Temperature", labelpad=20)
+    ax[0, 1].set_ylabel("Rescaled Temperature", labelpad=20)
+    
+    # Plot colorbars
+    cb_bwr = matplotlib.colorbar.ColorbarBase(ax_cb[digit], cmap=cmap_ortho, norm=norm_ortho, orientation='horizontal')
+    cb_bwr.set_label(r"$\alpha_" + str(digit_classes[1-digit]) + "$", labelpad=40)
+    ax_cb[digit].xaxis.set_ticks_position('top')
+    ax_cb[digit].xaxis.set_label_position('top')
+    cb_bwr.set_ticks([-0.5, 0, 0.5]) # Finally found how to center these things 
+    cb_bwr.set_ticklabels([-0.5, 0, 0.5])
+
+    # Plot temperature slices
+    colors=["red", "orange", "blue"]
+    for t_i, t in enumerate([-1, -5, -8]):
+        ax[digit, 1].axhline(y=temp_range_rescaled[t]-0.004, xmax=1, color=colors[t_i], linewidth=10, label=r"$T_r$ = "+'{0:.2f}'.format(temp_range_rescaled[t]))
+        ax_1d[digit].plot(data_coefs_inter[t, :, digit, 1-digit], marker=".", color=colors[t_i], linewidth=10)
+        ax_1d[digit].set_xlabel(r"$n$")
+        ax_1d[digit].set_xlim(0, 30)
+        ax_1d[digit].set_ylim(-0.4, 0.4)
+        ax_1d[digit].set_xticks([10, 20, 30])
+        ax_1d[digit].set_xticklabels([10, 20, 30])
+
+    ax_1d[0].set_ylabel(r"$\alpha$")
+    ax_1d[1].set_yticks([])
+
+    # Plot theoretical predictions
+    ax[digit, 1].plot(n, T_calc_rescaled, color='white', linewidth=10, path_effects=[pe.Stroke(linewidth=15, foreground='k'), pe.Normal()], label="Theoretical line")
+    ax[digit, 1].legend(bbox_to_anchor=(1, -1.6))
+
+
+# Plot a slightly different colorbar for the second digit.
+cmap_ortho = get_custom_cmap_2_inv(digit_classes[1])
+cb_bwr = matplotlib.colorbar.ColorbarBase(ax_cb[1], cmap=cmap_ortho, norm=norm_ortho, orientation='horizontal')
+cb_bwr.set_label(r"$\alpha_" + str(digit_classes[1-digit]) + "$", labelpad=40)
+ax_cb[1].xaxis.set_ticks_position('top')
+ax_cb[1].xaxis.set_label_position('top')
+cb_bwr.set_ticks([-0.5, 0, 0.5]) # Finally found how to center these things 
+cb_bwr.set_ticklabels([0.5, 0, -0.5])
+
+#Save
 plt.savefig("Figure_7_tmp.png")
